@@ -13,6 +13,7 @@ Real-time mass & balance calculator matching the Egmont Aviation OM App 08.2 for
 - **Modification support** — MÄM 40-662, MÄM 40-574, OÄM 40-164, OÄM 40-331
 - **Standard & Long Range tanks** — fuel input in USG, with litres/kg shown
 - **Calculation breakdown** — every step with formulas for verification
+- **Guided tour** — spotlight walkthrough on first visit, replayable via header icon
 - **Fully offline** — no server, no database, no tracking
 
 ## Learn Module

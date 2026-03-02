@@ -26,7 +26,7 @@ export const tourSteps: TourStep[] = [
     target: '[data-tour="tank-config"]',
     title: 'Fuel Tank Configuration',
     content:
-      'Select Standard (106 L) or Long Range (148 L) to match your aircraft. This sets the maximum fuel you can enter later.',
+      'Select Standard (28 USG / 106 L) or Long Range (39 USG / 148 L) to match your aircraft. This sets the maximum fuel you can enter later.',
     placement: 'bottom',
   },
   {
@@ -68,7 +68,7 @@ export const tourSteps: TourStep[] = [
     target: '[data-tour="cg-envelope"]',
     title: 'CG Envelope Chart',
     content:
-      'The chart plots ZFM, TOM, and LM in real time. All three points must fall inside the green envelope for the flight to be within limits.',
+      'The chart plots ZFM, TOM, and LM in real time. All three points must fall inside the envelope for the flight to be within limits.',
     placement: 'left',
   },
   {
@@ -83,6 +83,13 @@ export const tourSteps: TourStep[] = [
     title: 'Want to Learn More?',
     content:
       'Head to the Learn module for theory on mass & balance — including worked examples, diagrams, and quizzes.',
+    placement: 'bottom',
+  },
+  {
+    target: '[data-tour="tour-button"]',
+    title: 'Replay This Tour',
+    content:
+      'You can restart this walkthrough any time by clicking this icon.',
     placement: 'bottom',
   },
 ];

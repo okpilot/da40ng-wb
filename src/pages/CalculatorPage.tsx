@@ -42,7 +42,7 @@ export function CalculatorPage() {
             </p>
           </div>
           <div className="flex items-center gap-2">
-            <Button variant="ghost" size="icon" onClick={tour.start} aria-label="Start tour">
+            <Button variant="ghost" size="icon" onClick={tour.start} aria-label="Start tour" data-tour="tour-button">
               <HelpCircle className="h-5 w-5" />
             </Button>
             <Button variant="outline" asChild data-tour="learn-button">
