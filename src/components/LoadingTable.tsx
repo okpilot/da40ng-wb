@@ -132,7 +132,7 @@ export function LoadingTable({
   const fuelOverCapacity = loading.takeoffFuelUsg > tank.usableUsg;
 
   return (
-    <Card>
+    <Card data-tour="loading-table">
       <CardHeader className="pb-3">
         <CardTitle className="text-lg">Mass & Balance Sheet</CardTitle>
       </CardHeader>
@@ -146,16 +146,18 @@ export function LoadingTable({
               <TableHead className="text-right w-[110px]">Moment (kgm)</TableHead>
             </TableRow>
           </TableHeader>
+          {/* BEM row */}
           <TableBody>
-            {/* BEM row */}
             <TableRow>
               <TableCell>Basic Empty Mass</TableCell>
               <TableCell className="text-right">{fmt(config.bemMass)}</TableCell>
               <TableCell className="text-right">{fmt(config.bemCg, 3)}</TableCell>
               <TableCell className="text-right">{fmt(bemMoment)}</TableCell>
             </TableRow>
+          </TableBody>
 
-            {/* Station rows */}
+          {/* Station rows */}
+          <tbody data-tour="payload-stations">
             {visibleStations.map((station) => {
               const entry = loading.entries.find(
                 (e) => e.stationId === station.id,
@@ -196,8 +198,10 @@ export function LoadingTable({
                 </TableRow>
               );
             })}
+          </tbody>
 
-            {/* ZFM Subtotal + limits */}
+          {/* ZFM Subtotal + limits */}
+          <tbody data-tour="zfm-row">
             <SubtotalRow
               label="Zero Fuel Mass"
               condition={result.zfm}
@@ -206,7 +210,10 @@ export function LoadingTable({
               cgPassed={zfmCgOk}
               active={hasLoading}
             />
+          </tbody>
 
+          {/* Fuel section: takeoff fuel, TOM, trip fuel, LM */}
+          <tbody data-tour="fuel-section">
             {/* Takeoff Fuel */}
             <TableRow>
               <TableCell>
@@ -302,7 +309,7 @@ export function LoadingTable({
               cgPassed={lmCgOk}
               active={hasLoading}
             />
-          </TableBody>
+          </tbody>
         </Table>
       </CardContent>
     </Card>

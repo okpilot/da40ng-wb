@@ -33,7 +33,7 @@ export function AircraftConfig({
         <div className="grid grid-cols-1 lg:grid-cols-2 gap-6">
           {/* Left: BEM + Tank */}
           <div className="space-y-4">
-            <div className="space-y-2">
+            <div className="space-y-2" data-tour="bem-inputs">
               <Label className="text-sm font-medium text-muted-foreground">
                 Basic Empty Mass
               </Label>
@@ -69,7 +69,7 @@ export function AircraftConfig({
               </div>
             </div>
 
-            <div className="space-y-2">
+            <div className="space-y-2" data-tour="tank-config">
               <Label className="text-sm font-medium text-muted-foreground">
                 Fuel Tank Configuration
               </Label>
@@ -90,7 +90,7 @@ export function AircraftConfig({
           </div>
 
           {/* Right: Modifications */}
-          <div className="space-y-2">
+          <div className="space-y-2" data-tour="modifications">
             <Label className="text-sm font-medium text-muted-foreground">
               Modifications
             </Label>

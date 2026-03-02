@@ -3,10 +3,13 @@ import { AircraftConfig } from '@/components/AircraftConfig';
 import { LoadingTable } from '@/components/LoadingTable';
 import { CGEnvelopeChart } from '@/components/CGEnvelopeChart';
 import { CalculationBreakdown } from '@/components/CalculationBreakdown';
+import { SpotlightTour } from '@/components/tour/SpotlightTour';
 import { useCalculation } from '@/hooks/useCalculation';
+import { useTourState } from '@/hooks/useTourState';
+import { tourSteps } from '@/data/tourSteps';
 import { Separator } from '@/components/ui/separator';
 import { Button } from '@/components/ui/button';
-import { BookOpen } from 'lucide-react';
+import { BookOpen, HelpCircle } from 'lucide-react';
 
 export function CalculatorPage() {
   const {
@@ -23,12 +26,14 @@ export function CalculatorPage() {
     setTripFuel,
   } = useCalculation();
 
+  const tour = useTourState(tourSteps.length);
+
   const hasLoading =
     result.zfm.mass !== config.bemMass || result.tom.mass !== result.zfm.mass;
 
   return (
     <div className="min-h-screen bg-background">
-      <header className="border-b bg-card">
+      <header className="border-b bg-card" data-tour="header">
         <div className="max-w-7xl mx-auto px-4 py-4 flex items-center justify-between">
           <div>
             <h1 className="text-xl font-bold">DA40 NG Mass & Balance</h1>
@@ -36,12 +41,17 @@ export function CalculatorPage() {
               Egmont Aviation ATO — AFM Doc. #6.01.15-E Rev.3 / OM App 08.2
             </p>
           </div>
-          <Button variant="outline" asChild>
-            <Link to="/learn">
-              <BookOpen className="mr-2 h-4 w-4" />
-              Learn M&B
-            </Link>
-          </Button>
+          <div className="flex items-center gap-2">
+            <Button variant="ghost" size="icon" onClick={tour.start} aria-label="Start tour" data-tour="tour-button">
+              <HelpCircle className="h-5 w-5" />
+            </Button>
+            <Button variant="outline" asChild data-tour="learn-button">
+              <Link to="/learn">
+                <BookOpen className="mr-2 h-4 w-4" />
+                Learn M&B
+              </Link>
+            </Button>
+          </div>
         </div>
       </header>
 
@@ -67,7 +77,7 @@ export function CalculatorPage() {
             onTakeoffFuelChange={setTakeoffFuel}
             onTripFuelChange={setTripFuel}
           />
-          <div className="lg:sticky lg:top-6">
+          <div className="lg:sticky lg:top-6" data-tour="cg-envelope">
             <CGEnvelopeChart config={config} result={result} />
           </div>
         </div>
@@ -83,7 +93,7 @@ export function CalculatorPage() {
         )}
 
         <Separator />
-        <footer className="text-center text-xs text-muted-foreground pb-4 space-y-2">
+        <footer className="text-center text-xs text-muted-foreground pb-4 space-y-2" data-tour="footer-disclaimer">
           <p>
             For training purposes only. Always verify all data with the Aircraft Flight Manual for your specific aircraft.
           </p>
@@ -93,6 +103,15 @@ export function CalculatorPage() {
           </p>
         </footer>
       </main>
+
+      <SpotlightTour
+        isActive={tour.isActive}
+        currentStep={tour.currentStep}
+        totalSteps={tour.totalSteps}
+        onNext={tour.next}
+        onPrev={tour.prev}
+        onStop={tour.stop}
+      />
     </div>
   );
 }
