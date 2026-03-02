@@ -202,7 +202,7 @@ export function LoadingTable({
               label="Zero Fuel Mass"
               condition={result.zfm}
               massLimit={limits.maxZfm}
-              massLimitLabel="Max ZFM"
+              massLimitLabel="MZFM"
               cgPassed={zfmCgOk}
               active={hasLoading}
             />
@@ -298,7 +298,7 @@ export function LoadingTable({
               label="Landing Mass"
               condition={result.lm}
               massLimit={limits.maxLanding}
-              massLimitLabel="Max Ldg"
+              massLimitLabel="MLM"
               cgPassed={lmCgOk}
               active={hasLoading}
             />

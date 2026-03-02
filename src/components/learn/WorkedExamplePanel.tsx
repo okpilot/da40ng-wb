@@ -262,7 +262,7 @@ function MiniEnvelope({ progress }: Props) {
           <line x1={ENV_M.left} y1={toY(1280)} x2={ENV_M.left + ENV_PW} y2={toY(1280)} stroke="#9ca3af" strokeWidth="0.8" strokeDasharray="3 2" />
           <text x={ENV_M.left + ENV_PW - 2} y={toY(1280) - 2} fontSize="8" fill="#6b7280" textAnchor="end">MTOM 1280</text>
           <line x1={ENV_M.left} y1={toY(1200)} x2={ENV_M.left + ENV_PW} y2={toY(1200)} stroke="#9ca3af" strokeWidth="0.8" strokeDasharray="2 2" />
-          <text x={ENV_M.left + ENV_PW - 2} y={toY(1200) - 2} fontSize="8" fill="#6b7280" textAnchor="end">Max ZFM 1200</text>
+          <text x={ENV_M.left + ENV_PW - 2} y={toY(1200) - 2} fontSize="8" fill="#6b7280" textAnchor="end">MZFM 1200</text>
 
           {/* Trajectory */}
           {trajectory && (
@@ -330,7 +330,7 @@ function LimitChecks({ progress }: Props) {
         <CardContent className="px-3 pb-3 space-y-1.5">
           <div className="flex items-center gap-2 text-xs">
             <XCircle className="h-3.5 w-3.5 text-red-600 shrink-0" />
-            <span className="text-red-600 dark:text-red-400 font-medium">ZFM ≤ Max ZFM</span>
+            <span className="text-red-600 dark:text-red-400 font-medium">ZFM ≤ MZFM</span>
             <span className="ml-auto font-mono text-[10px] text-red-600">{ORIGINAL.zfm.mass} / {LIMITS.maxZfm} kg</span>
           </div>
           <div className="flex items-start gap-2 text-xs mt-2 p-2 bg-red-50 dark:bg-red-950/20 rounded border border-red-200 dark:border-red-800">
@@ -345,7 +345,7 @@ function LimitChecks({ progress }: Props) {
   // After correction: show all checks
   const checks = [
     {
-      label: 'ZFM ≤ Max ZFM',
+      label: 'ZFM ≤ MZFM',
       value: `${CORRECTED.zfm.mass} / ${LIMITS.maxZfm} kg`,
       passed: CORRECTED.zfm.mass <= LIMITS.maxZfm,
       visible: r.zfmCorrected,
@@ -357,7 +357,7 @@ function LimitChecks({ progress }: Props) {
       visible: r.tom,
     },
     {
-      label: 'LM ≤ Max Landing',
+      label: 'LM ≤ MLM',
       value: `${CORRECTED.lm.mass} / ${LIMITS.maxLanding} kg`,
       passed: CORRECTED.lm.mass <= LIMITS.maxLanding,
       visible: r.lm,

@@ -19,7 +19,7 @@ export const glossary: GlossaryEntry[] = [
   {
     term: 'Zero Fuel Mass',
     abbreviation: 'ZFM',
-    definition: 'BEM plus all payload (passengers and baggage), before adding usable fuel. Max ZFM for DA40 NG: 1200 kg (1265 kg with MÄM 40-574).',
+    definition: 'BEM plus all payload (passengers and baggage), before adding usable fuel. MZFM for DA40 NG: 1200 kg (1265 kg with MÄM 40-574).',
   },
   {
     term: 'Takeoff Mass',
@@ -74,7 +74,7 @@ export const glossary: GlossaryEntry[] = [
   },
   {
     term: 'ZFM',
-    definition: 'Zero Fuel Mass — BEM plus all payload, before adding usable fuel. Max ZFM: 1200 kg (base).',
+    definition: 'Zero Fuel Mass — BEM plus all payload, before adding usable fuel. MZFM: 1200 kg (base).',
   },
   {
     term: 'TOM',
@@ -98,7 +98,7 @@ export const glossary: GlossaryEntry[] = [
   },
   {
     term: 'MÄM 40-574',
-    definition: 'A mandatory modification that increases max landing mass to 1280 kg and max ZFM to 1265 kg.',
+    definition: 'A mandatory modification that increases MLM to 1280 kg and MZFM to 1265 kg.',
   },
   {
     term: 'OÄM 40-164',

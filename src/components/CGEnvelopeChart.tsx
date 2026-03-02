@@ -145,12 +145,21 @@ export function CGEnvelopeChart({ config, result }: Props) {
   const cgTicks = generateTicks(CG_MIN, CG_MAX, 0.025);
   const massTicks = generateTicks(MASS_MIN, MASS_MAX, 50);
 
-  // Limit lines for MTOM, Max Landing, Max ZFM
-  const limitLines: { mass: number; label: string; dash: string }[] = [
+  // Limit lines for MTOM, Max Landing, Max ZFM — merge labels at same mass
+  const rawLimitLines = [
     { mass: limits.mtom, label: `MTOM ${limits.mtom}`, dash: '6 3' },
-    { mass: limits.maxLanding, label: `Max Ldg ${limits.maxLanding}`, dash: '4 2' },
-    { mass: limits.maxZfm, label: `Max ZFM ${limits.maxZfm}`, dash: '2 2' },
+    { mass: limits.maxLanding, label: `MLM ${limits.maxLanding}`, dash: '4 2' },
+    { mass: limits.maxZfm, label: `MZFM ${limits.maxZfm}`, dash: '2 2' },
   ];
+  const limitLines: { mass: number; label: string; dash: string }[] = [];
+  for (const line of rawLimitLines) {
+    const existing = limitLines.find((l) => l.mass === line.mass);
+    if (existing) {
+      existing.label += ` / ${line.label}`;
+    } else {
+      limitLines.push({ ...line });
+    }
+  }
 
   return (
     <Card>

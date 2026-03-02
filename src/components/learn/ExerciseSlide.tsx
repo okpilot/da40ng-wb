@@ -80,10 +80,16 @@ function ExerciseFieldRow({
           </>
         )}
         {checked === true && (
-          <CheckCircle2 className="h-5 w-5 text-green-600" />
+          <>
+            <CheckCircle2 className="h-5 w-5 text-green-600" aria-hidden />
+            <span className="sr-only">Correct</span>
+          </>
         )}
         {checked === false && (
-          <XCircle className="h-5 w-5 text-red-600" />
+          <>
+            <XCircle className="h-5 w-5 text-red-600" aria-hidden />
+            <span className="sr-only">Incorrect</span>
+          </>
         )}
       </div>
       {checked === false && (

@@ -47,7 +47,7 @@ export const da40ng: AircraftData = {
     {
       id: 'mam40-574',
       label: 'MÄM 40-574',
-      description: 'Max landing 1280 kg / Max ZFM 1265 kg',
+      description: 'MLM 1280 kg / MZFM 1265 kg',
       limitOverrides: { maxLanding: 1280, maxZfm: 1265 },
     },
     {

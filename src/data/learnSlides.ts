@@ -217,7 +217,7 @@ export const learnSlides: Slide[] = [
       ],
       bullets: [
         'Basic Empty Mass (BEM) — The aircraft as delivered: airframe, engine, fixed equipment, unusable fuel, and full oil. Example: 940 kg at CG 2.442 m.',
-        'Zero Fuel Mass (ZFM) — BEM plus all payload (passengers, baggage). No fuel yet. Max ZFM = 1200 kg (base).',
+        'Zero Fuel Mass (ZFM) — BEM plus all payload (passengers, baggage). No fuel yet. MZFM = 1200 kg (base).',
         'Takeoff Mass (TOM) — ZFM plus fuel loaded for the flight. Max TOM = MTOM = 1280 kg (base).',
         'Landing Mass (LM) — TOM minus the fuel burned during the trip. Max LM = 1216 kg (base).',
         'Ramp Mass — Some operators also calculate ramp mass (TOM + fuel for start-up, warm-up, and taxi). In practice, we simplify this: subtract ~1 USG from your trip fuel to account for taxi, and use TOM as your primary mass. No need to overcomplicate it.',
@@ -237,8 +237,8 @@ export const learnSlides: Slide[] = [
       ],
       bullets: [
         'MTOM: 1280 kg (1310 kg with MÄM 40-662)',
-        'Max Landing: 1216 kg (1280 kg with MÄM 40-574)',
-        'Max ZFM: 1200 kg (1265 kg with MÄM 40-574)',
+        'MLM: 1216 kg (1280 kg with MÄM 40-574)',
+        'MZFM: 1200 kg (1265 kg with MÄM 40-574)',
         'Min Flight Mass: 940 kg',
         'Why do these limits exist? Exceeding them compromises structural integrity — the aircraft can break — and degrades performance (longer takeoff roll, reduced climb, higher stall speed).',
       ],
@@ -319,7 +319,7 @@ export const learnSlides: Slide[] = [
     type: 'interactive',
     diagram: 'none',
     content: {
-      description: 'Click or drag a point around the DA40 NG CG envelope. See live feedback about whether the point is within limits and how close you are to each boundary.',
+      description: 'Click anywhere on the DA40 NG CG envelope to place a point. See live feedback about whether the point is within limits and how close you are to each boundary.',
       tool: 'envelope-explorer',
     } as InteractiveContent,
   },
@@ -419,11 +419,11 @@ export const learnSlides: Slide[] = [
       ],
       bullets: [
         'MÄM 40-662 — Increases MTOM from 1280 to 1310 kg. Extends the CG envelope upward.',
-        'MÄM 40-574 — Increases max landing mass from 1216 to 1280 kg, and max ZFM from 1200 to 1265 kg.',
+        'MÄM 40-574 — Increases MLM from 1216 to 1280 kg, and MZFM from 1200 to 1265 kg.',
         'OÄM 40-164 — Adds baggage tube station (arm 4.32 m, max 18 kg). Far aft, so it shifts CG significantly.',
         'OÄM 40-331 — Adds baggage extension stations with various arms and limits.',
       ],
-      note: 'With both MÄMs active, MTOM = 1310 kg, max landing = 1280 kg, and max ZFM = 1265 kg. These are cumulative.',
+      note: 'With both MÄMs active, MTOM = 1310 kg, MLM = 1280 kg, and MZFM = 1265 kg. These are cumulative.',
     } as TheoryContent,
   },
   {
@@ -448,7 +448,7 @@ export const learnSlides: Slide[] = [
         {
           label: '1265 kg',
           correct: false,
-          explanation: '1265 kg is the max ZFM with MÄM 40-574. That\'s a different limit.',
+          explanation: '1265 kg is the MZFM with MÄM 40-574. That\'s a different limit.',
         },
         {
           label: '1350 kg',
@@ -575,7 +575,7 @@ export const learnSlides: Slide[] = [
           hint: 'CG = Total Moment ÷ Total Mass',
         },
       ],
-      explanation: 'ZFM = 1255 kg, moment = 3173.2 kg·m, CG = 3173.2 ÷ 1255 = 2.528 m. Note: Max ZFM is 1200 kg — we already exceed it by 55 kg!',
+      explanation: 'ZFM = 1255 kg, moment = 3173.2 kg·m, CG = 3173.2 ÷ 1255 = 2.528 m. Note: MZFM is 1200 kg — we already exceed it by 55 kg!',
     } as ExerciseContent,
   },
   // ── ZFM exceeded! Stop, explain, correct, then continue ──
@@ -641,7 +641,7 @@ export const learnSlides: Slide[] = [
           hint: 'Total moment ÷ total mass',
         },
       ],
-      explanation: 'Corrected ZFM = 1170 kg (within max ZFM of 1200 ✓), moment = 2897.0 kg·m, CG = 2897.0 ÷ 1170 = 2.476 m (within envelope ✓). We can now safely continue with fuel.',
+      explanation: 'Corrected ZFM = 1170 kg (within MZFM of 1200 ✓), moment = 2897.0 kg·m, CG = 2897.0 ÷ 1170 = 2.476 m (within envelope ✓). We can now safely continue with fuel.',
     } as ExerciseContent,
   },
   {
@@ -760,7 +760,7 @@ export const learnSlides: Slide[] = [
           hint: 'Landing moment ÷ landing mass',
         },
       ],
-      explanation: 'Trip fuel: 12 × 3.785 = 45.4 L × 0.84 = 38.2 kg, moment = 38.2 × 2.63 = 100.4 kg·m. LM = 1249.5 − 38.2 = 1211.3 kg (within max landing of 1216 ✓), CG = 2.481 m (within envelope ✓).',
+      explanation: 'Trip fuel: 12 × 3.785 = 45.4 L × 0.84 = 38.2 kg, moment = 38.2 × 2.63 = 100.4 kg·m. LM = 1249.5 − 38.2 = 1211.3 kg (within MLM of 1216 ✓), CG = 2.481 m (within envelope ✓).',
     } as ExerciseContent,
   },
   {
@@ -774,9 +774,9 @@ export const learnSlides: Slide[] = [
         'Look at the Limit Checks panel on the right — all green! After correcting the loading, all limits are satisfied:',
       ],
       bullets: [
-        'ZFM 1170 kg ≤ Max ZFM 1200 kg ✓',
+        'ZFM 1170 kg ≤ MZFM 1200 kg ✓',
         'TOM 1249.5 kg ≤ MTOM 1280 kg ✓',
-        'LM 1211.3 kg ≤ Max Landing 1216 kg ✓ (just 4.7 kg margin!)',
+        'LM 1211.3 kg ≤ MLM 1216 kg ✓ (just 4.7 kg margin!)',
         'ZFM CG 2.476 m — within envelope ✓',
         'TOM CG 2.486 m — within envelope ✓',
         'LM CG 2.481 m — within envelope ✓',
@@ -797,10 +797,10 @@ export const learnSlides: Slide[] = [
       bullets: [
         'Calculate BEM moment from the weighing report',
         'Add payload moments for each station',
-        'Check ZFM against max ZFM — we caught an exceedance and corrected it',
+        'Check ZFM against MZFM — we caught an exceedance and corrected it',
         'Convert fuel from USG to kg and calculate fuel moment',
         'Calculate TOM and verify against MTOM and CG envelope',
-        'Calculate LM and verify against max landing mass and CG envelope',
+        'Calculate LM and verify against MLM and CG envelope',
       ],
       note: 'The key lesson: always check masses and CG at each stage. If any limit is exceeded — mass or CG — stop and fix it before continuing. Don\'t carry mistakes forward. Try it yourself in the Calculator with different loadings!',
     } as TheoryContent,

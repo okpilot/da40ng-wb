@@ -44,9 +44,10 @@ export function FuelConverter() {
   return (
     <div className="space-y-4 p-4 border rounded-lg bg-muted/30">
       <div className="space-y-2">
-        <Label>Enter fuel quantity:</Label>
+        <Label htmlFor="fuel-qty">Enter fuel quantity:</Label>
         <div className="flex gap-2 items-center">
           <Input
+            id="fuel-qty"
             type="number"
             step="any"
             min="0"
