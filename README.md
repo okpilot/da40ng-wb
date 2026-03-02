@@ -2,7 +2,7 @@
 
 A free, open-source, client-side web app for calculating mass & balance on the **Diamond DA40 NG**. Built for flight students and instructors — no login, no backend, everything runs in your browser.
 
-**[Open the calculator](https://okpilot.github.io/da40ng-wb/)** (GitHub Pages — coming soon)
+**[Open the calculator](https://okpilot.github.io/da40ng-wb/)**
 
 ## Features
 
