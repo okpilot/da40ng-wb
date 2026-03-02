@@ -1,73 +1,68 @@
-# React + TypeScript + Vite
+# DA40 NG Mass & Balance Calculator
 
-This template provides a minimal setup to get React working in Vite with HMR and some ESLint rules.
+A free, open-source, client-side web app for calculating mass & balance on the **Diamond DA40 NG**. Built for flight students and instructors — no login, no backend, everything runs in your browser.
 
-Currently, two official plugins are available:
+**[Open the calculator](https://okpilot.github.io/da40ng-wb/)** (GitHub Pages — coming soon)
 
-- [@vitejs/plugin-react](https://github.com/vitejs/vite-plugin-react/blob/main/packages/plugin-react) uses [Babel](https://babeljs.io/) (or [oxc](https://oxc.rs) when used in [rolldown-vite](https://vite.dev/guide/rolldown)) for Fast Refresh
-- [@vitejs/plugin-react-swc](https://github.com/vitejs/vite-plugin-react/blob/main/packages/plugin-react-swc) uses [SWC](https://swc.rs/) for Fast Refresh
+## Features
 
-## React Compiler
+- **Mass & Balance sheet** matching the Egmont Aviation OM App 08.2 form layout
+- **CG envelope chart** (AFM-style SVG) with ZFM, TOM, and LM plotted in real time
+- **Inline limit checks** — mass limits and CG envelope pass/fail shown directly in the form
+- **Modification support** — toggle MÄM 40-662, MÄM 40-574, OÄM 40-164, OÄM 40-331 and see limits and envelope adjust instantly
+- **Standard & Long Range tanks** — fuel input in USG (per AFM), with litres shown for awareness
+- **Calculation breakdown** — every step shown with formulas, so students can follow and verify the math
+- **Fully offline** — no server, no database, no tracking. Works on any device with a browser
 
-The React Compiler is not enabled on this template because of its impact on dev & build performances. To add it, see [this documentation](https://react.dev/learn/react-compiler/installation).
+## Data Sources
 
-## Expanding the ESLint configuration
+- Diamond DA40 NG AFM, Doc. #6.01.15-E, Rev. 3 (Section 6 — Mass & Balance)
+- Egmont Aviation OM, App 08.2
 
-If you are developing a production application, we recommend updating the configuration to enable type-aware lint rules:
+## Aircraft Data
 
-```js
-export default defineConfig([
-  globalIgnores(['dist']),
-  {
-    files: ['**/*.{ts,tsx}'],
-    extends: [
-      // Other configs...
+| Parameter | Value |
+|---|---|
+| Front seats arm | 2.30 m |
+| Rear seats arm | 3.25 m |
+| Fuel arm | 2.63 m |
+| Baggage compartment arm | 3.65 m |
+| Standard tank (usable) | 28 USG / 106 L |
+| Long Range tank (usable) | 39 USG / 148 L |
+| Fuel density | 0.84 kg/L |
+| Base MTOM | 1280 kg |
+| Base max landing mass | 1216 kg |
+| Base max ZFM | 1200 kg |
 
-      // Remove tseslint.configs.recommended and replace with this
-      tseslint.configs.recommendedTypeChecked,
-      // Alternatively, use this for stricter rules
-      tseslint.configs.strictTypeChecked,
-      // Optionally, add this for stylistic rules
-      tseslint.configs.stylisticTypeChecked,
+### Modifications
 
-      // Other configs...
-    ],
-    languageOptions: {
-      parserOptions: {
-        project: ['./tsconfig.node.json', './tsconfig.app.json'],
-        tsconfigRootDir: import.meta.dirname,
-      },
-      // other options...
-    },
-  },
-])
+| Mod | Effect |
+|---|---|
+| MÄM 40-662 | MTOM increase to 1310 kg |
+| MÄM 40-574 | Max landing 1280 kg / Max ZFM 1265 kg |
+| OÄM 40-164 | Baggage tube (arm 4.32 m, max 18 kg) |
+| OÄM 40-331 | Baggage extension compartments |
+
+## Tech Stack
+
+- React + TypeScript + Vite
+- Tailwind CSS v4 + shadcn/ui
+- Pure SVG for the CG envelope chart
+- GitHub Pages for hosting
+
+## Development
+
+```bash
+git clone https://github.com/okpilot/da40ng-wb.git
+cd da40ng-wb
+npm install
+npm run dev
 ```
 
-You can also install [eslint-plugin-react-x](https://github.com/Rel1cx/eslint-react/tree/main/packages/plugins/eslint-plugin-react-x) and [eslint-plugin-react-dom](https://github.com/Rel1cx/eslint-react/tree/main/packages/plugins/eslint-plugin-react-dom) for React-specific lint rules:
+## Disclaimer
 
-```js
-// eslint.config.js
-import reactX from 'eslint-plugin-react-x'
-import reactDom from 'eslint-plugin-react-dom'
+**For training and reference purposes only.** Always verify mass & balance calculations against the official AFM and your operator's documentation before flight. The authors accept no responsibility for the use of this tool in operational flight planning.
 
-export default defineConfig([
-  globalIgnores(['dist']),
-  {
-    files: ['**/*.{ts,tsx}'],
-    extends: [
-      // Other configs...
-      // Enable lint rules for React
-      reactX.configs['recommended-typescript'],
-      // Enable lint rules for React DOM
-      reactDom.configs.recommended,
-    ],
-    languageOptions: {
-      parserOptions: {
-        project: ['./tsconfig.node.json', './tsconfig.app.json'],
-        tsconfigRootDir: import.meta.dirname,
-      },
-      // other options...
-    },
-  },
-])
-```
+## License
+
+MIT
