@@ -189,7 +189,10 @@ export function CalculationBreakdown({
                 Aft limit = {fmt(interpolateLimit(result.zfm.mass, aftLimit), 3)} m
               </Line>
               <Line>
-                ZFM CG {fmt(result.zfm.cg, 3)} m → {isWithinEnvelope(result.zfm.mass, result.zfm.cg, fwdLimit, aftLimit) ? 'WITHIN' : 'OUTSIDE'}
+                Max ZFM = {limits.maxZfm} kg, ZFM = {fmt(result.zfm.mass)} kg
+              </Line>
+              <Line>
+                ZFM CG {fmt(result.zfm.cg, 3)} m → {isWithinEnvelope(result.zfm.mass, result.zfm.cg, fwdLimit, aftLimit, limits.maxZfm) ? 'WITHIN' : 'OUTSIDE'}
               </Line>
               {loading.takeoffFuelUsg > 0 && (
                 <>
@@ -197,7 +200,7 @@ export function CalculationBreakdown({
                     Fwd limit at {fmt(result.tom.mass)} kg = {fmt(interpolateLimit(result.tom.mass, fwdLimit), 3)} m
                   </Line>
                   <Line>
-                    TOM CG {fmt(result.tom.cg, 3)} m → {isWithinEnvelope(result.tom.mass, result.tom.cg, fwdLimit, aftLimit) ? 'WITHIN' : 'OUTSIDE'}
+                    TOM CG {fmt(result.tom.cg, 3)} m → {isWithinEnvelope(result.tom.mass, result.tom.cg, fwdLimit, aftLimit, limits.mtom) ? 'WITHIN' : 'OUTSIDE'}
                   </Line>
                 </>
               )}
@@ -207,7 +210,7 @@ export function CalculationBreakdown({
                     Fwd limit at {fmt(result.lm.mass)} kg = {fmt(interpolateLimit(result.lm.mass, fwdLimit), 3)} m
                   </Line>
                   <Line>
-                    LM CG {fmt(result.lm.cg, 3)} m → {isWithinEnvelope(result.lm.mass, result.lm.cg, fwdLimit, aftLimit) ? 'WITHIN' : 'OUTSIDE'}
+                    LM CG {fmt(result.lm.cg, 3)} m → {isWithinEnvelope(result.lm.mass, result.lm.cg, fwdLimit, aftLimit, limits.maxLanding) ? 'WITHIN' : 'OUTSIDE'}
                   </Line>
                 </>
               )}

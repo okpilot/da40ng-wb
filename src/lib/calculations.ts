@@ -128,7 +128,20 @@ export function isWithinEnvelope(
   cg: number,
   fwdLimit: EnvelopePoint[],
   aftLimit: EnvelopePoint[],
+  massLimit?: number,
 ): boolean {
+  // Mass must be within the envelope's vertical bounds
+  const minMass = Math.max(fwdLimit[0].mass, aftLimit[0].mass);
+  const envelopeMaxMass = Math.min(
+    fwdLimit[fwdLimit.length - 1].mass,
+    aftLimit[aftLimit.length - 1].mass,
+  );
+  // Use the tighter of the envelope boundary and the applicable mass limit
+  const maxMass = massLimit != null
+    ? Math.min(envelopeMaxMass, massLimit)
+    : envelopeMaxMass;
+  if (mass < minMass || mass > maxMass) return false;
+
   const fwd = interpolateLimit(mass, fwdLimit);
   const aft = interpolateLimit(mass, aftLimit);
   return cg >= fwd && cg <= aft;

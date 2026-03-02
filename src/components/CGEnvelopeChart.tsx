@@ -123,12 +123,12 @@ export function CGEnvelopeChart({ config, result }: Props) {
 
   const conditions = hasLoading
     ? [
-        { label: 'ZFM', ...result.zfm },
+        { label: 'ZFM', ...result.zfm, massLimit: limits.maxZfm },
         ...(result.tom.mass !== result.zfm.mass
-          ? [{ label: 'TOM', ...result.tom }]
+          ? [{ label: 'TOM', ...result.tom, massLimit: limits.mtom }]
           : []),
         ...(result.lm.mass !== result.tom.mass
-          ? [{ label: 'LM', ...result.lm }]
+          ? [{ label: 'LM', ...result.lm, massLimit: limits.maxLanding }]
           : []),
       ]
     : [];
@@ -293,7 +293,7 @@ export function CGEnvelopeChart({ config, result }: Props) {
               cg={c.cg}
               mass={c.mass}
               label={c.label}
-              inEnvelope={isWithinEnvelope(c.mass, c.cg, fwdLimit, aftLimit)}
+              inEnvelope={isWithinEnvelope(c.mass, c.cg, fwdLimit, aftLimit, c.massLimit)}
             />
           ))}
 

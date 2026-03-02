@@ -125,9 +125,9 @@ export function LoadingTable({
   const fwdLimit = getActiveFwdLimit(da40ng, config.activeMods);
   const aftLimit = getActiveAftLimit(da40ng, config.activeMods);
 
-  const zfmCgOk = isWithinEnvelope(result.zfm.mass, result.zfm.cg, fwdLimit, aftLimit);
-  const tomCgOk = isWithinEnvelope(result.tom.mass, result.tom.cg, fwdLimit, aftLimit);
-  const lmCgOk = isWithinEnvelope(result.lm.mass, result.lm.cg, fwdLimit, aftLimit);
+  const zfmCgOk = isWithinEnvelope(result.zfm.mass, result.zfm.cg, fwdLimit, aftLimit, limits.maxZfm);
+  const tomCgOk = isWithinEnvelope(result.tom.mass, result.tom.cg, fwdLimit, aftLimit, limits.mtom);
+  const lmCgOk = isWithinEnvelope(result.lm.mass, result.lm.cg, fwdLimit, aftLimit, limits.maxLanding);
 
   const fuelOverCapacity = loading.takeoffFuelUsg > tank.usableUsg;
 
