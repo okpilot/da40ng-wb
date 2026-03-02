@@ -162,7 +162,7 @@ export function CalculationBreakdown({
           <div className="space-y-5">
             <Step label="Mass Limit Checks">
               <Line>
-                Max ZFM: {fmt(result.zfm.mass)} kg {result.zfm.mass <= limits.maxZfm ? '≤' : '>'} {limits.maxZfm} kg → {result.zfm.mass <= limits.maxZfm ? 'OK' : 'EXCEEDED'}
+                MZFM: {fmt(result.zfm.mass)} kg {result.zfm.mass <= limits.maxZfm ? '≤' : '>'} {limits.maxZfm} kg → {result.zfm.mass <= limits.maxZfm ? 'OK' : 'EXCEEDED'}
               </Line>
               {loading.takeoffFuelUsg > 0 && (
                 <>
@@ -176,7 +176,7 @@ export function CalculationBreakdown({
               )}
               {loading.tripFuelUsg > 0 && (
                 <Line>
-                  Max Ldg: {fmt(result.lm.mass)} kg {result.lm.mass <= limits.maxLanding ? '≤' : '>'} {limits.maxLanding} kg → {result.lm.mass <= limits.maxLanding ? 'OK' : 'EXCEEDED'}
+                  MLM: {fmt(result.lm.mass)} kg {result.lm.mass <= limits.maxLanding ? '≤' : '>'} {limits.maxLanding} kg → {result.lm.mass <= limits.maxLanding ? 'OK' : 'EXCEEDED'}
                 </Line>
               )}
             </Step>
@@ -189,7 +189,7 @@ export function CalculationBreakdown({
                 Aft limit = {fmt(interpolateLimit(result.zfm.mass, aftLimit), 3)} m
               </Line>
               <Line>
-                Max ZFM = {limits.maxZfm} kg, ZFM = {fmt(result.zfm.mass)} kg
+                MZFM = {limits.maxZfm} kg, ZFM = {fmt(result.zfm.mass)} kg
               </Line>
               <Line>
                 ZFM CG {fmt(result.zfm.cg, 3)} m → {isWithinEnvelope(result.zfm.mass, result.zfm.cg, fwdLimit, aftLimit, limits.maxZfm) ? 'WITHIN' : 'OUTSIDE'}
