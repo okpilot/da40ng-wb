@@ -100,7 +100,7 @@ function ExerciseFieldRow({
                 className="h-auto p-0 text-xs text-muted-foreground underline"
                 onClick={() => {
                   progress.setExerciseAnswer(slideId, field.id, '');
-                  progress.setExerciseChecked(slideId, field.id, undefined!);
+                  progress.setExerciseChecked(slideId, field.id, undefined);
                 }}
               >
                 Try again

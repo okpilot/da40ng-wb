@@ -89,7 +89,7 @@ export const learnSlides: Slide[] = [
     diagram: 'cg-effects',
     content: {
       paragraphs: [
-        'The Centre of Gravity (CG) is the point through which the total force of weight acts — and the point around which the aircraft rotates in pitch. Its position along the longitudinal axis dramatically affects flight characteristics.',
+        'The Centre of Gravity (CG) is the point through which the total force of weight acts — and the point around which the aircraft rotates. Its position along the longitudinal axis dramatically affects flight characteristics.',
         'A forward CG beyond limits is dangerous: the elevator may not have enough authority to flare for landing or to recover from a dive. It also increases stall speed and fuel consumption.',
         'An aft CG beyond limits is equally dangerous: stability is reduced and the elevator may lack authority to prevent a nose-up pitch, leading to an unrecoverable stall or spin.',
       ],
@@ -185,7 +185,7 @@ export const learnSlides: Slide[] = [
     diagram: 'balance',
     content: {
       paragraphs: [
-        'The Centre of Gravity (CG) is the point through which the total force of weight acts, and the point around which the aircraft rotates in pitch. It\'s found by dividing the total moment by the total mass:',
+        'The Centre of Gravity (CG) is the point through which the total force of weight acts, and the point around which the aircraft rotates. It\'s found by dividing the total moment by the total mass:',
         'CG = Total Moment ÷ Total Mass',
         'For example, if total moment is 2,815 kg·m and total mass is 1,120 kg, then CG = 2,815 ÷ 1,120 = 2.513 m aft of datum.',
         'Every item you add to the aircraft shifts the CG toward that item\'s station. Adding weight to the rear seats (arm 3.25 m) pulls the CG aft. Adding fuel (arm 2.63 m) pulls it slightly forward relative to a high CG.',

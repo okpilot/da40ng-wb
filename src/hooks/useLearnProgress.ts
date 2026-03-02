@@ -9,7 +9,7 @@ interface PersistedState {
   currentSlide: number;
   quizAnswers: Record<string, number>; // slideId → selected option index
   exerciseAnswers: Record<string, Record<string, string>>; // slideId → { fieldId: value }
-  exerciseChecked: Record<string, Record<string, boolean>>; // slideId → { fieldId: isCorrect }
+  exerciseChecked: Record<string, Record<string, boolean | undefined>>; // slideId → { fieldId: isCorrect }
 }
 
 export interface LearnProgress {
@@ -24,7 +24,7 @@ export interface LearnProgress {
   getExerciseAnswer: (slideId: string, fieldId: string) => string;
   setExerciseAnswer: (slideId: string, fieldId: string, value: string) => void;
   getExerciseChecked: (slideId: string, fieldId: string) => boolean | undefined;
-  setExerciseChecked: (slideId: string, fieldId: string, correct: boolean) => void;
+  setExerciseChecked: (slideId: string, fieldId: string, correct: boolean | undefined) => void;
   isExerciseComplete: (slideId: string) => boolean;
 
   // Navigation
@@ -34,23 +34,32 @@ export interface LearnProgress {
   reset: () => void;
 }
 
+const FRESH_STATE: PersistedState = {
+  version: STORAGE_VERSION,
+  currentSlide: 0,
+  quizAnswers: {},
+  exerciseAnswers: {},
+  exerciseChecked: {},
+};
+
 function loadState(): PersistedState {
   try {
     const raw = localStorage.getItem(STORAGE_KEY);
     if (raw) {
       const parsed = JSON.parse(raw);
-      if (parsed.version === STORAGE_VERSION) {
-        return parsed;
+      if (parsed?.version === STORAGE_VERSION) {
+        const safeSlide = Number.isInteger(parsed.currentSlide)
+          ? Math.min(Math.max(parsed.currentSlide, 0), learnSlides.length - 1)
+          : 0;
+        return {
+          ...FRESH_STATE,
+          ...parsed,
+          currentSlide: safeSlide,
+        };
       }
     }
   } catch { /* ignore */ }
-  return {
-    version: STORAGE_VERSION,
-    currentSlide: 0,
-    quizAnswers: {},
-    exerciseAnswers: {},
-    exerciseChecked: {},
-  };
+  return { ...FRESH_STATE };
 }
 
 function saveState(state: PersistedState) {
@@ -130,17 +139,22 @@ export function useLearnProgress(): LearnProgress {
   );
 
   const setExerciseChecked = useCallback(
-    (slideId: string, fieldId: string, correct: boolean) => {
-      setState((prev) => ({
-        ...prev,
-        exerciseChecked: {
-          ...prev.exerciseChecked,
-          [slideId]: {
-            ...prev.exerciseChecked[slideId],
-            [fieldId]: correct,
+    (slideId: string, fieldId: string, correct: boolean | undefined) => {
+      setState((prev) => {
+        const nextForSlide = { ...(prev.exerciseChecked[slideId] ?? {}) };
+        if (correct === undefined) {
+          delete nextForSlide[fieldId];
+        } else {
+          nextForSlide[fieldId] = correct;
+        }
+        return {
+          ...prev,
+          exerciseChecked: {
+            ...prev.exerciseChecked,
+            [slideId]: nextForSlide,
           },
-        },
-      }));
+        };
+      });
     },
     [],
   );
@@ -179,14 +193,7 @@ export function useLearnProgress(): LearnProgress {
   }, []);
 
   const reset = useCallback(() => {
-    const fresh: PersistedState = {
-      version: STORAGE_VERSION,
-      currentSlide: 0,
-      quizAnswers: {},
-      exerciseAnswers: {},
-      exerciseChecked: {},
-    };
-    setState(fresh);
+    setState({ ...FRESH_STATE });
   }, []);
 
   return {

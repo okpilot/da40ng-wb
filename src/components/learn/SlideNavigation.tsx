@@ -36,6 +36,7 @@ export function SlideNavigation({
 
       {/* Slide selector */}
       <select
+        aria-label="Jump to slide"
         value={currentSlide}
         onChange={(e) => onGoToSlide(Number(e.target.value))}
         className="text-xs border rounded px-2 py-1.5 bg-background text-foreground max-w-48 truncate"

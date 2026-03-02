@@ -17,7 +17,7 @@ function TermPopover({ entry, children }: { entry: GlossaryEntry; children: Reac
   return (
     <Popover>
       <PopoverTrigger asChild>
-        <button className="text-blue-600 dark:text-blue-400 underline decoration-dotted underline-offset-2 hover:text-blue-800 dark:hover:text-blue-300 cursor-help font-medium inline">
+        <button type="button" className="text-blue-600 dark:text-blue-400 underline decoration-dotted underline-offset-2 hover:text-blue-800 dark:hover:text-blue-300 cursor-help font-medium inline">
           {children}
         </button>
       </PopoverTrigger>

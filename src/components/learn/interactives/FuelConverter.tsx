@@ -59,6 +59,7 @@ export function FuelConverter() {
               <button
                 key={u.key}
                 onClick={() => setInputUnit(u.key)}
+                aria-pressed={inputUnit === u.key}
                 className={`text-xs px-3 py-1.5 rounded border transition-colors ${
                   inputUnit === u.key
                     ? 'bg-primary text-primary-foreground border-primary'

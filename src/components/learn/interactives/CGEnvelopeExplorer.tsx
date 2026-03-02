@@ -150,11 +150,13 @@ export function CGEnvelopeExplorer() {
             ? 'Within limits'
             : point.mass > 1280
               ? 'Outside limits — mass exceeds MTOM'
-              : point.cg < fwdCg
-                ? 'Outside limits — CG too far forward'
-                : point.cg > aftCg
-                  ? 'Outside limits — CG too far aft'
-                  : 'Outside limits — mass below minimum'
+              : point.mass < 940
+                ? 'Outside limits — mass below minimum'
+                : point.cg < fwdCg
+                  ? 'Outside limits — CG too far forward'
+                  : point.cg > aftCg
+                    ? 'Outside limits — CG too far aft'
+                    : 'Outside limits'
           }
         </p>
       </div>

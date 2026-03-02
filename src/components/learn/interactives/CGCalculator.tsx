@@ -224,6 +224,7 @@ export function CGCalculator() {
               variant="ghost"
               size="sm"
               className="h-8 w-8 p-0"
+              aria-label={`Remove ${item.label || 'item'}`}
               onClick={() => removeItem(item.id)}
             >
               <Trash2 className="h-3 w-3" />
