@@ -1,0 +1,92 @@
+import { Link } from 'react-router-dom';
+import { AircraftConfig } from '@/components/AircraftConfig';
+import { LoadingTable } from '@/components/LoadingTable';
+import { CGEnvelopeChart } from '@/components/CGEnvelopeChart';
+import { CalculationBreakdown } from '@/components/CalculationBreakdown';
+import { useCalculation } from '@/hooks/useCalculation';
+import { Separator } from '@/components/ui/separator';
+import { Button } from '@/components/ui/button';
+import { BookOpen } from 'lucide-react';
+
+export function CalculatorPage() {
+  const {
+    config,
+    loading,
+    visibleStations,
+    result,
+    setBemMass,
+    setBemCg,
+    toggleMod,
+    setTankConfig,
+    setStationMass,
+    setTakeoffFuel,
+    setTripFuel,
+  } = useCalculation();
+
+  const hasLoading =
+    result.zfm.mass !== config.bemMass || result.tom.mass !== result.zfm.mass;
+
+  return (
+    <div className="min-h-screen bg-background">
+      <header className="border-b bg-card">
+        <div className="max-w-7xl mx-auto px-4 py-4 flex items-center justify-between">
+          <div>
+            <h1 className="text-xl font-bold">DA40 NG Mass & Balance</h1>
+            <p className="text-sm text-muted-foreground">
+              Egmont Aviation ATO — AFM Doc. #6.01.15-E Rev.3 / OM App 08.2
+            </p>
+          </div>
+          <Button variant="outline" asChild>
+            <Link to="/learn">
+              <BookOpen className="mr-2 h-4 w-4" />
+              Learn M&B
+            </Link>
+          </Button>
+        </div>
+      </header>
+
+      <main className="max-w-7xl mx-auto px-4 py-6 space-y-6">
+        {/* Full-width aircraft config */}
+        <AircraftConfig
+          config={config}
+          onBemMassChange={setBemMass}
+          onBemCgChange={setBemCg}
+          onToggleMod={toggleMod}
+          onTankChange={setTankConfig}
+        />
+
+        {/* Form + Envelope side by side */}
+        <div className="grid grid-cols-1 lg:grid-cols-2 gap-6 items-start">
+          <LoadingTable
+            config={config}
+            loading={loading}
+            visibleStations={visibleStations}
+            result={result}
+            hasLoading={hasLoading}
+            onStationMassChange={setStationMass}
+            onTakeoffFuelChange={setTakeoffFuel}
+            onTripFuelChange={setTripFuel}
+          />
+          <div className="lg:sticky lg:top-6">
+            <CGEnvelopeChart config={config} result={result} />
+          </div>
+        </div>
+
+        {/* Calculation breakdown — only when there's data */}
+        {hasLoading && (
+          <CalculationBreakdown
+            config={config}
+            loading={loading}
+            visibleStations={visibleStations}
+            result={result}
+          />
+        )}
+
+        <Separator />
+        <footer className="text-center text-xs text-muted-foreground pb-4">
+          For training purposes only. Always verify with official AFM documents.
+        </footer>
+      </main>
+    </div>
+  );
+}
