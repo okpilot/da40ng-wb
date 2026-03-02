@@ -2,13 +2,29 @@ import { useCallback, useEffect, useState } from 'react';
 
 const STORAGE_KEY = 'da40ng-tour-seen';
 
+function hasSeenTour(): boolean {
+  try {
+    return localStorage.getItem(STORAGE_KEY) === '1';
+  } catch {
+    return false;
+  }
+}
+
+function markTourSeen(): void {
+  try {
+    localStorage.setItem(STORAGE_KEY, '1');
+  } catch {
+    // gracefully degrade — tour state still works in-memory
+  }
+}
+
 export function useTourState(totalSteps: number) {
   const [isActive, setIsActive] = useState(false);
   const [currentStep, setCurrentStep] = useState(0);
 
   // Auto-start on first visit
   useEffect(() => {
-    if (localStorage.getItem(STORAGE_KEY)) return;
+    if (hasSeenTour()) return;
     const id = setTimeout(() => {
       setCurrentStep(0);
       setIsActive(true);
@@ -18,7 +34,7 @@ export function useTourState(totalSteps: number) {
 
   const stop = useCallback(() => {
     setIsActive(false);
-    localStorage.setItem(STORAGE_KEY, '1');
+    markTourSeen();
   }, []);
 
   const start = useCallback(() => {
@@ -30,7 +46,7 @@ export function useTourState(totalSteps: number) {
     setCurrentStep((s) => {
       if (s >= totalSteps - 1) {
         setIsActive(false);
-        localStorage.setItem(STORAGE_KEY, '1');
+        markTourSeen();
         return s;
       }
       return s + 1;

@@ -4,6 +4,7 @@ import type { TourPlacement } from '@/data/tourSteps';
 import type { SpotlightRect } from './useSpotlightPosition';
 
 const MAX_WIDTH = 320;
+const ESTIMATED_HEIGHT = 180;
 const GAP = 12;
 const VIEWPORT_PAD = 12;
 
@@ -35,22 +36,22 @@ function computePosition(
       left = rect.left + rect.width / 2 - MAX_WIDTH / 2;
       break;
     case 'top':
-      top = rect.top - GAP;
+      top = rect.top - ESTIMATED_HEIGHT - GAP;
       left = rect.left + rect.width / 2 - MAX_WIDTH / 2;
       break;
     case 'left':
-      top = rect.top + rect.height / 2;
+      top = rect.top + rect.height / 2 - ESTIMATED_HEIGHT / 2;
       left = rect.left - MAX_WIDTH - GAP;
       break;
     case 'right':
-      top = rect.top + rect.height / 2;
+      top = rect.top + rect.height / 2 - ESTIMATED_HEIGHT / 2;
       left = rect.left + rect.width + GAP;
       break;
   }
 
   // Clamp to viewport
   left = Math.max(VIEWPORT_PAD, Math.min(left, vw - MAX_WIDTH - VIEWPORT_PAD));
-  top = Math.max(VIEWPORT_PAD, Math.min(top, vh - 200));
+  top = Math.max(VIEWPORT_PAD, Math.min(top, vh - ESTIMATED_HEIGHT - VIEWPORT_PAD));
 
   return { top, left };
 }
