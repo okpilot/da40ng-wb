@@ -1,55 +1,69 @@
 export function AircraftSideView() {
+  // Clean horizontal line with datum and stations marked
+  // Wider viewBox and larger fonts for readability
+  const datumX = 30;
+  const scale = 105; // pixels per metre
   const stations = [
-    { label: 'Front Seats', arm: 2.30, x: 160 },
-    { label: 'Fuel', arm: 2.63, x: 200 },
-    { label: 'Rear Seats', arm: 3.25, x: 270 },
-    { label: 'Baggage', arm: 3.65, x: 320 },
-    { label: 'Bag. Tube', arm: 4.32, x: 380 },
+    { label: 'Front Seats', arm: 2.30, color: '#1d4ed8' },
+    { label: 'Fuel Tanks', arm: 2.63, color: '#d97706' },
+    { label: 'Rear Seats', arm: 3.25, color: '#7c3aed' },
+    { label: 'Baggage', arm: 3.65, color: '#059669' },
+    { label: 'Bag. Tube', arm: 4.32, color: '#6b7280', note: 'OÄM 40-164' },
   ];
+
+  const toX = (arm: number) => datumX + arm * scale;
+  const lineEnd = toX(4.7);
 
   return (
     <div className="flex justify-center">
-      <svg viewBox="0 0 500 200" className="w-full max-w-[500px]" style={{ fontFamily: 'system-ui, sans-serif' }}>
-        {/* Aircraft body */}
-        <path
-          d="M 40 85 Q 70 55 140 65 L 420 70 Q 460 73 470 80 Q 460 87 420 90 L 140 95 Q 70 105 40 85 Z"
-          fill="#dbeafe"
-          stroke="#1d4ed8"
-          strokeWidth="1.5"
-        />
+      <svg viewBox="0 0 540 155" className="w-full max-w-[540px]" style={{ fontFamily: 'system-ui, sans-serif' }}>
+        {/* Main horizontal axis */}
+        <line x1={datumX} y1="70" x2={lineEnd} y2="70" stroke="#374151" strokeWidth="2" />
 
-        {/* Wing */}
-        <path d="M 180 50 L 220 50 L 230 65 L 230 95 L 220 110 L 180 110 L 170 95 L 170 65 Z" fill="#bfdbfe" stroke="#1d4ed8" strokeWidth="1" />
+        {/* Datum marker */}
+        <line x1={datumX} y1="35" x2={datumX} y2="105" stroke="#dc2626" strokeWidth="2.5" />
+        <text x={datumX} y="26" fontSize="12" fontWeight="700" textAnchor="middle" fill="#dc2626">DATUM</text>
+        <text x={datumX} y="118" fontSize="10" textAnchor="middle" fill="#dc2626">0.00 m</text>
 
-        {/* Propeller */}
-        <line x1="38" y1="65" x2="38" y2="105" stroke="#374151" strokeWidth="2" />
-
-        {/* Tail */}
-        <path d="M 445 70 L 465 40 L 475 42 L 458 70" fill="#bfdbfe" stroke="#1d4ed8" strokeWidth="1" />
-
-        {/* Datum line */}
-        <line x1="80" y1="30" x2="80" y2="170" stroke="#dc2626" strokeWidth="1.5" strokeDasharray="5 3" />
-        <text x="80" y="25" fontSize="10" fontWeight="600" textAnchor="middle" fill="#dc2626">DATUM</text>
-
-        {/* Station markers */}
-        {stations.map((s) => (
-          <g key={s.label}>
-            <line x1={s.x} y1="65" x2={s.x} y2="95" stroke="#16a34a" strokeWidth="1" strokeDasharray="2 2" />
-            <circle cx={s.x} cy="80" r="3" fill="#16a34a" />
-            {/* Arm line from datum */}
-            <line x1="80" y1={130} x2={s.x} y2={130} stroke="#9ca3af" strokeWidth="0.5" />
-            <text x={s.x} y="115" fontSize="8" textAnchor="middle" fill="#374151" fontWeight="600">
-              {s.label}
-            </text>
-            <text x={s.x} y="145" fontSize="8" textAnchor="middle" fill="#16a34a">
-              {s.arm} m
-            </text>
+        {/* Metre ticks */}
+        {[1, 2, 3, 4].map((m) => (
+          <g key={m}>
+            <line x1={toX(m)} y1="65" x2={toX(m)} y2="75" stroke="#9ca3af" strokeWidth="1" />
+            <text x={toX(m)} y="88" fontSize="9" textAnchor="middle" fill="#9ca3af">{m}.00</text>
           </g>
         ))}
 
-        {/* Arm dimension arrow */}
-        <text x="130" y="168" fontSize="9" textAnchor="middle" fill="#6b7280">
-          ← arm (distance from datum) →
+        {/* Station markers — alternate above/below to avoid overlap */}
+        {stations.map((s, i) => {
+          const x = toX(s.arm);
+          const above = i % 2 === 0;
+          const labelY = above ? 42 : 100;
+          const armY = above ? 55 : 113;
+          const tickTop = above ? 50 : 70;
+          const tickBot = above ? 70 : 90;
+
+          return (
+            <g key={s.label}>
+              <line x1={x} y1={tickTop} x2={x} y2={tickBot} stroke={s.color} strokeWidth="2.5" />
+              <circle cx={x} cy="70" r="4.5" fill={s.color} />
+              <text x={x} y={labelY} fontSize="10" fontWeight="600" textAnchor="middle" fill={s.color}>
+                {s.label}
+              </text>
+              <text x={x} y={armY} fontSize="10" textAnchor="middle" fill={s.color} fontWeight="500">
+                {s.arm} m
+              </text>
+              {s.note && (
+                <text x={x} y={armY + 12} fontSize="8" textAnchor="middle" fill="#9ca3af">
+                  ({s.note})
+                </text>
+              )}
+            </g>
+          );
+        })}
+
+        {/* Dimension label */}
+        <text x={(datumX + toX(4.32)) / 2} y="143" fontSize="10" textAnchor="middle" fill="#6b7280">
+          arm = distance aft from datum (metres)
         </text>
       </svg>
     </div>

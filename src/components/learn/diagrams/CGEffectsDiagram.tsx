@@ -1,66 +1,42 @@
 export function CGEffectsDiagram() {
   return (
     <div className="flex justify-center">
-      <svg viewBox="0 0 520 200" className="w-full max-w-[520px]" style={{ fontFamily: 'system-ui, sans-serif' }}>
-        {/* Forward CG side */}
-        <g>
-          <text x="130" y="18" fontSize="12" fontWeight="700" textAnchor="middle" fill="#1d4ed8">
-            Forward CG
-          </text>
+      <svg viewBox="0 0 500 160" className="w-full max-w-[500px]" style={{ fontFamily: 'system-ui, sans-serif' }}>
 
-          {/* Aircraft body */}
-          <path d="M 30 80 Q 60 60 130 65 L 220 70 Q 240 72 240 80 Q 240 88 220 90 L 130 95 Q 60 100 30 80 Z" fill="#dbeafe" stroke="#1d4ed8" strokeWidth="1.5" />
-          {/* Wing */}
-          <line x1="120" y1="55" x2="120" y2="105" stroke="#1d4ed8" strokeWidth="2" />
-          {/* CG marker — forward */}
-          <circle cx="100" cy="80" r="6" fill="#dc2626" stroke="#fff" strokeWidth="1.5" />
-          <text x="100" y="84" fontSize="8" fontWeight="700" textAnchor="middle" fill="#fff">CG</text>
-          {/* Arrow showing nose-heavy tendency */}
-          <path d="M 50 75 L 35 68" stroke="#dc2626" strokeWidth="2" markerEnd="url(#arrowRed)" />
-        </g>
+        {/* Datum */}
+        <text x="50" y="20" fontSize="12" fontWeight="700" textAnchor="middle" fill="#374151">DATUM</text>
+        <line x1="50" y1="28" x2="50" y2="72" stroke="#374151" strokeWidth="2.5" />
 
-        {/* Labels for forward CG */}
-        <g>
-          <text x="130" y="125" fontSize="9" textAnchor="middle" fill="#374151">Heavy controls</text>
-          <text x="130" y="138" fontSize="9" textAnchor="middle" fill="#374151">Higher stall speed</text>
-          <text x="130" y="151" fontSize="9" textAnchor="middle" fill="#374151">More fuel burn</text>
-          <text x="130" y="164" fontSize="9" textAnchor="middle" fill="#16a34a">More stable</text>
-        </g>
+        {/* Horizontal axis — along the bottom edge of the zones */}
+        <line x1="50" y1="68" x2="450" y2="68" stroke="#374151" strokeWidth="2" />
 
-        {/* Aft CG side */}
-        <g>
-          <text x="390" y="18" fontSize="12" fontWeight="700" textAnchor="middle" fill="#dc2626">
-            Aft CG
-          </text>
+        {/* Forward danger zone */}
+        <rect x="50" y="32" width="110" height="36" fill="#fecaca" rx="3" opacity="0.5" />
+        <text x="105" y="56" fontSize="11" textAnchor="middle" fill="#dc2626" fontWeight="700">FWD LIMIT</text>
 
-          {/* Aircraft body */}
-          <path d="M 290 80 Q 320 60 390 65 L 480 70 Q 500 72 500 80 Q 500 88 480 90 L 390 95 Q 320 100 290 80 Z" fill="#fef2f2" stroke="#dc2626" strokeWidth="1.5" />
-          {/* Wing */}
-          <line x1="380" y1="55" x2="380" y2="105" stroke="#dc2626" strokeWidth="2" />
-          {/* CG marker — aft */}
-          <circle cx="420" cy="80" r="6" fill="#dc2626" stroke="#fff" strokeWidth="1.5" />
-          <text x="420" y="84" fontSize="8" fontWeight="700" textAnchor="middle" fill="#fff">CG</text>
-          {/* Arrow showing tail-heavy tendency */}
-          <path d="M 470 75 L 485 68" stroke="#dc2626" strokeWidth="2" markerEnd="url(#arrowRed)" />
-        </g>
+        {/* Safe zone */}
+        <rect x="160" y="32" width="180" height="36" fill="#bbf7d0" rx="3" opacity="0.5" />
+        <text x="250" y="56" fontSize="12" textAnchor="middle" fill="#16a34a" fontWeight="700">SAFE CG RANGE</text>
 
-        {/* Labels for aft CG */}
-        <g>
-          <text x="390" y="125" fontSize="9" textAnchor="middle" fill="#374151">Light controls</text>
-          <text x="390" y="138" fontSize="9" textAnchor="middle" fill="#374151">Lower stall speed</text>
-          <text x="390" y="151" fontSize="9" textAnchor="middle" fill="#374151">Less fuel burn</text>
-          <text x="390" y="164" fontSize="9" textAnchor="middle" fill="#dc2626" fontWeight="600">UNSTABLE — DANGEROUS</text>
-        </g>
+        {/* Aft danger zone */}
+        <rect x="340" y="32" width="110" height="36" fill="#fecaca" rx="3" opacity="0.5" />
+        <text x="395" y="56" fontSize="11" textAnchor="middle" fill="#dc2626" fontWeight="700">AFT LIMIT</text>
 
-        {/* Center divider */}
-        <line x1="260" y1="10" x2="260" y2="180" stroke="#e5e7eb" strokeWidth="1" strokeDasharray="4 3" />
+        {/* Limit markers */}
+        <line x1="160" y1="28" x2="160" y2="72" stroke="#dc2626" strokeWidth="2" />
+        <line x1="340" y1="28" x2="340" y2="72" stroke="#dc2626" strokeWidth="2" />
 
-        {/* Arrow marker definition */}
-        <defs>
-          <marker id="arrowRed" markerWidth="8" markerHeight="6" refX="8" refY="3" orient="auto">
-            <path d="M 0 0 L 8 3 L 0 6 Z" fill="#dc2626" />
-          </marker>
-        </defs>
+        {/* Forward danger labels */}
+        <text x="105" y="90" fontSize="9" textAnchor="middle" fill="#991b1b" fontWeight="600">DANGEROUS:</text>
+        <text x="105" y="105" fontSize="10" textAnchor="middle" fill="#dc2626">Cannot flare</text>
+        <text x="105" y="120" fontSize="10" textAnchor="middle" fill="#dc2626">High stall speed</text>
+        <text x="105" y="135" fontSize="10" textAnchor="middle" fill="#dc2626">Nose-heavy</text>
+
+        {/* Aft danger labels */}
+        <text x="395" y="90" fontSize="9" textAnchor="middle" fill="#991b1b" fontWeight="600">DANGEROUS:</text>
+        <text x="395" y="105" fontSize="10" textAnchor="middle" fill="#dc2626">Unstable pitch</text>
+        <text x="395" y="118" fontSize="10" textAnchor="middle" fill="#dc2626">Unrecoverable stall</text>
+        <text x="395" y="133" fontSize="10" textAnchor="middle" fill="#dc2626">Tail-heavy</text>
       </svg>
     </div>
   );

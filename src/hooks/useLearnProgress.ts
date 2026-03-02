@@ -2,7 +2,7 @@ import { useState, useCallback, useEffect } from 'react';
 import { learnSlides } from '@/data/learnSlides';
 
 const STORAGE_KEY = 'da40ng-learn-progress';
-const STORAGE_VERSION = 1;
+const STORAGE_VERSION = 2;
 
 interface PersistedState {
   version: number;
@@ -28,6 +28,7 @@ export interface LearnProgress {
   isExerciseComplete: (slideId: string) => boolean;
 
   // Navigation
+  goToSlide: (index: number) => void;
   goToNext: () => void;
   goToPrev: () => void;
   reset: () => void;
@@ -156,6 +157,13 @@ export function useLearnProgress(): LearnProgress {
     [state.exerciseChecked],
   );
 
+  const goToSlide = useCallback((index: number) => {
+    setState((prev) => {
+      if (index < 0 || index >= learnSlides.length) return prev;
+      return { ...prev, currentSlide: index };
+    });
+  }, []);
+
   const goToNext = useCallback(() => {
     setState((prev) => {
       if (prev.currentSlide >= learnSlides.length - 1) return prev;
@@ -191,6 +199,7 @@ export function useLearnProgress(): LearnProgress {
     getExerciseChecked,
     setExerciseChecked,
     isExerciseComplete,
+    goToSlide,
     goToNext,
     goToPrev,
     reset,

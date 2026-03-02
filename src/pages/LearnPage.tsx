@@ -5,17 +5,19 @@ import { learnSlides } from '@/data/learnSlides';
 import { useLearnProgress } from '@/hooks/useLearnProgress';
 import { SlideRenderer } from '@/components/learn/SlideRenderer';
 import { SlideNavigation } from '@/components/learn/SlideNavigation';
+import { WorkedExamplePanel } from '@/components/learn/WorkedExamplePanel';
 
 export function LearnPage() {
   const progress = useLearnProgress();
   const slide = learnSlides[progress.currentSlide];
   const sections = [...new Set(learnSlides.map((s) => s.section))];
   const currentSectionIndex = sections.indexOf(slide.section);
+  const isWorkedExample = slide.section === 'Worked Example';
 
   return (
     <div className="min-h-screen bg-background">
       <header className="border-b bg-card">
-        <div className="max-w-4xl mx-auto px-4 py-4 flex items-center justify-between">
+        <div className={`${isWorkedExample ? 'max-w-7xl' : 'max-w-4xl'} mx-auto px-4 py-4 flex items-center justify-between`}>
           <div>
             <h1 className="text-xl font-bold">Learn Mass & Balance</h1>
             <p className="text-sm text-muted-foreground">
@@ -37,7 +39,7 @@ export function LearnPage() {
         </div>
       </header>
 
-      <main className="max-w-4xl mx-auto px-4 py-6">
+      <main className={`${isWorkedExample ? 'max-w-7xl' : 'max-w-4xl'} mx-auto px-4 py-6`}>
         {/* Progress bar */}
         <div className="mb-6">
           <div className="flex justify-between text-xs text-muted-foreground mb-1">
@@ -68,17 +70,46 @@ export function LearnPage() {
           </div>
         </div>
 
-        {/* Slide content */}
-        <SlideRenderer slide={slide} progress={progress} />
+        {/* Slide content — two-column during worked example */}
+        {isWorkedExample ? (
+          <div className="grid grid-cols-1 lg:grid-cols-[1fr_360px] gap-6 items-start">
+            <div>
+              <SlideRenderer slide={slide} progress={progress} />
+              <SlideNavigation
+                currentSlide={progress.currentSlide}
+                totalSlides={learnSlides.length}
+                canAdvance={progress.canAdvance}
+                onPrev={progress.goToPrev}
+                onNext={progress.goToNext}
+                onGoToSlide={progress.goToSlide}
+              />
+            </div>
+            <WorkedExamplePanel progress={progress} />
+          </div>
+        ) : (
+          <>
+            <SlideRenderer slide={slide} progress={progress} />
+            <SlideNavigation
+              currentSlide={progress.currentSlide}
+              totalSlides={learnSlides.length}
+              canAdvance={progress.canAdvance}
+              onPrev={progress.goToPrev}
+              onNext={progress.goToNext}
+              onGoToSlide={progress.goToSlide}
+            />
+          </>
+        )}
 
-        {/* Navigation */}
-        <SlideNavigation
-          currentSlide={progress.currentSlide}
-          totalSlides={learnSlides.length}
-          canAdvance={progress.canAdvance}
-          onPrev={progress.goToPrev}
-          onNext={progress.goToNext}
-        />
+        <footer className="mt-8 pt-4 border-t text-center text-xs text-muted-foreground space-y-2 pb-4">
+          <p>
+            For training purposes only. This module is not a substitute for official flight training or AFM documentation.
+            Always verify all data with the Aircraft Flight Manual for your specific aircraft.
+          </p>
+          <p>
+            Oleksandr Konovalov bears no legal responsibility for the use of this training module or the calculator.
+            The pilot-in-command is solely responsible for verifying mass and balance before every flight.
+          </p>
+        </footer>
       </main>
     </div>
   );

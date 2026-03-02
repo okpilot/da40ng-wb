@@ -83,8 +83,14 @@ export function CalculatorPage() {
         )}
 
         <Separator />
-        <footer className="text-center text-xs text-muted-foreground pb-4">
-          For training purposes only. Always verify with official AFM documents.
+        <footer className="text-center text-xs text-muted-foreground pb-4 space-y-2">
+          <p>
+            For training purposes only. Always verify all data with the Aircraft Flight Manual for your specific aircraft.
+          </p>
+          <p>
+            Oleksandr Konovalov bears no legal responsibility for the use of this calculator.
+            The pilot-in-command is solely responsible for verifying mass and balance before every flight.
+          </p>
         </footer>
       </main>
     </div>

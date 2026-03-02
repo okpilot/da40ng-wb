@@ -2,10 +2,25 @@ import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
 import { CheckCircle2, XCircle } from 'lucide-react';
 import type { Slide, QuizContent } from '@/data/learnSlides';
 import type { LearnProgress } from '@/hooks/useLearnProgress';
+import { GlossaryText } from './GlossaryText';
+import { MomentCalculator } from './interactives/MomentCalculator';
+import { CGCalculator } from './interactives/CGCalculator';
+import { FuelConverter } from './interactives/FuelConverter';
+import { CGEnvelopeExplorer } from './interactives/CGEnvelopeExplorer';
 
 interface Props {
   slide: Slide;
   progress: LearnProgress;
+}
+
+function QuizTool({ tool }: { tool: string }) {
+  switch (tool) {
+    case 'moment-calculator': return <MomentCalculator />;
+    case 'cg-calculator': return <CGCalculator />;
+    case 'fuel-converter': return <FuelConverter />;
+    case 'envelope-explorer': return <CGEnvelopeExplorer />;
+    default: return null;
+  }
 }
 
 export function QuizSlide({ slide, progress }: Props) {
@@ -19,8 +34,20 @@ export function QuizSlide({ slide, progress }: Props) {
         <CardTitle className="text-2xl">{slide.title}</CardTitle>
       </CardHeader>
       <CardContent className="space-y-4">
+        {/* Optional interactive tool above the question */}
+        {content.tool && (
+          <div className="space-y-2">
+            <QuizTool tool={content.tool} />
+            {content.toolHint && (
+              <p className="text-sm font-medium text-muted-foreground italic">
+                {content.toolHint}
+              </p>
+            )}
+          </div>
+        )}
+
         <p className="text-base font-medium leading-relaxed">
-          {content.question}
+          <GlossaryText text={content.question} />
         </p>
 
         <div className="space-y-3">

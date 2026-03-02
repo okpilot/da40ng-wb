@@ -2,9 +2,10 @@ import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
 import { Button } from '@/components/ui/button';
 import { Input } from '@/components/ui/input';
 import { Label } from '@/components/ui/label';
-import { CheckCircle2, XCircle, Lightbulb } from 'lucide-react';
+import { CheckCircle2, XCircle, Lightbulb, Eye } from 'lucide-react';
 import type { Slide, ExerciseContent, ExerciseField } from '@/data/learnSlides';
 import type { LearnProgress } from '@/hooks/useLearnProgress';
+import { GlossaryText } from './GlossaryText';
 
 interface Props {
   slide: Slide;
@@ -30,12 +31,20 @@ function ExerciseFieldRow({
     progress.setExerciseChecked(slideId, field.id, correct);
   };
 
+  const handleShowAnswer = () => {
+    // Round to a sensible number of decimal places based on tolerance
+    const dp = field.tolerance < 0.01 ? 3 : field.tolerance < 0.1 ? 2 : 1;
+    const rounded = parseFloat(field.correctValue.toFixed(dp)).toString();
+    progress.setExerciseAnswer(slideId, field.id, rounded);
+    progress.setExerciseChecked(slideId, field.id, true);
+  };
+
   return (
     <div className="space-y-2 p-4 rounded-lg border bg-card">
       <Label htmlFor={field.id} className="text-sm font-medium">
         {field.label}
       </Label>
-      <div className="flex gap-2 items-center">
+      <div className="flex gap-2 items-center flex-wrap">
         <Input
           id={field.id}
           type="number"
@@ -50,14 +59,25 @@ function ExerciseFieldRow({
         />
         <span className="text-sm text-muted-foreground">{field.unit}</span>
         {checked === undefined && (
-          <Button
-            size="sm"
-            variant="outline"
-            onClick={handleCheck}
-            disabled={!value || isNaN(parseFloat(value))}
-          >
-            Check
-          </Button>
+          <>
+            <Button
+              size="sm"
+              variant="outline"
+              onClick={handleCheck}
+              disabled={!value || isNaN(parseFloat(value))}
+            >
+              Check
+            </Button>
+            <Button
+              size="sm"
+              variant="ghost"
+              onClick={handleShowAnswer}
+              className="text-muted-foreground"
+            >
+              <Eye className="mr-1 h-3.5 w-3.5" />
+              Show answer
+            </Button>
+          </>
         )}
         {checked === true && (
           <CheckCircle2 className="h-5 w-5 text-green-600" />
@@ -73,17 +93,27 @@ function ExerciseFieldRow({
             <p className="text-xs text-amber-800 dark:text-amber-200">
               {field.hint}
             </p>
-            <Button
-              size="sm"
-              variant="ghost"
-              className="h-auto p-0 text-xs text-muted-foreground underline"
-              onClick={() => {
-                progress.setExerciseAnswer(slideId, field.id, '');
-                progress.setExerciseChecked(slideId, field.id, undefined!);
-              }}
-            >
-              Try again
-            </Button>
+            <div className="flex gap-3">
+              <Button
+                size="sm"
+                variant="ghost"
+                className="h-auto p-0 text-xs text-muted-foreground underline"
+                onClick={() => {
+                  progress.setExerciseAnswer(slideId, field.id, '');
+                  progress.setExerciseChecked(slideId, field.id, undefined!);
+                }}
+              >
+                Try again
+              </Button>
+              <Button
+                size="sm"
+                variant="ghost"
+                className="h-auto p-0 text-xs text-muted-foreground underline"
+                onClick={handleShowAnswer}
+              >
+                Show answer
+              </Button>
+            </div>
           </div>
         </div>
       )}
@@ -103,7 +133,7 @@ export function ExerciseSlide({ slide, progress }: Props) {
       <CardContent className="space-y-4">
         {content.description.split('\n').map((line, i) => (
           <p key={i} className="text-sm leading-relaxed whitespace-pre-wrap">
-            {line}
+            <GlossaryText text={line} />
           </p>
         ))}
 

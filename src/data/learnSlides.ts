@@ -24,6 +24,9 @@ export interface QuizOption {
 export interface QuizContent {
   question: string;
   options: QuizOption[];
+  /** Optional interactive tool shown above the question */
+  tool?: 'moment-calculator' | 'cg-calculator' | 'fuel-converter' | 'envelope-explorer';
+  toolHint?: string;
 }
 
 export interface ExerciseField {
@@ -55,7 +58,7 @@ export interface Slide {
   content: TheoryContent | QuizContent | ExerciseContent | InteractiveContent;
 }
 
-// All 28 slides
+// All 31 slides
 export const learnSlides: Slide[] = [
   // ── Section 1: Introduction (3 slides) ──────────────────────
   {
@@ -86,11 +89,11 @@ export const learnSlides: Slide[] = [
     diagram: 'cg-effects',
     content: {
       paragraphs: [
-        'The centre of gravity (CG) is the point where the aircraft balances. Its position along the longitudinal axis dramatically affects flight characteristics.',
-        'A forward CG makes the aircraft more stable but requires more elevator force to flare, increases stall speed, and increases fuel consumption due to the increased tail-down force needed.',
-        'An aft CG makes the controls feel lighter and reduces fuel consumption, but reduces stability. If the CG moves too far aft, the aircraft can become uncontrollable — the elevator may not have enough authority to prevent a nose-up pitch that leads to an unrecoverable stall.',
+        'The Centre of Gravity (CG) is the point through which the total force of weight acts — and the point around which the aircraft rotates in pitch. Its position along the longitudinal axis dramatically affects flight characteristics.',
+        'A forward CG beyond limits is dangerous: the elevator may not have enough authority to flare for landing or to recover from a dive. It also increases stall speed and fuel consumption.',
+        'An aft CG beyond limits is equally dangerous: stability is reduced and the elevator may lack authority to prevent a nose-up pitch, leading to an unrecoverable stall or spin.',
       ],
-      note: 'An aft CG beyond limits is the more dangerous condition — it can make the aircraft impossible to recover from a stall or spin.',
+      note: 'Exceeding either the forward or aft CG limit is dangerous and can lead to loss of control. Both must be checked.',
     } as TheoryContent,
   },
   {
@@ -182,7 +185,7 @@ export const learnSlides: Slide[] = [
     diagram: 'balance',
     content: {
       paragraphs: [
-        'The Centre of Gravity (CG) is the single point where the total weight of the aircraft effectively acts. It\'s found by dividing the total moment by the total mass:',
+        'The Centre of Gravity (CG) is the point through which the total force of weight acts, and the point around which the aircraft rotates in pitch. It\'s found by dividing the total moment by the total mass:',
         'CG = Total Moment ÷ Total Mass',
         'For example, if total moment is 2,815 kg·m and total mass is 1,120 kg, then CG = 2,815 ÷ 1,120 = 2.513 m aft of datum.',
         'Every item you add to the aircraft shifts the CG toward that item\'s station. Adding weight to the rear seats (arm 3.25 m) pulls the CG aft. Adding fuel (arm 2.63 m) pulls it slightly forward relative to a high CG.',
@@ -213,12 +216,13 @@ export const learnSlides: Slide[] = [
         'Aircraft mass is built up in stages. Each stage adds items and has its own limit:',
       ],
       bullets: [
-        'Basic Empty Mass (BEM) — The aircraft as delivered: airframe, engine, fixed equipment, unusable fuel, and full oil. For our DA40 NG, the default BEM is 940 kg at CG 2.442 m.',
+        'Basic Empty Mass (BEM) — The aircraft as delivered: airframe, engine, fixed equipment, unusable fuel, and full oil. Example: 940 kg at CG 2.442 m.',
         'Zero Fuel Mass (ZFM) — BEM plus all payload (passengers, baggage). No fuel yet. Max ZFM = 1200 kg (base).',
         'Takeoff Mass (TOM) — ZFM plus fuel loaded for the flight. Max TOM = MTOM = 1280 kg (base).',
         'Landing Mass (LM) — TOM minus the fuel burned during the trip. Max LM = 1216 kg (base).',
+        'Ramp Mass — Some operators also calculate ramp mass (TOM + fuel for start-up, warm-up, and taxi). In practice, we simplify this: subtract ~1 USG from your trip fuel to account for taxi, and use TOM as your primary mass. No need to overcomplicate it.',
       ],
-      note: 'The CG must be within the envelope at ZFM, TOM, and LM — all three conditions are checked.',
+      note: 'BEM is unique to each individual aircraft and is recorded on the weighing report. Always check the weighing report for your specific aircraft — never assume a "standard" BEM. The CG must be within the envelope at ZFM, TOM, and LM — all three conditions are checked.',
     } as TheoryContent,
   },
   {
@@ -236,8 +240,9 @@ export const learnSlides: Slide[] = [
         'Max Landing: 1216 kg (1280 kg with MÄM 40-574)',
         'Max ZFM: 1200 kg (1265 kg with MÄM 40-574)',
         'Min Flight Mass: 940 kg',
+        'Why do these limits exist? Exceeding them compromises structural integrity — the aircraft can break — and degrades performance (longer takeoff roll, reduced climb, higher stall speed).',
       ],
-      note: 'You must check the aircraft\'s technical log to know which modifications are installed. The modification status affects both mass limits and CG envelope boundaries.',
+      note: 'These are type-certified base limits for the DA40 NG. You must always check the AFM and technical log of your specific aircraft to confirm the applicable limits and installed modifications. Limits may differ between individual aircraft.',
     } as TheoryContent,
   },
   {
@@ -325,7 +330,9 @@ export const learnSlides: Slide[] = [
     type: 'quiz',
     diagram: 'none',
     content: {
-      question: 'An aircraft has a mass of 1100 kg and CG of 2.38 m. Is this within the standard DA40 NG envelope? (Forward limit at 1100 kg is 2.40 m, aft limit is 2.53 m)',
+      tool: 'envelope-explorer',
+      toolHint: 'Try plotting mass 1100 kg and CG 2.38 m on the envelope above, then answer:',
+      question: 'An aircraft has a mass of 1100 kg and CG of 2.38 m. Is this within the standard DA40 NG envelope?',
       options: [
         {
           label: 'Yes, it\'s within limits',
@@ -392,11 +399,10 @@ export const learnSlides: Slide[] = [
     diagram: 'fuel',
     content: {
       paragraphs: [
-        'As fuel burns during flight, both the aircraft mass and moment change. Since the fuel arm (2.63 m) is typically forward of the loaded CG, burning fuel shifts the CG aft.',
+        'As fuel burns during flight, both the aircraft mass and moment change. On the DA40 NG, the fuel arm (2.63 m) is always aft of the CG (the aft CG limit is 2.53 m). Burning fuel removes mass from behind the CG, which shifts the CG forward.',
         'This is why we check both TOM (takeoff mass) and LM (landing mass). The CG moves during flight as fuel burns, and it must remain within the envelope throughout.',
         'In practice, if TOM and LM are both within the envelope, all intermediate points will also be within limits because the CG moves linearly between them as fuel burns.',
       ],
-      note: 'If the loaded CG is close to the aft limit at takeoff, fuel burn during flight could push it even further aft. Always check the landing condition!',
     } as TheoryContent,
   },
 
@@ -453,8 +459,8 @@ export const learnSlides: Slide[] = [
     } as QuizContent,
   },
 
-  // ── Section 7: Guided Worked Example (8 slides) ─────────────
-  // Scenario: BEM 940/2.442, Front 160, Rear 140, Baggage 15, Fuel 25 USG, Trip 12 USG
+  // ── Section 7: Guided Worked Example (11 slides) ────────────
+  // Scenario: BEM 940/2.442, Front 160, Rear 140→55, Baggage 15, Fuel 25 USG, Trip 12 USG
   {
     id: 'example-scenario',
     section: 'Worked Example',
@@ -467,14 +473,14 @@ export const learnSlides: Slide[] = [
         'Here\'s the scenario — a DA40 NG with standard configuration (no modifications, standard tank):',
       ],
       bullets: [
-        'BEM: 940 kg at CG 2.442 m',
+        'BEM: 940 kg at CG 2.442 m (example values — always use your aircraft\'s weighing report)',
         'Front Seats: 160 kg (arm 2.30 m)',
         'Rear Seats: 140 kg (arm 3.25 m)',
         'Baggage: 15 kg (arm 3.65 m)',
         'Takeoff Fuel: 25 USG (arm 2.63 m)',
         'Trip Fuel: 12 USG',
       ],
-      note: 'This scenario is deliberately designed to exceed limits — see if you can spot where the problems are!',
+      note: 'Work through each step carefully. If we discover a limit exceedance, we\'ll stop and correct before continuing.',
     } as TheoryContent,
   },
   {
@@ -484,7 +490,7 @@ export const learnSlides: Slide[] = [
     type: 'exercise',
     diagram: 'none',
     content: {
-      description: 'Calculate the BEM moment. Moment = Mass × Arm.',
+      description: 'Calculate the BEM moment. Moment = Mass × Arm.\n\nRound moments to 1 decimal place (e.g. 1234.5 kg·m).',
       fields: [
         {
           id: 'bem-moment',
@@ -495,7 +501,7 @@ export const learnSlides: Slide[] = [
           hint: 'Multiply the BEM mass by the BEM CG arm: 940 × 2.442',
         },
       ],
-      explanation: 'BEM Moment = 940 × 2.442 = 2295.5 kg·m. This is the starting point for all further calculations.',
+      explanation: 'BEM Moment = 940 × 2.442 = 2295.48 kg·m (or 2295.5 rounded to 1dp). This is the starting point for all further calculations.',
     } as ExerciseContent,
   },
   {
@@ -505,7 +511,7 @@ export const learnSlides: Slide[] = [
     type: 'exercise',
     diagram: 'none',
     content: {
-      description: 'Calculate the moment for each payload item. Remember: Moment = Mass × Arm.',
+      description: 'Calculate the moment for each payload item. Moment = Mass × Arm.\n\nRound moments to 1 decimal place.',
       fields: [
         {
           id: 'front-moment',
@@ -542,7 +548,7 @@ export const learnSlides: Slide[] = [
     type: 'exercise',
     diagram: 'none',
     content: {
-      description: 'Sum up BEM and all payload to find ZFM. Then calculate the ZFM CG.\n\nBEM: 940 kg / 2295.5 kg·m\nFront: 160 kg / 368.0 kg·m\nRear: 140 kg / 455.0 kg·m\nBaggage: 15 kg / 54.75 kg·m',
+      description: 'Sum up BEM and all payload to find ZFM. Then calculate the ZFM CG.\n\nCG = Total Moment ÷ Total Mass\nRound mass to whole kg, moments to 1dp, CG to 2–3 decimal places.\n\nBEM: 940 kg / 2295.5 kg·m\nFront: 160 kg / 368.0 kg·m\nRear: 140 kg / 455.0 kg·m\nBaggage: 15 kg / 54.75 kg·m',
       fields: [
         {
           id: 'zfm-mass',
@@ -563,8 +569,8 @@ export const learnSlides: Slide[] = [
         {
           id: 'zfm-cg',
           label: 'ZFM CG',
-          correctValue: 2.528,
-          tolerance: 0.002,
+          correctValue: 2.52847,
+          tolerance: 0.01,
           unit: 'm',
           hint: 'CG = Total Moment ÷ Total Mass',
         },
@@ -572,14 +578,80 @@ export const learnSlides: Slide[] = [
       explanation: 'ZFM = 1255 kg, moment = 3173.2 kg·m, CG = 3173.2 ÷ 1255 = 2.528 m. Note: Max ZFM is 1200 kg — we already exceed it by 55 kg!',
     } as ExerciseContent,
   },
+  // ── ZFM exceeded! Stop, explain, correct, then continue ──
+  {
+    id: 'example-correction',
+    section: 'Worked Example',
+    title: 'Problem: ZFM Exceeded!',
+    type: 'theory',
+    diagram: 'none',
+    content: {
+      paragraphs: [
+        'ZFM of 1255 kg exceeds the maximum ZFM of 1200 kg by 55 kg. We cannot continue with this loading.',
+        'We must correct this before proceeding. The heaviest payload item in the rear is 140 kg. If one rear passenger (85 kg) stays behind, the rear seats load becomes 55 kg.',
+        'Let\'s recalculate with the corrected loading:',
+      ],
+      bullets: [
+        'Front Seats: 160 kg (unchanged)',
+        'Rear Seats: 55 kg (was 140 — one passenger offloaded)',
+        'Baggage: 15 kg (unchanged)',
+      ],
+      note: 'In real operations, you would discover this during preflight planning and adjust the loading before anyone boards. Never load an aircraft beyond its limits.',
+    } as TheoryContent,
+  },
   {
     id: 'example-step4',
     section: 'Worked Example',
-    title: 'Step 4: Fuel Conversion',
+    title: 'Step 4: Corrected ZFM',
     type: 'exercise',
     diagram: 'none',
     content: {
-      description: 'Convert the takeoff fuel from USG to kg, then calculate the fuel moment.\n\n25 USG × 3.785 L/USG = litres × 0.84 kg/L = kg\nFuel arm = 2.63 m',
+      description: 'Recalculate ZFM with the corrected rear seat loading (55 kg instead of 140 kg).\n\nCG = Total Moment ÷ Total Mass\nRound mass to whole kg, moments to 1dp, CG to 2–3 decimal places.\n\nBEM: 940 kg / 2295.5 kg·m\nFront: 160 kg / 368.0 kg·m\nRear: 55 kg / arm 3.25 m\nBaggage: 15 kg / 54.75 kg·m',
+      fields: [
+        {
+          id: 'rear-moment-corrected',
+          label: 'Corrected Rear Moment (55 × 3.25)',
+          correctValue: 178.75,
+          tolerance: 0.5,
+          unit: 'kg·m',
+          hint: '55 × 3.25 = ?',
+        },
+        {
+          id: 'zfm-mass-corrected',
+          label: 'Corrected ZFM Mass',
+          correctValue: 1170,
+          tolerance: 0.5,
+          unit: 'kg',
+          hint: '940 + 160 + 55 + 15 = ?',
+        },
+        {
+          id: 'zfm-moment-corrected',
+          label: 'Corrected ZFM Moment',
+          correctValue: 2896.98,
+          tolerance: 0.5,
+          unit: 'kg·m',
+          hint: '2295.5 + 368.0 + 178.75 + 54.75 = ?',
+        },
+        {
+          id: 'zfm-cg-corrected',
+          label: 'Corrected ZFM CG',
+          correctValue: 2.47605,
+          tolerance: 0.01,
+          unit: 'm',
+          hint: 'Total moment ÷ total mass',
+        },
+      ],
+      explanation: 'Corrected ZFM = 1170 kg (within max ZFM of 1200 ✓), moment = 2897.0 kg·m, CG = 2897.0 ÷ 1170 = 2.476 m (within envelope ✓). We can now safely continue with fuel.',
+    } as ExerciseContent,
+  },
+  {
+    id: 'example-step5',
+    section: 'Worked Example',
+    title: 'Step 5: Fuel Conversion',
+    type: 'exercise',
+    diagram: 'none',
+    content: {
+      description: 'Convert the takeoff fuel from USG to kg, then calculate the fuel moment.\n\nNote: we don\'t calculate ramp mass separately — to keep things simple, we just subtract 1 USG from the total fuel for start-up, warm-up, and taxi. So if you planned 26 USG total, your takeoff fuel is 25 USG.\n\nRound litres and kg to 1 decimal place, moment to 1dp.\n\n25 USG × 3.785 L/USG = litres × 0.84 kg/L = kg\nFuel arm = 2.63 m',
       fields: [
         {
           id: 'fuel-litres',
@@ -610,18 +682,18 @@ export const learnSlides: Slide[] = [
     } as ExerciseContent,
   },
   {
-    id: 'example-step5',
+    id: 'example-step6',
     section: 'Worked Example',
-    title: 'Step 5: Takeoff Mass',
+    title: 'Step 6: Takeoff Mass',
     type: 'exercise',
     diagram: 'none',
     content: {
-      description: 'Add fuel to ZFM to find TOM, then calculate the TOM CG.\n\nZFM: 1255 kg / 3173.2 kg·m\nFuel: 79.5 kg / 209.1 kg·m',
+      description: 'Add fuel to the corrected ZFM to find TOM, then calculate the TOM CG.\n\nCG = Total Moment ÷ Total Mass\nRound mass to 1dp, moments to 1dp, CG to 2–3 decimal places.\n\nCorrected ZFM: 1170 kg / 2897.0 kg·m\nFuel: 79.5 kg / 209.1 kg·m',
       fields: [
         {
           id: 'tom-mass',
           label: 'TOM Mass',
-          correctValue: 1334.49,
+          correctValue: 1249.49,
           tolerance: 0.5,
           unit: 'kg',
           hint: 'ZFM mass + fuel mass',
@@ -629,7 +701,7 @@ export const learnSlides: Slide[] = [
         {
           id: 'tom-moment',
           label: 'TOM Moment',
-          correctValue: 3382.30,
+          correctValue: 3106.05,
           tolerance: 0.5,
           unit: 'kg·m',
           hint: 'ZFM moment + fuel moment',
@@ -637,46 +709,80 @@ export const learnSlides: Slide[] = [
         {
           id: 'tom-cg',
           label: 'TOM CG',
-          correctValue: 2.535,
-          tolerance: 0.002,
+          correctValue: 2.48585,
+          tolerance: 0.01,
           unit: 'm',
           hint: 'Total moment ÷ total mass',
         },
       ],
-      explanation: 'TOM = 1255 + 79.5 = 1334.5 kg, moment = 3173.2 + 209.1 = 3382.3 kg·m, CG = 3382.3 ÷ 1334.5 = 2.535 m. TOM of 1334.5 kg exceeds MTOM of 1280 kg by 54.5 kg!',
+      explanation: 'TOM = 1170 + 79.5 = 1249.5 kg (within MTOM of 1280 ✓), moment = 2897.0 + 209.1 = 3106.1 kg·m, CG = 3106.1 ÷ 1249.5 = 2.486 m (within envelope ✓).',
     } as ExerciseContent,
   },
   {
-    id: 'example-step6',
+    id: 'example-step7',
     section: 'Worked Example',
-    title: 'Step 6: Limit Checks',
-    type: 'quiz',
+    title: 'Step 7: Landing Mass',
+    type: 'exercise',
     diagram: 'none',
     content: {
-      question: 'Based on your calculations (ZFM 1255 kg at CG 2.528 m, TOM 1334.5 kg at CG 2.535 m), which limits are exceeded? The base limits are: Max ZFM 1200 kg, MTOM 1280 kg, aft CG limit 2.53 m.',
-      options: [
+      description: 'Convert the trip fuel (12 USG) and subtract it from TOM to find Landing Mass.\n\nCG = Total Moment ÷ Total Mass\nRound mass to 1dp, moments to 1dp, CG to 2–3 decimal places.\n\nTOM: 1249.5 kg / 3106.1 kg·m\nTrip fuel: 12 USG, arm 2.63 m',
+      fields: [
         {
-          label: 'Only MTOM is exceeded',
-          correct: false,
-          explanation: 'MTOM is exceeded (1334.5 > 1280), but that\'s not the only problem. Check ZFM and CG too.',
+          id: 'trip-fuel-kg',
+          label: 'Trip fuel in kg (12 × 3.785 × 0.84)',
+          correctValue: 38.157,
+          tolerance: 0.5,
+          unit: 'kg',
+          hint: '12 × 3.785 = 45.4 L × 0.84 = ?',
         },
         {
-          label: 'ZFM and MTOM are exceeded, and TOM CG is beyond aft limit',
-          correct: true,
-          explanation: 'Correct! ZFM of 1255 kg exceeds max ZFM of 1200 kg. TOM of 1334.5 kg exceeds MTOM of 1280 kg. TOM CG of 2.535 m exceeds the aft limit of 2.53 m. Three failures!',
+          id: 'lm-mass',
+          label: 'Landing Mass',
+          correctValue: 1211.34,
+          tolerance: 0.5,
+          unit: 'kg',
+          hint: 'TOM mass − trip fuel mass',
         },
         {
-          label: 'Everything is within limits',
-          correct: false,
-          explanation: 'Not at all! This scenario was designed to fail. Check ZFM against 1200 kg and TOM against 1280 kg.',
+          id: 'lm-moment',
+          label: 'Landing Moment',
+          correctValue: 3005.70,
+          tolerance: 0.5,
+          unit: 'kg·m',
+          hint: 'TOM moment − trip fuel moment',
         },
         {
-          label: 'Only ZFM is exceeded',
-          correct: false,
-          explanation: 'ZFM is exceeded, but so is MTOM. And the CG at takeoff is beyond the aft limit.',
+          id: 'lm-cg',
+          label: 'Landing CG',
+          correctValue: 2.48130,
+          tolerance: 0.01,
+          unit: 'm',
+          hint: 'Landing moment ÷ landing mass',
         },
       ],
-    } as QuizContent,
+      explanation: 'Trip fuel: 12 × 3.785 = 45.4 L × 0.84 = 38.2 kg, moment = 38.2 × 2.63 = 100.4 kg·m. LM = 1249.5 − 38.2 = 1211.3 kg (within max landing of 1216 ✓), CG = 2.481 m (within envelope ✓).',
+    } as ExerciseContent,
+  },
+  {
+    id: 'example-step8',
+    section: 'Worked Example',
+    title: 'Step 8: Limit Checks',
+    type: 'theory',
+    diagram: 'none',
+    content: {
+      paragraphs: [
+        'Look at the Limit Checks panel on the right — all green! After correcting the loading, all limits are satisfied:',
+      ],
+      bullets: [
+        'ZFM 1170 kg ≤ Max ZFM 1200 kg ✓',
+        'TOM 1249.5 kg ≤ MTOM 1280 kg ✓',
+        'LM 1211.3 kg ≤ Max Landing 1216 kg ✓ (just 4.7 kg margin!)',
+        'ZFM CG 2.476 m — within envelope ✓',
+        'TOM CG 2.486 m — within envelope ✓',
+        'LM CG 2.481 m — within envelope ✓',
+      ],
+      note: 'All limits satisfied — this loading is legal. In real operations, always double-check your numbers against the AFM for the specific aircraft you are flying.',
+    } as TheoryContent,
   },
   {
     id: 'example-summary',
@@ -686,14 +792,17 @@ export const learnSlides: Slide[] = [
     diagram: 'none',
     content: {
       paragraphs: [
-        'In this scenario, we found three limit exceedances:',
+        'In this exercise, you learned the complete M&B workflow:',
       ],
       bullets: [
-        'ZFM 1255 kg exceeds max ZFM 1200 kg — too much payload',
-        'TOM 1334.5 kg exceeds MTOM 1280 kg — aircraft is too heavy',
-        'TOM CG 2.535 m exceeds aft limit 2.53 m — balance is off',
+        'Calculate BEM moment from the weighing report',
+        'Add payload moments for each station',
+        'Check ZFM against max ZFM — we caught an exceedance and corrected it',
+        'Convert fuel from USG to kg and calculate fuel moment',
+        'Calculate TOM and verify against MTOM and CG envelope',
+        'Calculate LM and verify against max landing mass and CG envelope',
       ],
-      note: 'To fix this, you\'d need to offload passengers or baggage (reducing ZFM), and possibly move weight forward. Try it yourself in the Calculator — use these same values and experiment with different loadings to get within limits.',
+      note: 'The key lesson: always check masses and CG at each stage. If any limit is exceeded — mass or CG — stop and fix it before continuing. Don\'t carry mistakes forward. Try it yourself in the Calculator with different loadings!',
     } as TheoryContent,
   },
 ];

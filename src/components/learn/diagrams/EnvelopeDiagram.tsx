@@ -68,7 +68,7 @@ export function EnvelopeDiagram() {
 
         {/* MTOM line */}
         <line x1={M.left} y1={toY(1280)} x2={M.left + PW} y2={toY(1280)} stroke="#9ca3af" strokeWidth="1" strokeDasharray="4 2" />
-        <text x={M.left + PW - 2} y={toY(1280) - 3} fontSize="8" fill="#6b7280" textAnchor="end">MTOM 1280</text>
+        <text x={M.left + PW - 2} y={toY(1280) - 3} fontSize="9" fill="#6b7280" textAnchor="end">MTOM 1280</text>
 
         {/* Axes */}
         <line x1={M.left} y1={M.top} x2={M.left} y2={M.top + PH} stroke="#374151" strokeWidth="1" />
@@ -78,7 +78,7 @@ export function EnvelopeDiagram() {
         {[2.35, 2.40, 2.45, 2.50, 2.55].map((v) => (
           <g key={`xt-${v}`}>
             <line x1={toX(v)} y1={M.top + PH} x2={toX(v)} y2={M.top + PH + 4} stroke="#374151" strokeWidth="1" />
-            <text x={toX(v)} y={M.top + PH + 14} fontSize="8" textAnchor="middle" fill="#374151">{v.toFixed(2)}</text>
+            <text x={toX(v)} y={M.top + PH + 14} fontSize="9" textAnchor="middle" fill="#374151">{v.toFixed(2)}</text>
           </g>
         ))}
 
@@ -86,7 +86,7 @@ export function EnvelopeDiagram() {
         {[900, 1000, 1100, 1200, 1300].map((v) => (
           <g key={`yt-${v}`}>
             <line x1={M.left - 4} y1={toY(v)} x2={M.left} y2={toY(v)} stroke="#374151" strokeWidth="1" />
-            <text x={M.left - 6} y={toY(v) + 3} fontSize="8" textAnchor="end" fill="#374151">{v}</text>
+            <text x={M.left - 6} y={toY(v) + 3} fontSize="9" textAnchor="end" fill="#374151">{v}</text>
           </g>
         ))}
 

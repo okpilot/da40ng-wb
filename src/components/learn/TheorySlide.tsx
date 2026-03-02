@@ -2,6 +2,7 @@ import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
 import { Info } from 'lucide-react';
 import type { Slide, TheoryContent } from '@/data/learnSlides';
 import { SlideDiagram } from './diagrams/SlideDiagram';
+import { GlossaryText } from './GlossaryText';
 
 interface Props {
   slide: Slide;
@@ -18,7 +19,7 @@ export function TheorySlide({ slide }: Props) {
       <CardContent className="space-y-4">
         {content.paragraphs.map((p, i) => (
           <p key={i} className="text-base leading-relaxed">
-            {p}
+            <GlossaryText text={p} />
           </p>
         ))}
 
@@ -27,7 +28,7 @@ export function TheorySlide({ slide }: Props) {
             {content.bullets.map((b, i) => (
               <li key={i} className="flex gap-2 text-sm">
                 <span className="text-primary mt-1 shrink-0">&#8226;</span>
-                <span>{b}</span>
+                <span><GlossaryText text={b} /></span>
               </li>
             ))}
           </ul>
@@ -43,7 +44,7 @@ export function TheorySlide({ slide }: Props) {
           <div className="flex gap-3 p-4 bg-blue-50 dark:bg-blue-950/30 rounded-lg border border-blue-200 dark:border-blue-800 mt-4">
             <Info className="h-5 w-5 text-blue-600 dark:text-blue-400 shrink-0 mt-0.5" />
             <p className="text-sm text-blue-800 dark:text-blue-200">
-              {content.note}
+              <GlossaryText text={content.note} />
             </p>
           </div>
         )}

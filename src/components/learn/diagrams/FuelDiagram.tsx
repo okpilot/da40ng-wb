@@ -1,40 +1,39 @@
 export function FuelDiagram() {
   return (
     <div className="flex justify-center">
-      <svg viewBox="0 0 460 140" className="w-full max-w-[460px]" style={{ fontFamily: 'system-ui, sans-serif' }}>
-        {/* Conversion chain */}
+      <svg viewBox="0 0 480 150" className="w-full max-w-[500px]" style={{ fontFamily: 'system-ui, sans-serif' }}>
         {/* USG box */}
-        <rect x="20" y="30" width="100" height="50" rx="6" fill="#dbeafe" stroke="#1d4ed8" strokeWidth="1.5" />
-        <text x="70" y="52" fontSize="11" fontWeight="700" textAnchor="middle" fill="#1d4ed8">USG</text>
-        <text x="70" y="68" fontSize="9" textAnchor="middle" fill="#6b7280">US Gallons</text>
+        <rect x="15" y="25" width="115" height="55" rx="8" fill="#dbeafe" stroke="#1d4ed8" strokeWidth="1.5" />
+        <text x="72" y="50" fontSize="14" fontWeight="700" textAnchor="middle" fill="#1d4ed8">USG</text>
+        <text x="72" y="68" fontSize="10" textAnchor="middle" fill="#6b7280">US Gallons</text>
 
         {/* Arrow 1 */}
-        <line x1="120" y1="55" x2="160" y2="55" stroke="#374151" strokeWidth="1.5" markerEnd="url(#arrowBlk)" />
-        <text x="140" y="48" fontSize="8" textAnchor="middle" fill="#374151">× 3.785</text>
+        <line x1="130" y1="52" x2="170" y2="52" stroke="#374151" strokeWidth="2" markerEnd="url(#arrowBlk)" />
+        <text x="150" y="44" fontSize="10" textAnchor="middle" fill="#374151" fontWeight="600">× 3.785</text>
 
         {/* Litres box */}
-        <rect x="160" y="30" width="100" height="50" rx="6" fill="#dcfce7" stroke="#16a34a" strokeWidth="1.5" />
-        <text x="210" y="52" fontSize="11" fontWeight="700" textAnchor="middle" fill="#16a34a">Litres</text>
-        <text x="210" y="68" fontSize="9" textAnchor="middle" fill="#6b7280">Volume</text>
+        <rect x="170" y="25" width="115" height="55" rx="8" fill="#dcfce7" stroke="#16a34a" strokeWidth="1.5" />
+        <text x="228" y="50" fontSize="14" fontWeight="700" textAnchor="middle" fill="#16a34a">Litres</text>
+        <text x="228" y="68" fontSize="10" textAnchor="middle" fill="#6b7280">Volume</text>
 
         {/* Arrow 2 */}
-        <line x1="260" y1="55" x2="300" y2="55" stroke="#374151" strokeWidth="1.5" markerEnd="url(#arrowBlk)" />
-        <text x="280" y="48" fontSize="8" textAnchor="middle" fill="#374151">× 0.84</text>
+        <line x1="285" y1="52" x2="325" y2="52" stroke="#374151" strokeWidth="2" markerEnd="url(#arrowBlk)" />
+        <text x="305" y="44" fontSize="10" textAnchor="middle" fill="#374151" fontWeight="600">× 0.84</text>
 
         {/* kg box */}
-        <rect x="300" y="30" width="100" height="50" rx="6" fill="#fef3c7" stroke="#d97706" strokeWidth="1.5" />
-        <text x="350" y="52" fontSize="11" fontWeight="700" textAnchor="middle" fill="#d97706">kg</text>
-        <text x="350" y="68" fontSize="9" textAnchor="middle" fill="#6b7280">Mass</text>
+        <rect x="325" y="25" width="115" height="55" rx="8" fill="#fef3c7" stroke="#d97706" strokeWidth="1.5" />
+        <text x="382" y="50" fontSize="14" fontWeight="700" textAnchor="middle" fill="#d97706">kg</text>
+        <text x="382" y="68" fontSize="10" textAnchor="middle" fill="#6b7280">Mass</text>
 
-        {/* Example */}
-        <text x="70" y="100" fontSize="9" textAnchor="middle" fill="#1d4ed8">25 USG</text>
-        <text x="140" y="100" fontSize="9" textAnchor="middle" fill="#374151">→</text>
-        <text x="210" y="100" fontSize="9" textAnchor="middle" fill="#16a34a">94.6 L</text>
-        <text x="280" y="100" fontSize="9" textAnchor="middle" fill="#374151">→</text>
-        <text x="350" y="100" fontSize="9" textAnchor="middle" fill="#d97706">79.5 kg</text>
+        {/* Example values */}
+        <text x="72" y="105" fontSize="11" textAnchor="middle" fill="#1d4ed8" fontWeight="600">25 USG</text>
+        <text x="150" y="105" fontSize="11" textAnchor="middle" fill="#374151">→</text>
+        <text x="228" y="105" fontSize="11" textAnchor="middle" fill="#16a34a" fontWeight="600">94.6 L</text>
+        <text x="305" y="105" fontSize="11" textAnchor="middle" fill="#374151">→</text>
+        <text x="382" y="105" fontSize="11" textAnchor="middle" fill="#d97706" fontWeight="600">79.5 kg</text>
 
         {/* Fuel arm note */}
-        <text x="230" y="125" fontSize="9" textAnchor="middle" fill="#6b7280">
+        <text x="240" y="135" fontSize="10" textAnchor="middle" fill="#6b7280">
           Fuel arm: 2.63 m aft of datum (all tank types)
         </text>
 
