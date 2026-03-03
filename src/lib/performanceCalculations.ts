@@ -267,7 +267,7 @@ function applyCorrections(
   d50 = gr + airSegment;
 
   // 4. Wind correction (both GR and D50)
-  if (headwind !== 0) {
+  if (Math.abs(headwind) >= 0.1) {
     let windFactor: number;
     let windLabel: string;
     if (headwind > 0) {
@@ -348,6 +348,12 @@ export function calculateTakeoff(inputs: TakeoffInputs): TakeoffResult {
 
   // Clamp PA for table lookup
   const clampedPa = clamp(pa, 0, 10000);
+  if (pa < 0) {
+    warnings.push({
+      level: 'amber',
+      message: 'Pressure altitude below 0 ft — using 0 ft table values (AFM 5.2)',
+    });
+  }
   if (pa > 10000) {
     warnings.push({
       level: 'red',

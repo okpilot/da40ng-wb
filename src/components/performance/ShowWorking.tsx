@@ -29,6 +29,7 @@ export function ShowWorking({ result, inputs }: ShowWorkingProps) {
         type="button"
         className="w-full px-6 py-4 flex items-center gap-2 text-left"
         onClick={() => setIsOpen(!isOpen)}
+        aria-expanded={isOpen}
       >
         {isOpen ? <ChevronDown className="h-4 w-4" /> : <ChevronRight className="h-4 w-4" />}
         <span className="font-semibold text-sm">Calculation Breakdown</span>
@@ -78,7 +79,9 @@ function BaseConditions({ inputs }: { inputs: TakeoffInputs }) {
         : inputs.rwycc === 5
           ? `Grass wet ${inputs.grassLength === 'lte5cm' ? '≤5 cm' : inputs.grassLength === '5to10cm' ? '5–10 cm' : '25 cm'}`
           : `Grass dry ${inputs.grassLength === 'lte5cm' ? '≤5 cm' : inputs.grassLength === '5to10cm' ? '5–10 cm' : '25 cm'}`,
-      correction: inputs.surface === 'paved' && inputs.rwycc === 6 ? 'None' : 'Yes',
+      correction: inputs.surface === 'paved'
+        ? (inputs.rwycc === 5 ? 'Advisory only' : 'None')
+        : 'Yes',
     },
     {
       condition: 'Slope',

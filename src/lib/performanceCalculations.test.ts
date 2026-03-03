@@ -233,7 +233,6 @@ describe('calculateTakeoff', () => {
       expect(result.oatClamped).toBe(true);
       expect(result.clampedOat).toBe(0);
       expect(result.warnings.some(w => w.message.includes('0°C'))).toBe(true);
-      expect(result.clampedOat).toBe(0);
     });
 
     it('warns for OAT above 50°C', () => {

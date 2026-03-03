@@ -36,6 +36,7 @@ export function TakeoffInputsPanel({ inputs, onUpdate }: TakeoffInputsProps) {
             <button
               key={code}
               type="button"
+              aria-pressed={inputs.rwycc === code}
               className={`px-3 py-1 text-sm rounded-md border transition-colors ${
                 inputs.rwycc === code
                   ? 'bg-primary text-primary-foreground border-primary'

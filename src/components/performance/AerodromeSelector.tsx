@@ -43,6 +43,7 @@ function Pill({ active, onClick, children }: {
   return (
     <button
       type="button"
+      aria-pressed={active}
       className={`px-2.5 py-1 text-xs rounded-md border transition-colors ${
         active
           ? 'bg-primary text-primary-foreground border-primary'

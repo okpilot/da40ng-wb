@@ -67,6 +67,7 @@ export function CatFactors({ result, inputs }: CatFactorsProps) {
         type="button"
         className="w-full px-6 py-4 flex items-center gap-2 text-left"
         onClick={() => setIsOpen(!isOpen)}
+        aria-expanded={isOpen}
       >
         {isOpen ? <ChevronDown className="h-4 w-4" /> : <ChevronRight className="h-4 w-4" />}
         <span className="font-semibold text-sm">EASA Part CAT Safety Factors</span>
