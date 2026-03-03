@@ -4,6 +4,8 @@ import { Card, CardContent } from '@/components/ui/card';
 interface RunwayDiagramProps {
   inputs: TakeoffInputs;
   result: TakeoffResult;
+  departureLabel: string;
+  fullRunwayTora: number;
 }
 
 function barColor(required: number, available: number): string {
@@ -14,14 +16,27 @@ function barColor(required: number, available: number): string {
   return '#22c55e';
 }
 
-export function RunwayDiagram({ inputs, result }: RunwayDiagramProps) {
+export function RunwayDiagram({ inputs, result, departureLabel, fullRunwayTora }: RunwayDiagramProps) {
   const tora = inputs.tora;
   const toda = inputs.toda;
   const asda = inputs.asda;
+  const isIntersection = departureLabel !== 'Full length';
+
+  // For intersection: show full runway with greyed portion behind the intersection point
+  const rwyLength = isIntersection && fullRunwayTora > tora ? fullRunwayTora : tora;
+  const behindDist = isIntersection && fullRunwayTora > tora ? fullRunwayTora - tora : 0;
+
   const stopway = Math.max(0, asda - tora);
   const clearway = Math.max(0, toda - tora);
 
-  const maxDist = Math.max(toda, asda, result.todr, 1);
+  // maxDist accounts for full runway + clearway/stopway
+  const maxDist = Math.max(
+    behindDist + toda,
+    behindDist + asda,
+    behindDist + result.todr,
+    rwyLength,
+    1,
+  );
 
   const torrColor = barColor(result.torr, tora);
   const todrColor = barColor(result.todr, toda);
@@ -31,7 +46,10 @@ export function RunwayDiagram({ inputs, result }: RunwayDiagramProps) {
   const margin = { left: 30, right: 120 };
   const usableW = W - margin.left - margin.right;
 
-  const x = (d: number) => margin.left + (d / maxDist) * usableW;
+  // x(0) = start of available runway (intersection point or threshold)
+  // For intersection, the greyed portion is to the left
+  const x = (d: number) => margin.left + ((behindDist + d) / maxDist) * usableW;
+  const xAbs = (d: number) => margin.left + (d / maxDist) * usableW;
 
   const rwyTop = 42;
   const rwyH = 26;
@@ -47,14 +65,14 @@ export function RunwayDiagram({ inputs, result }: RunwayDiagramProps) {
     <Card className="py-2">
       <CardContent>
         <svg viewBox={`0 0 ${W} ${H}`} className="w-full" preserveAspectRatio="xMidYMid meet" role="img" aria-label="Horizontal runway diagram">
-          <defs>
-            <pattern id="hatch-h" patternUnits="userSpaceOnUse" width="8" height="8">
-              <path d="M0,8 l8,-8" stroke="#9ca3af" strokeWidth="1.5" />
-            </pattern>
-          </defs>
 
-          {/* Runway surface */}
-          <rect x={x(0)} y={rwyTop} width={x(tora) - x(0)} height={rwyH} fill="#4b5563" rx={3} />
+          {/* Full runway surface */}
+          <rect x={xAbs(0)} y={rwyTop} width={xAbs(rwyLength) - xAbs(0)} height={rwyH} fill="#4b5563" rx={3} />
+
+          {/* Greyed-out portion behind intersection */}
+          {behindDist > 0 && (
+            <rect x={xAbs(0)} y={rwyTop} width={xAbs(behindDist) - xAbs(0)} height={rwyH} fill="rgba(0,0,0,0.35)" rx={3} />
+          )}
 
           {/* Stopway */}
           {stopway > 0 && (
@@ -66,13 +84,74 @@ export function RunwayDiagram({ inputs, result }: RunwayDiagramProps) {
             <rect x={x(tora)} y={rwyTop - 10} width={x(tora + clearway) - x(tora)} height={rwyH + 20} fill="none" stroke="#4b5563" strokeWidth={2} strokeDasharray="6,4" rx={3} />
           )}
 
-          {/* Centerline */}
-          <line x1={x(0) + 8} y1={rwyTop + rwyH / 2} x2={x(tora) - 4} y2={rwyTop + rwyH / 2} stroke="#d1d5db" strokeWidth={1} strokeDasharray="12,8" />
+          {/* Threshold zebra stripes (at the actual runway start, not intersection) */}
+          {(() => {
+            const zebraX = xAbs(0) + 3;
+            const zebraWidth = Math.min(18, (xAbs(rwyLength) - xAbs(0)) * 0.025);
+            const stripeCount = 6;
+            const stripeH = (rwyH - 4) / (stripeCount * 2 - 1);
+            return (
+              <g>
+                {Array.from({ length: stripeCount }).map((_, i) => (
+                  <rect
+                    key={i}
+                    x={zebraX}
+                    y={rwyTop + 2 + i * stripeH * 2}
+                    width={zebraWidth}
+                    height={stripeH}
+                    fill="#d1d5db"
+                    rx={1}
+                  />
+                ))}
+              </g>
+            );
+          })()}
 
-          {/* Slope indicator */}
+          {/* DER zebra stripes (at the far end of the runway) */}
+          {(() => {
+            const rwyEnd = xAbs(rwyLength);
+            const zebraWidth = Math.min(18, (xAbs(rwyLength) - xAbs(0)) * 0.025);
+            const stripeCount = 6;
+            const stripeH = (rwyH - 4) / (stripeCount * 2 - 1);
+            return (
+              <g>
+                {Array.from({ length: stripeCount }).map((_, i) => (
+                  <rect
+                    key={i}
+                    x={rwyEnd - zebraWidth - 3}
+                    y={rwyTop + 2 + i * stripeH * 2}
+                    width={zebraWidth}
+                    height={stripeH}
+                    fill="#d1d5db"
+                    rx={1}
+                  />
+                ))}
+              </g>
+            );
+          })()}
+
+          {/* Intersection marker line */}
+          {behindDist > 0 && (
+            <g>
+              <line x1={x(0)} y1={rwyTop - 4} x2={x(0)} y2={rwyBot + 4} stroke="#f59e0b" strokeWidth={2.5} />
+              <text x={x(0) - 6} y={rwyTop + rwyH / 2 + 4} textAnchor="end" fontSize="10" fill="#f59e0b" fontWeight="700">
+                {departureLabel}
+              </text>
+            </g>
+          )}
+
+          {/* Centerline — clear of both zebra thresholds */}
+          {(() => {
+            const zebraWidth = Math.min(18, (xAbs(rwyLength) - xAbs(0)) * 0.025);
+            const clStart = x(0) + (behindDist > 0 ? 4 : zebraWidth + 8);
+            const clEnd = xAbs(rwyLength) - zebraWidth - 8;
+            return <line x1={clStart} y1={rwyTop + rwyH / 2} x2={clEnd} y2={rwyTop + rwyH / 2} stroke="#d1d5db" strokeWidth={1} strokeDasharray="12,8" />;
+          })()}
+
+          {/* Slope indicator — outside runway, to the right of DER */}
           {inputs.slope !== 0 && (
-            <text x={x(tora / 2)} y={rwyTop - 3} textAnchor="middle" fontSize="11" fill="#6b7280" fontWeight="600">
-              {inputs.slope > 0 ? '\u2197' : '\u2198'} {Math.abs(inputs.slope).toFixed(1)}% {inputs.slope > 0 ? 'uphill' : 'downhill'}
+            <text x={xAbs(rwyLength) + 8} y={rwyTop + rwyH / 2 + 4} textAnchor="start" fontSize="10" fill="#6b7280" fontWeight="600">
+              Slope {Math.abs(inputs.slope).toFixed(1)}% {inputs.slope > 0 ? 'uphill' : 'downhill'}
             </text>
           )}
 
@@ -82,6 +161,13 @@ export function RunwayDiagram({ inputs, result }: RunwayDiagramProps) {
           )}
           {clearway > 0 && (
             <text x={(x(tora) + x(tora + clearway)) / 2} y={rwyTop - 13} textAnchor="middle" fontSize="9" fill="#4b5563" fontWeight="600">CWY</text>
+          )}
+
+          {/* Departure label for full length — rendered after centerline so it's on top */}
+          {!isIntersection && (
+            <text x={x(tora / 2)} y={rwyTop + rwyH / 2 + 4} textAnchor="middle" fontSize="11" fill="#e5e7eb" fontWeight="700">
+              FULL LENGTH
+            </text>
           )}
 
           {/* DECLARED DISTANCES — below runway */}
@@ -105,8 +191,6 @@ export function RunwayDiagram({ inputs, result }: RunwayDiagramProps) {
             </g>
           )}
 
-          {/* THR label */}
-          <text x={x(0)} y={rwyBot + 10} textAnchor="middle" fontSize="10" fill="#9ca3af" fontWeight="600">THR</text>
         </svg>
       </CardContent>
     </Card>

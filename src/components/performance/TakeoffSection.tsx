@@ -13,8 +13,15 @@ export function TakeoffSection() {
   const { inputs, updateInput, result } = useTakeoff();
 
   const [isOpen, setIsOpen] = useState(true);
+  const [departureLabel, setDepartureLabel] = useState('Full length');
+  const [fullRunwayTora, setFullRunwayTora] = useState(0);
   const hasNa = result.warnings.some((w) => w.message.includes('N/A'));
   const showDiagram = inputs.tora > 0 && !hasNa;
+
+  const handleDepartureChange = (label: string, fullTora: number) => {
+    setDepartureLabel(label);
+    setFullRunwayTora(fullTora);
+  };
 
   return (
     <section className="space-y-4">
@@ -37,7 +44,11 @@ export function TakeoffSection() {
                 wheelFairings={inputs.wheelFairings}
                 onWheelFairingsChange={(v) => updateInput('wheelFairings', v)}
               />
-              <AerodromeSelector inputs={inputs} onUpdate={updateInput} />
+              <AerodromeSelector
+                inputs={inputs}
+                onUpdate={updateInput}
+                onDepartureChange={handleDepartureChange}
+              />
             </div>
             <div className="space-y-4">
               <TakeoffInputsPanel inputs={inputs} onUpdate={updateInput} />
@@ -45,10 +56,15 @@ export function TakeoffSection() {
             </div>
           </div>
 
-          <TakeoffResultsPanel result={result} inputs={inputs} />
+          <TakeoffResultsPanel result={result} inputs={inputs} departureLabel={departureLabel} />
 
           {showDiagram && (
-            <RunwayDiagram inputs={inputs} result={result} />
+            <RunwayDiagram
+              inputs={inputs}
+              result={result}
+              departureLabel={departureLabel}
+              fullRunwayTora={fullRunwayTora}
+            />
           )}
 
           <ShowWorking result={result} inputs={inputs} />

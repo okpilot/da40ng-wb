@@ -372,25 +372,20 @@ Linear interpolation between the 4 weight-specific values:
 
 ## Implementation Phases
 
-### Phase 1 — Takeoff calculation + page scaffold
+### Phase 1 — Takeoff calculation + page scaffold ✅ COMPLETE
 
-- [ ] `/performance` route + page scaffold (stacked sections layout)
-- [ ] Top strip: fairings toggle, mod config
-- [ ] Takeoff conditions inputs (elevation, QNH, OAT, wind, runway, surface, slope)
-- [ ] Derived values: PA, density altitude, ISA deviation, wind components
-- [ ] Interpolation engine: bilinear (PA × OAT) + linear (weight)
-- [ ] Digitize take-off distance tables (5.3.7)
-  - 4 weight tables: 1310, 1280, 1200, 1100 kg
-  - Each: 11 PA (SL–10000 ft) × 6 OAT (0–50°C)
-  - Two values per cell: ground roll + 50ft distance
-- [ ] Take-off correction factors (surface, slope, wind, fairings)
-- [ ] Result display with correction breakdown
-- [ ] V-speeds for mass (interpolated from 4 weight values)
-- [ ] "Show working" collapsible panel
-  - Step-by-step calculation with actual values
-  - AFM tables rendered with highlighted interpolation cells
-  - Interpolation walkthrough
-  - Correction breakdown line items
+- [x] `/performance` route + page scaffold
+- [x] Aircraft configuration card (TOM, flaps T/O 5°, wheel fairings)
+- [x] Aerodrome & runway card (elevation, heading, slope from THR/DER, surface, grass options, declared distances) — manual entry only
+- [x] Weather conditions card (wind, OAT, QNH, RWYCC 6 Dry / 5 Wet)
+- [x] Advisory data (PA, DA, ISA dev, wind components, correction factors)
+- [x] Interpolation engine: bilinear (PA × OAT) + linear (weight)
+- [x] Digitize take-off distance tables (5.3.7) — 4 weights × 11 PA × 6 OAT
+- [x] Take-off correction factors (surface, slope, wind, fairings)
+- [x] Results card (TORR, TODR, V_R, V_50 with green/amber/red margin indicators)
+- [x] Horizontal runway diagram (TORA/TODA/ASDA declared, TORR/TODR required, stopway, clearway)
+- [x] "Show working" collapsible panel (step-by-step, AFM tables with highlights, interpolation walkthrough, correction breakdown)
+- [x] Navigation links on Calculator and Learn pages
 
 ### Phase 2 — Takeoff climb
 
