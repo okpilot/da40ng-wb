@@ -1,6 +1,6 @@
 import { Link } from 'react-router-dom';
 import { Button } from '@/components/ui/button';
-import { Calculator, RotateCcw } from 'lucide-react';
+import { Calculator, RotateCcw, Gauge } from 'lucide-react';
 import { learnSlides } from '@/data/learnSlides';
 import { useLearnProgress } from '@/hooks/useLearnProgress';
 import { SlideRenderer } from '@/components/learn/SlideRenderer';
@@ -28,6 +28,12 @@ export function LearnPage() {
             <Button variant="ghost" size="sm" onClick={progress.reset}>
               <RotateCcw className="mr-2 h-4 w-4" />
               Restart
+            </Button>
+            <Button variant="outline" asChild>
+              <Link to="/performance">
+                <Gauge className="mr-2 h-4 w-4" />
+                Performance
+              </Link>
             </Button>
             <Button variant="outline" asChild>
               <Link to="/">

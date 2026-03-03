@@ -4,6 +4,7 @@ import { HashRouter, Routes, Route } from 'react-router-dom'
 import './index.css'
 import { CalculatorPage } from '@/pages/CalculatorPage'
 import { LearnPage } from '@/pages/LearnPage'
+import { PerformancePage } from '@/pages/PerformancePage'
 
 createRoot(document.getElementById('root')!).render(
   <StrictMode>
@@ -11,6 +12,7 @@ createRoot(document.getElementById('root')!).render(
       <Routes>
         <Route path="/" element={<CalculatorPage />} />
         <Route path="/learn" element={<LearnPage />} />
+        <Route path="/performance" element={<PerformancePage />} />
       </Routes>
     </HashRouter>
   </StrictMode>,

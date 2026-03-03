@@ -88,3 +88,146 @@ export interface LimitCheck {
   limit: number;
   unit: string;
 }
+
+// ── Performance types ──────────────────────────────────────────────
+
+export type SurfaceType = 'paved' | 'grass';
+
+export type GrassLength = 'lte5cm' | '5to10cm' | '25cm';
+
+export type Rwycc = 6 | 5 | 4 | 3 | 2 | 1 | 0;
+
+export interface Intersection {
+  name: string;
+  distanceFromThreshold: number;
+  tora: number;
+  toda: number;
+  asda: number;
+}
+
+export interface Runway {
+  designator: string;
+  heading: number;
+  tora: number;
+  toda: number;
+  asda: number;
+  lda: number;
+  surface: SurfaceType;
+  slope: number;
+  displacedThreshold: number;
+  stopway: number;
+  clearway: number;
+  intersections: Intersection[];
+}
+
+export interface Aerodrome {
+  icao: string;
+  name: string;
+  elevation: number;
+  runways: Runway[];
+}
+
+/** A single cell in a take-off distance table: [groundRoll, dist50ft] or null if N/A */
+export type TakeoffCell = [number, number] | null;
+
+/** One weight table: PA rows × OAT columns */
+export interface TakeoffTable {
+  weight: number;
+  vR: number;
+  v50: number;
+  pressureAltitudes: number[];
+  oats: number[];
+  /** rows[paIndex][oatIndex] */
+  rows: TakeoffCell[][];
+}
+
+export interface TakeoffInputs {
+  mass: number;
+  elevation: number;
+  qnh: number;
+  oat: number;
+  windDirection: number;
+  windSpeed: number;
+  runwayHeading: number;
+  surface: SurfaceType;
+  grassLength: GrassLength;
+  rwycc: Rwycc;
+  softGround: boolean;
+  slope: number;
+  wheelFairings: boolean;
+  // Declared distances
+  tora: number;
+  toda: number;
+  asda: number;
+  lda: number;
+}
+
+export interface CorrectionStep {
+  label: string;
+  factor: number | null;
+  addGr: number;
+  addD50: number;
+  grAfter: number;
+  d50After: number;
+}
+
+export interface InterpolationDetail {
+  /** The two weight tables used */
+  lowerWeight: number;
+  upperWeight: number;
+  /** Weight fraction between tables (0–1) */
+  weightFraction: number;
+  /** PA rows bracketing the input */
+  lowerPa: number;
+  upperPa: number;
+  paFraction: number;
+  /** OAT columns bracketing the input */
+  lowerOat: number;
+  upperOat: number;
+  oatFraction: number;
+  /** The 4 cells from the lower weight table [paLow/oatLow, paLow/oatHigh, paHigh/oatLow, paHigh/oatHigh] */
+  lowerTableCells: (TakeoffCell)[];
+  upperTableCells: (TakeoffCell)[];
+  /** Interpolated GR and D50 within each weight table */
+  lowerTableGr: number;
+  lowerTableD50: number;
+  upperTableGr: number;
+  upperTableD50: number;
+  /** Final interpolated base values */
+  baseGr: number;
+  baseD50: number;
+}
+
+export interface VSpeeds {
+  vR: number;
+  v50: number;
+}
+
+export interface TakeoffWarning {
+  level: 'amber' | 'red';
+  message: string;
+}
+
+export interface TakeoffResult {
+  // Derived conditions
+  pressureAltitude: number;
+  densityAltitude: number;
+  isaTemperature: number;
+  isaDeviation: number;
+  headwind: number;
+  crosswind: number;
+  // Table lookup
+  interpolation: InterpolationDetail;
+  // Corrections
+  corrections: CorrectionStep[];
+  // Final distances
+  torr: number;
+  todr: number;
+  // V-speeds
+  vSpeeds: VSpeeds;
+  // Warnings
+  warnings: TakeoffWarning[];
+  /** OAT was clamped to table range */
+  oatClamped: boolean;
+  clampedOat: number;
+}
