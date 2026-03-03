@@ -255,7 +255,7 @@ export function RunwayDiagram({ inputs, result, departureLabel, fullRunwayTora, 
   const layout = computeLayout(inputs, result, departureLabel, fullRunwayTora, 130);
   const { x, rwyBot } = layout;
 
-  const todrColor = barColor(result.todr, inputs.toda);
+  const todrColor = barColor(result.todr, inputs.tora);
   const declY = rwyBot + 14;
   const declGap = 14;
   const reqY = layout.rwyTop - 10;
@@ -268,16 +268,26 @@ export function RunwayDiagram({ inputs, result, departureLabel, fullRunwayTora, 
           <RunwayBody layout={layout} inputs={inputs} runwayDesignator={runwayDesignator} departureLabel={departureLabel} />
 
           {/* DECLARED DISTANCES — below runway */}
-          <DimLineH y={declY} x1={x(0)} x2={x(inputs.tora)} label="TORA" value={`${inputs.tora} m`} color="#3b82f6" />
-          <DimLineH y={declY + declGap} x1={x(0)} x2={x(inputs.toda)} label="TODA" value={`${inputs.toda} m`} color="#8b5cf6" />
-          <DimLineH y={declY + declGap * 2} x1={x(0)} x2={x(inputs.asda)} label="ASDA" value={`${inputs.asda} m`} color="#06b6d4" />
+          <DimLineH y={declY} x1={x(0)} x2={x(inputs.tora)} label="TORA" value={`${inputs.tora} m · binding`} color="#3b82f6" />
+          <DimLineH y={declY + declGap} x1={x(0)} x2={x(inputs.toda)} label="TODA" value={`${inputs.toda} m · SA`} color="#9ca3af" />
+          <DimLineH y={declY + declGap * 2} x1={x(0)} x2={x(inputs.asda)} label="ASDA" value={`${inputs.asda} m · SA`} color="#9ca3af" />
 
           {/* REQUIRED DISTANCES — above runway */}
           {result.torr > 0 && (
-            <DimLineH y={reqY} x1={x(0)} x2={x(result.torr)} label="TORR" value={`${result.torr} m`} color="#9ca3af" />
+            <DimLineH y={reqY} x1={x(0)} x2={x(result.torr)} label="TORR" value={`${result.torr} m · SA`} color="#9ca3af" />
           )}
           {result.todr > 0 && (
             <DimLineH y={reqY - reqGap} x1={x(0)} x2={x(result.todr)} label="TODR" value={`${result.todr} m`} color={todrColor} />
+          )}
+
+          {/* TODR vertical drop line onto runway */}
+          {result.todr > 0 && (
+            <line x1={x(result.todr)} y1={reqY - reqGap} x2={x(result.todr)} y2={layout.rwyBot} stroke={todrColor} strokeWidth={1.5} strokeDasharray="4,3" />
+          )}
+
+          {/* TORA binding vertical line onto runway */}
+          {inputs.tora > 0 && (
+            <line x1={x(inputs.tora)} y1={declY} x2={x(inputs.tora)} y2={layout.rwyTop} stroke="#ef4444" strokeWidth={1.5} strokeDasharray="4,3" />
           )}
 
           {/* 50ft marker */}
@@ -328,8 +338,7 @@ export function CatRunwayDiagram({ inputs, result, departureLabel, fullRunwayTor
   const layout = computeLayout(inputs, result, departureLabel, fullRunwayTora, H);
   const { x, rwyBot, rwyTop } = layout;
 
-  const todrPass = todr <= binding.value;
-  const todrColor = todrPass ? '#22c55e' : '#ef4444';
+  const todrColor = barColor(todr, binding.value);
 
   const reqY = rwyTop - 10;
   const limY = rwyBot + 14;
@@ -340,11 +349,32 @@ export function CatRunwayDiagram({ inputs, result, departureLabel, fullRunwayTor
 
       {/* TORR + TODR — above runway */}
       {result.torr > 0 && (
-        <DimLineH y={reqY} x1={x(0)} x2={x(result.torr)} label="TORR" value={`${result.torr} m`} color="#9ca3af" />
+        <DimLineH y={reqY} x1={x(0)} x2={x(result.torr)} label="TORR" value={`${result.torr} m · SA`} color="#9ca3af" />
       )}
       {todr > 0 && (
         <DimLineH y={reqY - 14} x1={x(0)} x2={x(todr)} label="TODR" value={`${todr} m`} color={todrColor} />
       )}
+
+      {/* TODR vertical drop line onto runway */}
+      {todr > 0 && (
+        <line x1={x(todr)} y1={reqY - 14} x2={x(todr)} y2={rwyBot} stroke={todrColor} strokeWidth={1.5} strokeDasharray="4,3" />
+      )}
+
+      {/* 50ft marker */}
+      {todr > 0 && (
+        <g transform={`translate(${x(todr)}, ${reqY - 14 - 8})`}>
+          <polygon points="0,0 -4,-7 4,-7" fill="#f59e0b" />
+          <text x={0} y={-10} textAnchor="middle" fontSize="8" fill="#f59e0b" fontWeight="600">50 ft</text>
+        </g>
+      )}
+
+      {/* Binding limit vertical line onto runway — originates from the binding row */}
+      {binding.value > 0 && (() => {
+        const bindIdx = limits.findIndex(l => l.value === binding.value);
+        return (
+          <line x1={x(binding.value)} y1={limY + bindIdx * limGap} x2={x(binding.value)} y2={rwyTop} stroke="#ef4444" strokeWidth={1.5} strokeDasharray="4,3" />
+        );
+      })()}
 
       {/* Factored limits — below runway */}
       {limits.map((lim, i) => {

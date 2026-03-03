@@ -72,8 +72,8 @@ export function TakeoffResultsPanel({ result, inputs, departureLabel }: TakeoffR
               label="TODR"
               sublabel="Over 50 ft"
               value={`${result.todr} m`}
-              color={distanceColor(result.todr, inputs.toda)}
-              margin={inputs.toda > 0 ? marginInfo(result.todr, inputs.toda) : null}
+              color={distanceColor(result.todr, inputs.tora)}
+              margin={inputs.tora > 0 ? marginInfo(result.todr, inputs.tora) : null}
             />
             <ResultBox
               label={<>V<sub>R</sub></>}
