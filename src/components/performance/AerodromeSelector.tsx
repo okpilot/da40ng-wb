@@ -23,7 +23,7 @@ interface IntersectionEntry {
 }
 
 interface SavedAerodrome {
-  name: string;
+  icao: string;
   elevation: number;
   designator: string;
   runwayHeading: number;
@@ -68,11 +68,12 @@ export function AerodromeSelector({ inputs, onUpdate, onDepartureChange, onDesig
   const [intersections, setIntersections] = useState<IntersectionEntry[]>([]);
   const [activeIntId, setActiveIntId] = useState<number | null>(null);
 
+  const [icao, setIcao] = useState('');
+
   // Saved aerodromes
   const [savedAerodromes, setSavedAerodromes] = useLocalStorage<SavedAerodrome[]>('da40ng-saved-aerodromes', []);
-  const [saveName, setSaveName] = useState('');
-  const [showSaveInput, setShowSaveInput] = useState(false);
   const [showLoadList, setShowLoadList] = useState(false);
+  const [confirmOverwrite, setConfirmOverwrite] = useState(false);
 
   // Slope calculation
   useEffect(() => {
@@ -126,27 +127,40 @@ export function AerodromeSelector({ inputs, onUpdate, onDepartureChange, onDesig
     if (activeIntId === null) onUpdate(field, value);
   };
 
+  const saveKey = `${icao.trim().toUpperCase()}/${designator.trim()}`;
+  const canSave = icao.trim().length > 0 && designator.trim().length > 0;
+
+  const buildEntry = (): SavedAerodrome => ({
+    icao: icao.trim().toUpperCase(),
+    elevation: inputs.elevation,
+    designator,
+    runwayHeading: inputs.runwayHeading,
+    thrElev, derElev,
+    surface: inputs.surface,
+    grassLength: inputs.grassLength,
+    fullTora, fullToda, fullAsda,
+    intersections: intersections.map(({ name, tora, toda, asda }) => ({ name, tora, toda, asda })),
+  });
+
+  const getSavedKey = (s: SavedAerodrome) =>
+    `${(s.icao || (s as any).name || '').toUpperCase()}/${s.designator}`;
+
   // Save current config
-  const handleSave = () => {
-    if (!saveName.trim()) return;
-    const entry: SavedAerodrome = {
-      name: saveName.trim(),
-      elevation: inputs.elevation,
-      designator,
-      runwayHeading: inputs.runwayHeading,
-      thrElev, derElev,
-      surface: inputs.surface,
-      grassLength: inputs.grassLength,
-      fullTora, fullToda, fullAsda,
-      intersections: intersections.map(({ name, tora, toda, asda }) => ({ name, tora, toda, asda })),
-    };
-    setSavedAerodromes((prev) => [...prev.filter((a) => a.name !== entry.name), entry]);
-    setSaveName('');
-    setShowSaveInput(false);
+  const handleSave = (force = false) => {
+    if (!canSave) return;
+    const exists = savedAerodromes.some((a) => getSavedKey(a) === saveKey);
+    if (exists && !force) {
+      setConfirmOverwrite(true);
+      return;
+    }
+    const entry = buildEntry();
+    setSavedAerodromes((prev) => [...prev.filter((a) => getSavedKey(a) !== saveKey), entry]);
+    setConfirmOverwrite(false);
   };
 
   // Load a saved config
   const handleLoad = (saved: SavedAerodrome) => {
+    setIcao(saved.icao || (saved as any).name || '');
     onUpdate('elevation', saved.elevation);
     setDesignator(saved.designator || '');
     onDesignatorChange(saved.designator || '');
@@ -168,8 +182,8 @@ export function AerodromeSelector({ inputs, onUpdate, onDepartureChange, onDesig
     setShowLoadList(false);
   };
 
-  const handleDeleteSaved = (name: string) => {
-    setSavedAerodromes((prev) => prev.filter((a) => a.name !== name));
+  const handleDeleteSaved = (key: string) => {
+    setSavedAerodromes((prev) => prev.filter((a) => getSavedKey(a) !== key));
   };
 
   return (
@@ -182,15 +196,20 @@ export function AerodromeSelector({ inputs, onUpdate, onDepartureChange, onDesig
               <button
                 type="button"
                 className="flex items-center gap-1 px-2 py-1 text-xs rounded-md border border-input text-muted-foreground hover:bg-muted transition-colors"
-                onClick={() => { setShowLoadList(!showLoadList); setShowSaveInput(false); }}
+                onClick={() => setShowLoadList(!showLoadList)}
               >
                 <FolderOpen className="h-3 w-3" /> Load
               </button>
             )}
             <button
               type="button"
-              className="flex items-center gap-1 px-2 py-1 text-xs rounded-md border border-input text-muted-foreground hover:bg-muted transition-colors"
-              onClick={() => { setShowSaveInput(!showSaveInput); setShowLoadList(false); }}
+              className={`flex items-center gap-1 px-2 py-1 text-xs rounded-md border transition-colors ${
+                canSave
+                  ? 'border-input text-muted-foreground hover:bg-muted'
+                  : 'border-input text-muted-foreground/40 cursor-not-allowed'
+              }`}
+              disabled={!canSave}
+              onClick={() => handleSave()}
             >
               <Save className="h-3 w-3" /> Save
             </button>
@@ -198,25 +217,25 @@ export function AerodromeSelector({ inputs, onUpdate, onDepartureChange, onDesig
         </div>
       </CardHeader>
       <CardContent className="space-y-3">
-        {/* Save input */}
-        {showSaveInput && (
-          <div className="flex gap-2 items-end bg-muted/50 rounded-lg p-2">
-            <div className="flex-1">
-              <Label className="text-xs text-muted-foreground">Save as</Label>
-              <Input
-                placeholder="e.g. LOAN RWY 09"
-                value={saveName}
-                className="h-8 text-sm"
-                onChange={(e) => setSaveName(e.target.value)}
-                onKeyDown={(e) => e.key === 'Enter' && handleSave()}
-              />
-            </div>
+        {/* Overwrite confirmation */}
+        {confirmOverwrite && (
+          <div className="flex items-center gap-2 bg-amber-500/10 border border-amber-500/30 rounded-lg px-3 py-2 text-sm">
+            <span className="flex-1 text-amber-700 dark:text-amber-400">
+              <span className="font-semibold">{saveKey}</span> already saved. Overwrite?
+            </span>
             <button
               type="button"
-              className="h-8 px-3 text-xs rounded-md bg-primary text-primary-foreground hover:bg-primary/90 transition-colors"
-              onClick={handleSave}
+              className="px-2.5 py-1 text-xs rounded-md bg-amber-600 text-white hover:bg-amber-700 transition-colors"
+              onClick={() => handleSave(true)}
             >
-              Save
+              Overwrite
+            </button>
+            <button
+              type="button"
+              className="px-2.5 py-1 text-xs rounded-md border border-input text-muted-foreground hover:bg-muted transition-colors"
+              onClick={() => setConfirmOverwrite(false)}
+            >
+              Cancel
             </button>
           </div>
         )}
@@ -225,34 +244,48 @@ export function AerodromeSelector({ inputs, onUpdate, onDepartureChange, onDesig
         {showLoadList && (
           <div className="bg-muted/50 rounded-lg p-2 space-y-1">
             <div className="text-xs text-muted-foreground mb-1">Saved aerodromes</div>
-            {savedAerodromes.map((saved) => (
-              <div key={saved.name} className="flex items-center gap-2">
-                <button
-                  type="button"
-                  className="flex-1 text-left px-2 py-1.5 text-sm rounded-md hover:bg-muted transition-colors"
-                  onClick={() => handleLoad(saved)}
-                >
-                  <span className="font-semibold">{saved.name}</span>
-                  <span className="text-muted-foreground text-xs ml-2">
-                    {saved.elevation} ft · {String(saved.runwayHeading).padStart(3, '0')}° · {saved.surface} · TORA {saved.fullTora} m
-                  </span>
-                </button>
-                <button
-                  type="button"
-                  className="h-7 w-7 flex items-center justify-center rounded-md text-muted-foreground hover:bg-destructive/10 hover:text-destructive transition-colors"
-                  onClick={() => handleDeleteSaved(saved.name)}
-                  title="Delete"
-                >
-                  <X className="h-3 w-3" />
-                </button>
-              </div>
-            ))}
+            {savedAerodromes.map((saved) => {
+              const key = getSavedKey(saved);
+              return (
+                <div key={key} className="flex items-center gap-2">
+                  <button
+                    type="button"
+                    className="flex-1 text-left px-2 py-1.5 text-sm rounded-md hover:bg-muted transition-colors"
+                    onClick={() => handleLoad(saved)}
+                  >
+                    <span className="font-semibold">{key}</span>
+                    <span className="text-muted-foreground text-xs ml-2">
+                      {saved.elevation} ft · {saved.surface} · TORA {saved.fullTora} m
+                    </span>
+                  </button>
+                  <button
+                    type="button"
+                    className="h-7 w-7 flex items-center justify-center rounded-md text-muted-foreground hover:bg-destructive/10 hover:text-destructive transition-colors"
+                    onClick={() => handleDeleteSaved(key)}
+                    title="Delete"
+                  >
+                    <X className="h-3 w-3" />
+                  </button>
+                </div>
+              );
+            })}
           </div>
         )}
 
-        {/* Elevation + designator + heading */}
-        <div className="grid grid-cols-3 gap-3">
-          <InputField label="Aerodrome elevation (ft)" id="elev" value={inputs.elevation}
+        {/* ICAO + Elevation + designator + heading */}
+        <div className="grid grid-cols-4 gap-3">
+          <div>
+            <Label htmlFor="icao" className="text-xs text-muted-foreground">ICAO code</Label>
+            <Input
+              id="icao"
+              placeholder="LOAN"
+              value={icao}
+              maxLength={4}
+              className="h-8 text-sm uppercase"
+              onChange={(e) => setIcao(e.target.value.toUpperCase())}
+            />
+          </div>
+          <InputField label="Elevation (ft)" id="elev" value={inputs.elevation}
             onChange={(v) => onUpdate('elevation', v)} />
           <div>
             <Label htmlFor="rwy-desig" className="text-xs text-muted-foreground">Runway designator</Label>

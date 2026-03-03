@@ -66,8 +66,7 @@ export function TakeoffResultsPanel({ result, inputs, departureLabel }: TakeoffR
               label="TORR"
               sublabel="Ground Roll"
               value={`${result.torr} m`}
-              color={distanceColor(result.torr, inputs.tora)}
-              margin={inputs.tora > 0 ? marginInfo(result.torr, inputs.tora) : null}
+              color=""
             />
             <ResultBox
               label="TODR"

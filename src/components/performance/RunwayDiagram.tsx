@@ -41,7 +41,6 @@ export function RunwayDiagram({ inputs, result, departureLabel, fullRunwayTora, 
     1,
   );
 
-  const torrColor = barColor(result.torr, tora);
   const todrColor = barColor(result.todr, toda);
 
   const W = 900;
@@ -204,7 +203,7 @@ export function RunwayDiagram({ inputs, result, departureLabel, fullRunwayTora, 
 
           {/* REQUIRED DISTANCES — above runway */}
           {result.torr > 0 && (
-            <DimLineH y={reqY} x1={x(0)} x2={x(result.torr)} label="TORR" value={`${result.torr} m`} color={torrColor} />
+            <DimLineH y={reqY} x1={x(0)} x2={x(result.torr)} label="TORR" value={`${result.torr} m`} color="#9ca3af" />
           )}
           {result.todr > 0 && (
             <DimLineH y={reqY - reqGap} x1={x(0)} x2={x(result.todr)} label="TODR" value={`${result.todr} m`} color={todrColor} />
