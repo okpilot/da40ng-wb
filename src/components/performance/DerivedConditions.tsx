@@ -15,39 +15,58 @@ export function DerivedConditions({ result }: DerivedConditionsProps) {
       <CardHeader className="pb-0 pt-0">
         <CardTitle className="text-sm">Advisory Data</CardTitle>
       </CardHeader>
-      <CardContent className="space-y-2">
-        <div className="grid grid-cols-3 gap-x-4 gap-y-1 text-xs">
-          <Item label="Press. Alt." value={`${Math.round(result.pressureAltitude)} ft`} />
-          <Item label="Density Alt." value={`${Math.round(result.densityAltitude)} ft`} />
-          <Item label="ISA Temp" value={`${result.isaTemperature.toFixed(1)} °C`} />
-          <Item label="ISA Dev." value={`${result.isaDeviation >= 0 ? '+' : ''}${result.isaDeviation.toFixed(1)} °C`} />
-          <Item
+      <CardContent className="space-y-3">
+        {/* Derived values */}
+        <div className="grid grid-cols-3 gap-3">
+          <DataCell label="Pressure Altitude" value={`${Math.round(result.pressureAltitude)} ft`} />
+          <DataCell label="Density Altitude" value={`${Math.round(result.densityAltitude)} ft`} />
+          <DataCell label="ISA Temperature" value={`${result.isaTemperature.toFixed(1)} °C`} />
+          <DataCell
+            label="ISA Deviation"
+            value={`${result.isaDeviation >= 0 ? '+' : ''}${result.isaDeviation.toFixed(1)} °C`}
+          />
+          <DataCell
             label={tailwind ? 'Tailwind' : 'Headwind'}
             value={`${Math.abs(result.headwind).toFixed(1)} kt`}
             warn={tailwind}
           />
-          <Item
+          <DataCell
             label="Crosswind"
             value={`${result.crosswind.toFixed(1)} kt`}
             warn={xwExceed}
-            warnLabel={xwExceed ? '> MAX' : undefined}
+            note={xwExceed ? 'Exceeds max demo 25 kt' : undefined}
           />
         </div>
 
         {/* Correction factors */}
         {!hasNa && result.corrections.length > 0 && (
-          <div className="border-t pt-2">
-            <div className="text-xs text-muted-foreground mb-1">Correction factors applied</div>
-            <div className="grid grid-cols-3 gap-x-4 gap-y-1 text-xs">
-              <Item label="Base (AFM)" value={`GR ${Math.round(result.interpolation.baseGr)} / D50 ${Math.round(result.interpolation.baseD50)}`} />
-              {result.corrections.map((step, i) => (
-                <Item
-                  key={i}
-                  label={step.label}
-                  value={step.factor != null ? `×${step.factor.toFixed(2)}` : `+${step.addGr} / +${step.addD50}`}
-                />
-              ))}
+          <div className="border-t pt-3 space-y-2">
+            <div className="text-xs text-muted-foreground">Correction Factors Applied</div>
+
+            {/* Base from AFM */}
+            <div className="text-sm">
+              <span className="text-muted-foreground">Base from AFM table: </span>
+              Ground roll {Math.round(result.interpolation.baseGr)} m, 50 ft distance {Math.round(result.interpolation.baseD50)} m
             </div>
+
+            {/* Each correction step */}
+            {result.corrections.map((step, i) => {
+              const prevGr = i === 0 ? result.interpolation.baseGr : result.corrections[i - 1].grAfter;
+              const prevD50 = i === 0 ? result.interpolation.baseD50 : result.corrections[i - 1].d50After;
+              const grDiff = Math.round(step.grAfter) - Math.round(prevGr);
+              const d50Diff = Math.round(step.d50After) - Math.round(prevD50);
+
+              return (
+                <div key={i} className="text-sm">
+                  <span className="text-muted-foreground">{step.label}: </span>
+                  {step.factor != null ? (
+                    <>factor {step.factor.toFixed(2)} applied — ground roll {grDiff >= 0 ? '+' : ''}{grDiff} m = {Math.round(step.grAfter)} m, 50 ft distance {d50Diff >= 0 ? '+' : ''}{d50Diff} m = {Math.round(step.d50After)} m</>
+                  ) : (
+                    <>ground roll +{step.addGr} m = {Math.round(step.grAfter)} m, 50 ft distance +{step.addD50} m = {Math.round(step.d50After)} m</>
+                  )}
+                </div>
+              );
+            })}
           </div>
         )}
       </CardContent>
@@ -55,24 +74,14 @@ export function DerivedConditions({ result }: DerivedConditionsProps) {
   );
 }
 
-function Item({
-  label,
-  value,
-  warn,
-  warnLabel,
-}: {
-  label: string;
-  value: string;
-  warn?: boolean;
-  warnLabel?: string;
+function DataCell({ label, value, warn, note }: {
+  label: string; value: string; warn?: boolean; note?: string;
 }) {
   return (
-    <div className="flex justify-between items-baseline py-0.5">
-      <span className="text-muted-foreground">{label}</span>
-      <span className={`font-mono font-medium ${warn ? 'text-amber-500' : ''}`}>
-        {value}
-        {warnLabel && <span className="text-[10px] ml-1">{warnLabel}</span>}
-      </span>
+    <div>
+      <div className="text-xs text-muted-foreground">{label}</div>
+      <div className={`text-sm font-mono ${warn ? 'text-amber-500' : ''}`}>{value}</div>
+      {note && <div className="text-xs text-destructive">{note}</div>}
     </div>
   );
 }
