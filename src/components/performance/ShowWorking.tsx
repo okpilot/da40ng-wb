@@ -385,82 +385,67 @@ function RegulatoryComparison({ result, inputs }: { result: TakeoffResult; input
   if (inputs.tora <= 0) return null;
 
   const hasSwyOrCwy = inputs.toda > inputs.tora || inputs.asda > inputs.tora;
+  const todr = result.todr;
 
   interface Check {
     label: string;
-    factored: number;
+    sourceLabel: string;
     available: number;
-    availableLabel: string;
-    math: string;
+    divisor: number;
+    limit: number;
   }
 
   const checks: Check[] = hasSwyOrCwy
     ? [
-        {
-          label: 'TODR ≤ TORA',
-          factored: result.todr,
-          available: inputs.tora,
-          availableLabel: 'TORA',
-          math: `${result.todr} m`,
-        },
-        {
-          label: 'TODR × 1.15 ≤ TODA',
-          factored: Math.ceil(result.todr * 1.15),
-          available: inputs.toda,
-          availableLabel: 'TODA',
-          math: `${result.todr} × 1.15 = ${Math.ceil(result.todr * 1.15)} m`,
-        },
-        {
-          label: 'TODR × 1.30 ≤ ASDA',
-          factored: Math.ceil(result.todr * 1.3),
-          available: inputs.asda,
-          availableLabel: 'ASDA',
-          math: `${result.todr} × 1.30 = ${Math.ceil(result.todr * 1.3)} m`,
-        },
+        { label: 'TORA / 1.0', sourceLabel: 'TORA', available: inputs.tora, divisor: 1.0, limit: Math.floor(inputs.tora / 1.0) },
+        { label: 'TODA / 1.15', sourceLabel: 'TODA', available: inputs.toda, divisor: 1.15, limit: Math.floor(inputs.toda / 1.15) },
+        { label: 'ASDA / 1.30', sourceLabel: 'ASDA', available: inputs.asda, divisor: 1.3, limit: Math.floor(inputs.asda / 1.3) },
       ]
     : [
-        {
-          label: 'TODR × 1.25 ≤ TORA',
-          factored: Math.ceil(result.todr * 1.25),
-          available: inputs.tora,
-          availableLabel: 'TORA',
-          math: `${result.todr} × 1.25 = ${Math.ceil(result.todr * 1.25)} m`,
-        },
+        { label: 'TORA / 1.25', sourceLabel: 'TORA', available: inputs.tora, divisor: 1.25, limit: Math.floor(inputs.tora / 1.25) },
       ];
+
+  const binding = checks.reduce((min, c) => (c.limit < min.limit ? c : min), checks[0]);
 
   return (
     <div>
       <SectionTitle>6. Regulatory Comparison</SectionTitle>
       <div className="space-y-3">
         <div className="bg-muted rounded-lg p-3">
-          <div className="text-xs font-semibold text-muted-foreground">Part NCO — unfactored AFM distances</div>
+          <div className="text-xs font-semibold text-muted-foreground">Part NCO — TODR ≤ TORA (binding)</div>
           <div className="text-sm font-mono mt-1">
-            TORR {result.torr} m | TODR {result.todr} m
+            TODR {todr} m vs TORA {inputs.tora} m → <span className={todr <= inputs.tora ? 'text-green-600 font-semibold' : 'text-destructive font-semibold'}>{todr <= inputs.tora ? 'PASS' : 'FAIL'}</span>
+            <span className="text-muted-foreground ml-2">({inputs.tora - todr > 0 ? '+' : ''}{inputs.tora - todr} m)</span>
           </div>
-          <div className="text-xs text-muted-foreground mt-1">
-            AFM 5.3.7: "The available runway length must be at least equal to the take-off distance over a 50 ft obstacle." → TODR ≤ TORA ({result.todr} ≤ {inputs.tora} m)
+          <div className="text-[10px] text-muted-foreground mt-1">
+            AFM 5.3.7: "The available runway length must be at least equal to the take-off distance over a 50 ft obstacle."
           </div>
         </div>
 
         <div className="bg-muted rounded-lg p-3">
           <div className="text-xs font-semibold text-muted-foreground">
-            Part CAT factoring (CAT.POL.A.305)
+            Part CAT — max allowable TODR (CAT.POL.A.305)
             {hasSwyOrCwy ? ' — with SWY/CWY' : ' — no SWY/CWY'}
           </div>
           <div className="space-y-1.5 mt-2">
             {checks.map((check) => {
-              const pass = check.factored <= check.available;
+              const pass = todr <= check.limit;
+              const margin = check.limit - todr;
               return (
                 <div key={check.label} className="text-sm font-mono flex items-center gap-2">
                   <span className={`font-semibold ${pass ? 'text-green-600' : 'text-destructive'}`}>
                     {pass ? 'PASS' : 'FAIL'}
                   </span>
                   <span>
-                    {check.math} vs {check.availableLabel} {check.available} m
+                    {check.sourceLabel} {check.available} / {check.divisor} = {check.limit} m {pass ? '≥' : '<'} TODR {todr} m
+                    <span className="text-muted-foreground ml-1">({margin > 0 ? '+' : ''}{margin} m)</span>
                   </span>
                 </div>
               );
             })}
+          </div>
+          <div className="text-xs font-semibold mt-2">
+            Most restrictive: {binding.label} = {binding.limit} m
           </div>
         </div>
 
