@@ -49,7 +49,7 @@ export function AerodromeSelector({ inputs, onUpdate }: AerodromeSelectorProps) 
         <div className="grid grid-cols-2 gap-3">
           <InputField label="Aerodrome elevation (ft)" id="elev" value={inputs.elevation}
             onChange={(v) => onUpdate('elevation', v)} />
-          <InputField label="Runway heading (°)" id="rwy-hdg" value={inputs.runwayHeading} min={0} max={360}
+          <InputField label="Runway heading (°T)" id="rwy-hdg" value={inputs.runwayHeading} min={0} max={360}
             onChange={(v) => onUpdate('runwayHeading', v)} />
         </div>
 
@@ -136,9 +136,9 @@ function InputField({ label, id, value, min, max, step, onChange }: {
         min={min}
         max={max}
         step={step}
-        value={value}
+        value={value || ''}
         className="h-8 text-sm"
-        onChange={(e) => onChange(Number(e.target.value))}
+        onChange={(e) => onChange(e.target.value === '' ? 0 : Number(e.target.value))}
       />
     </div>
   );

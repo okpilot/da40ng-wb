@@ -16,7 +16,7 @@ export function TakeoffInputsPanel({ inputs, onUpdate }: TakeoffInputsProps) {
       </CardHeader>
       <CardContent className="space-y-3">
         <div className="grid grid-cols-2 sm:grid-cols-4 gap-2">
-          <InputField label="Wind (°)" id="wind-dir" value={inputs.windDirection} min={0} max={360}
+          <InputField label="Wind (°T)" id="wind-dir" value={inputs.windDirection} min={0} max={360}
             onChange={(v) => onUpdate('windDirection', v)} />
           <InputField label="Wind (kt)" id="wind-spd" value={inputs.windSpeed} min={0}
             onChange={(v) => onUpdate('windSpeed', v)} />
@@ -65,9 +65,9 @@ function InputField({ label, id, value, min, max, step, onChange }: {
         min={min}
         max={max}
         step={step}
-        value={value}
+        value={value || ''}
         className="h-8 text-sm"
-        onChange={(e) => onChange(Number(e.target.value))}
+        onChange={(e) => onChange(e.target.value === '' ? 0 : Number(e.target.value))}
       />
     </div>
   );
