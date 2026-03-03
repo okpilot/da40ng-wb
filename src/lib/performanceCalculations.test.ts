@@ -167,28 +167,63 @@ function makeInputs(overrides: Partial<TakeoffInputs> = {}): TakeoffInputs {
 }
 
 describe('calculateTakeoff', () => {
-  describe('base conditions (ISA, sea level, calm, paved, dry)', () => {
-    it('matches ISA column for 1200 kg at sea level', () => {
-      // AFM ISA column for 1200 kg at SL: GR=352, D50=524
+  describe('exact table lookups (no interpolation needed)', () => {
+    it('returns exact AFM value for 1200 kg, SL, 0°C', () => {
+      // 1200 kg table, SL row, 0°C col: GR=325, D50=490
+      const result = calculateTakeoff(makeInputs({ mass: 1200, oat: 0 }));
+      expect(result.torr).toBe(325);
+      expect(result.todr).toBe(490);
+    });
+
+    it('returns exact AFM value for 1310 kg, SL, 0°C', () => {
+      // 1310 kg table, SL row, 0°C col: GR=365, D50=550
+      const result = calculateTakeoff(makeInputs({ mass: 1310, oat: 0 }));
+      expect(result.torr).toBe(365);
+      expect(result.todr).toBe(550);
+    });
+
+    it('returns exact AFM value for 1100 kg, SL, 0°C', () => {
+      // 1100 kg table, SL row, 0°C col: GR=280, D50=430
+      const result = calculateTakeoff(makeInputs({ mass: 1100, oat: 0 }));
+      expect(result.torr).toBe(280);
+      expect(result.todr).toBe(430);
+    });
+
+    it('returns exact AFM value for 1280 kg, 4000ft, 30°C', () => {
+      // 1280 kg table, 4000ft row, 30°C col: GR=585, D50=830
+      const result = calculateTakeoff(makeInputs({
+        mass: 1280, elevation: 4000, qnh: 1013.25, oat: 30,
+      }));
+      expect(result.torr).toBe(585);
+      expect(result.todr).toBe(830);
+    });
+
+    it('returns exact AFM value for 1200 kg, 3000ft, 20°C', () => {
+      // 1200 kg table, 3000ft row, 20°C col: GR=445, D50=650
+      const result = calculateTakeoff(makeInputs({
+        mass: 1200, elevation: 3000, qnh: 1013.25, oat: 20,
+      }));
+      expect(result.torr).toBe(445);
+      expect(result.todr).toBe(650);
+    });
+  });
+
+  describe('OAT interpolation at exact weight and PA', () => {
+    it('interpolates between OAT columns for 1200 kg at SL, 15°C', () => {
+      // 1200 kg, SL: 10°C→GR=345,D50=520. 20°C→GR=365,D50=540.
+      // 15°C is midpoint: GR=355, D50=530
       const result = calculateTakeoff(makeInputs({ mass: 1200, oat: 15 }));
-      // OAT 15 at SL → ISA exactly. Interpolating between 10°C and 20°C columns:
-      // 10°C: GR=345, D50=520. 20°C: GR=365, D50=540. At 15°C (50% between): GR=355, D50=530
-      expect(result.torr).toBeCloseTo(355, -1); // within ~5m
-      expect(result.todr).toBeCloseTo(530, -1);
+      expect(result.torr).toBe(355);
+      expect(result.todr).toBe(530);
     });
+  });
 
-    it('matches ISA column for 1310 kg at sea level', () => {
-      const result = calculateTakeoff(makeInputs({ mass: 1310, oat: 15 }));
-      // 10°C: GR=385, D50=580. 20°C: GR=410, D50=610. At 15°C: GR≈398, D50≈595
-      expect(result.torr).toBeCloseTo(398, -1);
-      expect(result.todr).toBeCloseTo(595, -1);
-    });
-
-    it('matches ISA column for 1100 kg at sea level', () => {
-      const result = calculateTakeoff(makeInputs({ mass: 1100, oat: 15 }));
-      // 10°C: GR=295, D50=450. 20°C: GR=310, D50=470. At 15°C: GR≈303, D50≈460
-      expect(result.torr).toBeCloseTo(303, -1);
-      expect(result.todr).toBeCloseTo(460, -1);
+  describe('weight interpolation', () => {
+    it('interpolates between 1200 and 1280 kg tables', () => {
+      // At SL, 0°C: 1200kg→GR=325, 1280kg→GR=365. Mass 1240 is 50% between.
+      // Expected GR = 345
+      const result = calculateTakeoff(makeInputs({ mass: 1240, oat: 0 }));
+      expect(result.torr).toBe(345);
     });
   });
 
