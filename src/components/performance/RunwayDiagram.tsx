@@ -6,6 +6,7 @@ interface RunwayDiagramProps {
   result: TakeoffResult;
   departureLabel: string;
   fullRunwayTora: number;
+  runwayDesignator: string;
 }
 
 function barColor(required: number, available: number): string {
@@ -16,7 +17,7 @@ function barColor(required: number, available: number): string {
   return '#22c55e';
 }
 
-export function RunwayDiagram({ inputs, result, departureLabel, fullRunwayTora }: RunwayDiagramProps) {
+export function RunwayDiagram({ inputs, result, departureLabel, fullRunwayTora, runwayDesignator }: RunwayDiagramProps) {
   const tora = inputs.tora;
   const toda = inputs.toda;
   const asda = inputs.asda;
@@ -104,6 +105,17 @@ export function RunwayDiagram({ inputs, result, departureLabel, fullRunwayTora }
                   />
                 ))}
               </g>
+            );
+          })()}
+
+          {/* Runway designator — after threshold zebra */}
+          {runwayDesignator && (() => {
+            const zebraWidth = Math.min(18, (xAbs(rwyLength) - xAbs(0)) * 0.025);
+            const desigX = xAbs(0) + zebraWidth + 12;
+            return (
+              <text x={desigX} y={rwyTop + rwyH / 2 + 5} textAnchor="middle" fontSize="14" fill="#d1d5db" fontWeight="700" letterSpacing="2">
+                {runwayDesignator}
+              </text>
             );
           })()}
 

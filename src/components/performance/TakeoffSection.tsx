@@ -15,6 +15,7 @@ export function TakeoffSection() {
   const [isOpen, setIsOpen] = useState(true);
   const [departureLabel, setDepartureLabel] = useState('Full length');
   const [fullRunwayTora, setFullRunwayTora] = useState(0);
+  const [runwayDesignator, setRunwayDesignator] = useState('');
   const hasNa = result.warnings.some((w) => w.message.includes('N/A'));
   const showDiagram = inputs.tora > 0 && !hasNa;
 
@@ -48,6 +49,7 @@ export function TakeoffSection() {
                 inputs={inputs}
                 onUpdate={updateInput}
                 onDepartureChange={handleDepartureChange}
+                onDesignatorChange={setRunwayDesignator}
               />
             </div>
             <div className="space-y-4">
@@ -64,6 +66,7 @@ export function TakeoffSection() {
               result={result}
               departureLabel={departureLabel}
               fullRunwayTora={fullRunwayTora}
+              runwayDesignator={runwayDesignator}
             />
           )}
 

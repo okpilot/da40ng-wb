@@ -11,6 +11,7 @@ interface AerodromeSelectorProps {
   inputs: TakeoffInputs;
   onUpdate: <K extends keyof TakeoffInputs>(key: K, value: TakeoffInputs[K]) => void;
   onDepartureChange: (label: string, fullTora: number) => void;
+  onDesignatorChange: (designator: string) => void;
 }
 
 interface IntersectionEntry {
@@ -24,6 +25,7 @@ interface IntersectionEntry {
 interface SavedAerodrome {
   name: string;
   elevation: number;
+  designator: string;
   runwayHeading: number;
   thrElev: number;
   derElev: number;
@@ -55,12 +57,13 @@ function Pill({ active, onClick, children }: {
 
 let nextIntId = 1;
 
-export function AerodromeSelector({ inputs, onUpdate, onDepartureChange }: AerodromeSelectorProps) {
+export function AerodromeSelector({ inputs, onUpdate, onDepartureChange, onDesignatorChange }: AerodromeSelectorProps) {
   const [thrElev, setThrElev] = useState(0);
   const [derElev, setDerElev] = useState(0);
   const [fullTora, setFullTora] = useState(0);
   const [fullToda, setFullToda] = useState(0);
   const [fullAsda, setFullAsda] = useState(0);
+  const [designator, setDesignator] = useState('');
   const [intersections, setIntersections] = useState<IntersectionEntry[]>([]);
   const [activeIntId, setActiveIntId] = useState<number | null>(null);
 
@@ -128,6 +131,7 @@ export function AerodromeSelector({ inputs, onUpdate, onDepartureChange }: Aerod
     const entry: SavedAerodrome = {
       name: saveName.trim(),
       elevation: inputs.elevation,
+      designator,
       runwayHeading: inputs.runwayHeading,
       thrElev, derElev,
       surface: inputs.surface,
@@ -143,6 +147,8 @@ export function AerodromeSelector({ inputs, onUpdate, onDepartureChange }: Aerod
   // Load a saved config
   const handleLoad = (saved: SavedAerodrome) => {
     onUpdate('elevation', saved.elevation);
+    setDesignator(saved.designator || '');
+    onDesignatorChange(saved.designator || '');
     onUpdate('runwayHeading', saved.runwayHeading);
     onUpdate('surface', saved.surface);
     onUpdate('grassLength', saved.grassLength);
@@ -243,10 +249,20 @@ export function AerodromeSelector({ inputs, onUpdate, onDepartureChange }: Aerod
           </div>
         )}
 
-        {/* Elevation + heading */}
-        <div className="grid grid-cols-2 gap-3">
+        {/* Elevation + designator + heading */}
+        <div className="grid grid-cols-3 gap-3">
           <InputField label="Aerodrome elevation (ft)" id="elev" value={inputs.elevation}
             onChange={(v) => onUpdate('elevation', v)} />
+          <div>
+            <Label htmlFor="rwy-desig" className="text-xs text-muted-foreground">Runway designator</Label>
+            <Input
+              id="rwy-desig"
+              placeholder="e.g. 09"
+              value={designator}
+              className="h-8 text-sm"
+              onChange={(e) => { setDesignator(e.target.value); onDesignatorChange(e.target.value); }}
+            />
+          </div>
           <InputField label="Runway heading (°T)" id="rwy-hdg" value={inputs.runwayHeading} min={0} max={360}
             onChange={(v) => onUpdate('runwayHeading', v)} />
         </div>
