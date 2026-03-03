@@ -7,6 +7,7 @@ import { DerivedConditions } from './DerivedConditions';
 import { TakeoffResultsPanel } from './TakeoffResults';
 import { RunwayDiagram } from './RunwayDiagram';
 import { ShowWorking } from './ShowWorking';
+import { CatFactors } from './CatFactors';
 import { ChevronDown, ChevronRight } from 'lucide-react';
 
 export function TakeoffSection() {
@@ -69,6 +70,8 @@ export function TakeoffSection() {
               runwayDesignator={runwayDesignator}
             />
           )}
+
+          <CatFactors result={result} inputs={inputs} />
 
           <ShowWorking result={result} inputs={inputs} />
         </div>

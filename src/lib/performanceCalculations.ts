@@ -472,6 +472,12 @@ export function calculateTakeoff(inputs: TakeoffInputs): TakeoffResult {
       message: `TORR (${Math.round(finalGr)} m) exceeds TORA (${inputs.tora} m)`,
     });
   }
+  if (inputs.tora > 0 && finalD50 > inputs.tora) {
+    warnings.push({
+      level: 'red',
+      message: `TODR (${Math.round(finalD50)} m) exceeds TORA (${inputs.tora} m) — AFM 5.3.7`,
+    });
+  }
   if (inputs.toda > 0 && finalD50 > inputs.toda) {
     warnings.push({
       level: 'red',

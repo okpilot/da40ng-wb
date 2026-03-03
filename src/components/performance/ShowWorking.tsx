@@ -53,6 +53,9 @@ export function ShowWorking({ result, inputs }: ShowWorkingProps) {
           {result.corrections.length > 0 && (
             <CorrectionBreakdownDetailed result={result} />
           )}
+
+          {/* 6. Regulatory comparison */}
+          <RegulatoryComparison result={result} inputs={inputs} />
         </CardContent>
       )}
     </Card>
@@ -367,6 +370,99 @@ function CorrectionBreakdownDetailed({ result }: { result: TakeoffResult }) {
         <div className="flex justify-between text-sm font-mono bg-primary/10 rounded px-3 py-2 font-bold">
           <span>Final</span>
           <span>TORR {result.torr} m | TODR {result.todr} m</span>
+        </div>
+      </div>
+    </div>
+  );
+}
+
+// ── 6. Regulatory comparison ──────────────────────────────────────
+
+function RegulatoryComparison({ result, inputs }: { result: TakeoffResult; inputs: TakeoffInputs }) {
+  if (inputs.tora <= 0) return null;
+
+  const hasSwyOrCwy = inputs.toda > inputs.tora || inputs.asda > inputs.tora;
+
+  interface Check {
+    label: string;
+    factored: number;
+    available: number;
+    availableLabel: string;
+    math: string;
+  }
+
+  const checks: Check[] = hasSwyOrCwy
+    ? [
+        {
+          label: 'TODR ≤ TORA',
+          factored: result.todr,
+          available: inputs.tora,
+          availableLabel: 'TORA',
+          math: `${result.todr} m`,
+        },
+        {
+          label: 'TODR × 1.15 ≤ TODA',
+          factored: Math.ceil(result.todr * 1.15),
+          available: inputs.toda,
+          availableLabel: 'TODA',
+          math: `${result.todr} × 1.15 = ${Math.ceil(result.todr * 1.15)} m`,
+        },
+        {
+          label: 'TODR × 1.30 ≤ ASDA',
+          factored: Math.ceil(result.todr * 1.3),
+          available: inputs.asda,
+          availableLabel: 'ASDA',
+          math: `${result.todr} × 1.30 = ${Math.ceil(result.todr * 1.3)} m`,
+        },
+      ]
+    : [
+        {
+          label: 'TODR × 1.25 ≤ TORA',
+          factored: Math.ceil(result.todr * 1.25),
+          available: inputs.tora,
+          availableLabel: 'TORA',
+          math: `${result.todr} × 1.25 = ${Math.ceil(result.todr * 1.25)} m`,
+        },
+      ];
+
+  return (
+    <div>
+      <SectionTitle>6. Regulatory Comparison</SectionTitle>
+      <div className="space-y-3">
+        <div className="bg-muted rounded-lg p-3">
+          <div className="text-xs font-semibold text-muted-foreground">Part NCO — unfactored AFM distances</div>
+          <div className="text-sm font-mono mt-1">
+            TORR {result.torr} m | TODR {result.todr} m
+          </div>
+          <div className="text-xs text-muted-foreground mt-1">
+            AFM 5.3.7: "The available runway length must be at least equal to the take-off distance over a 50 ft obstacle." → TODR ≤ TORA ({result.todr} ≤ {inputs.tora} m)
+          </div>
+        </div>
+
+        <div className="bg-muted rounded-lg p-3">
+          <div className="text-xs font-semibold text-muted-foreground">
+            Part CAT factoring (CAT.POL.A.305)
+            {hasSwyOrCwy ? ' — with SWY/CWY' : ' — no SWY/CWY'}
+          </div>
+          <div className="space-y-1.5 mt-2">
+            {checks.map((check) => {
+              const pass = check.factored <= check.available;
+              return (
+                <div key={check.label} className="text-sm font-mono flex items-center gap-2">
+                  <span className={`font-semibold ${pass ? 'text-green-600' : 'text-destructive'}`}>
+                    {pass ? 'PASS' : 'FAIL'}
+                  </span>
+                  <span>
+                    {check.math} vs {check.availableLabel} {check.available} m
+                  </span>
+                </div>
+              );
+            })}
+          </div>
+        </div>
+
+        <div className="text-[10px] text-muted-foreground">
+          Ref: Commission Regulation (EU) No 965/2012, Annex IV, CAT.POL.A.305 — Performance Class B single-engine aeroplanes.
         </div>
       </div>
     </div>
