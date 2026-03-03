@@ -241,7 +241,7 @@ Each section has a collapsible "Show working" panel that displays:
 
 ### 1. Step-by-step calculation
 - Numbered steps with formulas and actual values plugged in
-- e.g. "PA = 1200 + 30 × (1013.25 − 1005) = 1448 ft"
+- e.g. "PA = 1200 + 30 × (1013 − 1005) = 1448 ft"
 - e.g. "ISA temp at 1448 ft = 15 − 2 × 1.448 = 12.1°C → ISA dev = +8.9°C"
 - Wind component breakdown with diagram values
 
@@ -280,7 +280,7 @@ Each section has a collapsible "Show working" panel that displays:
 - Wheel fairings: yes / no
 
 ### Derived values (pure formulas)
-- Pressure altitude [ft] = elevation + 30 × (1013.25 − QNH)
+- Pressure altitude [ft] = elevation + 30 × (1013 − QNH)
 - ISA temperature [°C] = 15 − 2 × (PA / 1000)
 - ISA deviation [°C] = OAT − ISA temperature
 - Density altitude [ft] = PA + 120 × (OAT − ISA temp)

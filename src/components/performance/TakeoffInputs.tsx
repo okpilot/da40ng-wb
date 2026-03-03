@@ -67,7 +67,7 @@ function InputField({ label, id, value, min, max, step, onChange }: {
         step={step}
         value={value || ''}
         className="h-8 text-sm"
-        onChange={(e) => onChange(e.target.value === '' ? 0 : Number(e.target.value))}
+        onChange={(e) => { const n = Number(e.target.value); onChange(e.target.value === '' || isNaN(n) ? 0 : n); }}
       />
     </div>
   );

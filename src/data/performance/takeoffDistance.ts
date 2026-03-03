@@ -6,8 +6,8 @@ import type { TakeoffTable } from '@/lib/types';
  * Conditions: Power MAX, Flaps T/O, Runway dry/paved/level,
  * Brakes held until full power, Nose wheel lift-off @ V_R, Initial climb @ V_50
  *
- * Each table: 11 pressure altitudes (SL–10000 ft) × 6 OAT columns (0–50°C)
- * plus an ISA column. Cells are [groundRoll, dist50ft] in metres.
+ * Each table: 11 pressure altitudes (SL–10000 ft) × 6 OAT columns (0–50°C).
+ * Cells are [groundRoll, dist50ft] in metres.
  * null = N/A (hatched area in AFM).
  *
  * Source: Doc. #6.01.15-E Rev.3, pages 5-13 to 5-16

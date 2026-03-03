@@ -60,9 +60,9 @@ let nextIntId = 1;
 export function AerodromeSelector({ inputs, onUpdate, onDepartureChange, onDesignatorChange }: AerodromeSelectorProps) {
   const [thrElev, setThrElev] = useState(0);
   const [derElev, setDerElev] = useState(0);
-  const [fullTora, setFullTora] = useState(0);
-  const [fullToda, setFullToda] = useState(0);
-  const [fullAsda, setFullAsda] = useState(0);
+  const [fullTora, setFullTora] = useState(inputs.tora);
+  const [fullToda, setFullToda] = useState(inputs.toda);
+  const [fullAsda, setFullAsda] = useState(inputs.asda);
   const [designator, setDesignator] = useState('');
   const [intersections, setIntersections] = useState<IntersectionEntry[]>([]);
   const [activeIntId, setActiveIntId] = useState<number | null>(null);
@@ -398,7 +398,7 @@ function InputField({ label, id, value, min, max, step, onChange }: {
         step={step}
         value={value || ''}
         className="h-8 text-sm"
-        onChange={(e) => onChange(e.target.value === '' ? 0 : Number(e.target.value))}
+        onChange={(e) => { const n = Number(e.target.value); onChange(e.target.value === '' || isNaN(n) ? 0 : n); }}
       />
     </div>
   );

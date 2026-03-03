@@ -33,7 +33,7 @@ export function AircraftConfigStrip({
               max={1310}
               value={mass}
               className="h-8 text-sm w-28"
-              onChange={(e) => onMassChange(Number(e.target.value))}
+              onChange={(e) => { const n = Number(e.target.value); onMassChange(e.target.value === '' || isNaN(n) ? 0 : n); }}
             />
           </div>
 

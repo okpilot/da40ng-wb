@@ -32,8 +32,10 @@ export function RunwayDiagram({ inputs, result, departureLabel, fullRunwayTora, 
 
   // maxDist accounts for full runway + clearway/stopway
   const maxDist = Math.max(
+    behindDist + tora,
     behindDist + toda,
     behindDist + asda,
+    behindDist + result.torr,
     behindDist + result.todr,
     rwyLength,
     1,

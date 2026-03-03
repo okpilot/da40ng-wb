@@ -233,12 +233,14 @@ describe('calculateTakeoff', () => {
       expect(result.oatClamped).toBe(true);
       expect(result.clampedOat).toBe(0);
       expect(result.warnings.some(w => w.message.includes('0°C'))).toBe(true);
+      expect(result.clampedOat).toBe(0);
     });
 
     it('warns for OAT above 50°C', () => {
       const result = calculateTakeoff(makeInputs({ oat: 55 }));
       expect(result.oatClamped).toBe(true);
       expect(result.warnings.some(w => w.message.includes('50°C'))).toBe(true);
+      expect(result.clampedOat).toBe(50);
     });
   });
 
@@ -248,6 +250,10 @@ describe('calculateTakeoff', () => {
       expect(result.warnings.some(w => w.message.includes('1100 kg'))).toBe(true);
       // Should still produce valid results (uses 1100 kg table)
       expect(result.torr).toBeGreaterThan(0);
+      // Should produce same result as 1100 kg
+      const ref = calculateTakeoff(makeInputs({ mass: 1100 }));
+      expect(result.torr).toBe(ref.torr);
+      expect(result.todr).toBe(ref.todr);
     });
   });
 

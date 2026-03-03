@@ -359,6 +359,13 @@ export function calculateTakeoff(inputs: TakeoffInputs): TakeoffResult {
     });
   }
 
+  if (inputs.mass > 1310) {
+    warnings.push({
+      level: 'red',
+      message: 'Mass exceeds maximum take-off mass (1310 kg)',
+    });
+  }
+
   // RWYCC warnings
   if (inputs.rwycc <= 4) {
     warnings.push({

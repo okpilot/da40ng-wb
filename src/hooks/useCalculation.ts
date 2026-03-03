@@ -41,7 +41,7 @@ const initialLoading: LoadingState = {
 function toConfig(stored: StoredConfig): AircraftConfig {
   return {
     ...stored,
-    activeMods: new Set(stored.activeMods),
+    activeMods: new Set(Array.isArray(stored.activeMods) ? stored.activeMods : []),
   };
 }
 
