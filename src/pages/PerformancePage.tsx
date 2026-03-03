@@ -1,5 +1,6 @@
 import { Link } from 'react-router-dom';
 import { Button } from '@/components/ui/button';
+import { Tabs, TabsContent, TabsList, TabsTrigger } from '@/components/ui/tabs';
 import { Calculator, BookOpen, RotateCcw } from 'lucide-react';
 import { Separator } from '@/components/ui/separator';
 import { TakeoffSection } from '@/components/performance/TakeoffSection';
@@ -41,7 +42,30 @@ export function PerformancePage() {
       </header>
 
       <main className="max-w-7xl mx-auto px-4 py-6 space-y-6">
-        <TakeoffSection />
+        <Tabs defaultValue="takeoff">
+          <TabsList className="w-full justify-start">
+            <TabsTrigger value="takeoff">Take Off</TabsTrigger>
+            <TabsTrigger value="climb" disabled>Climb</TabsTrigger>
+            <TabsTrigger value="cruise" disabled>Cruise</TabsTrigger>
+            <TabsTrigger value="landing" disabled>Landing</TabsTrigger>
+          </TabsList>
+
+          <TabsContent value="takeoff" className="mt-6">
+            <TakeoffSection />
+          </TabsContent>
+
+          <TabsContent value="climb" className="mt-6">
+            <p className="text-sm text-muted-foreground">Coming soon</p>
+          </TabsContent>
+
+          <TabsContent value="cruise" className="mt-6">
+            <p className="text-sm text-muted-foreground">Coming soon</p>
+          </TabsContent>
+
+          <TabsContent value="landing" className="mt-6">
+            <p className="text-sm text-muted-foreground">Coming soon</p>
+          </TabsContent>
+        </Tabs>
 
         <Separator />
         <footer className="text-center text-xs text-muted-foreground pb-4 space-y-2">
