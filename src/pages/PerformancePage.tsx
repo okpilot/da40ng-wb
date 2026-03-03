@@ -1,6 +1,6 @@
 import { Link } from 'react-router-dom';
 import { Button } from '@/components/ui/button';
-import { Calculator, BookOpen } from 'lucide-react';
+import { Calculator, BookOpen, RotateCcw } from 'lucide-react';
 import { Separator } from '@/components/ui/separator';
 import { TakeoffSection } from '@/components/performance/TakeoffSection';
 
@@ -16,6 +16,13 @@ export function PerformancePage() {
             </p>
           </div>
           <div className="flex items-center gap-2">
+            <Button variant="ghost" size="sm" onClick={() => {
+              localStorage.removeItem('da40ng-perf-inputs');
+              window.location.reload();
+            }}>
+              <RotateCcw className="mr-2 h-4 w-4" />
+              Reset
+            </Button>
             <Button variant="outline" size="sm" asChild>
               <Link to="/">
                 <Calculator className="mr-2 h-4 w-4" />

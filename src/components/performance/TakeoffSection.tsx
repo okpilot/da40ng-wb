@@ -10,7 +10,7 @@ import { ShowWorking } from './ShowWorking';
 import { ChevronDown, ChevronRight } from 'lucide-react';
 
 export function TakeoffSection() {
-  const { inputs, updateInput, result } = useTakeoff();
+  const { inputs, updateInput, resetInputs, result } = useTakeoff();
 
   const [isOpen, setIsOpen] = useState(true);
   const [departureLabel, setDepartureLabel] = useState('Full length');

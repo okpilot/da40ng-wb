@@ -1,4 +1,4 @@
-import { useCallback, useMemo, useState } from 'react';
+import { useCallback, useMemo } from 'react';
 import { da40ng } from '@/data/da40ng';
 import {
   calculateLoadingCondition,
@@ -11,11 +11,20 @@ import type {
   ModificationId,
   TankConfig,
 } from '@/lib/types';
+import { useLocalStorage } from './useLocalStorage';
 
-const initialConfig: AircraftConfig = {
+// Serializable version of AircraftConfig (Set → array)
+interface StoredConfig {
+  bemMass: number;
+  bemCg: number;
+  activeMods: ModificationId[];
+  tankConfig: TankConfig;
+}
+
+const initialStoredConfig: StoredConfig = {
   bemMass: da40ng.defaultBem.mass,
   bemCg: da40ng.defaultBem.cg,
-  activeMods: new Set<ModificationId>(),
+  activeMods: [],
   tankConfig: 'standard',
 };
 
@@ -29,30 +38,51 @@ const initialLoading: LoadingState = {
   tripFuelUsg: 0,
 };
 
+function toConfig(stored: StoredConfig): AircraftConfig {
+  return {
+    ...stored,
+    activeMods: new Set(stored.activeMods),
+  };
+}
+
+function toStored(config: AircraftConfig): StoredConfig {
+  return {
+    ...config,
+    activeMods: [...config.activeMods],
+  };
+}
+
 export function useCalculation() {
-  const [config, setConfig] = useState<AircraftConfig>(initialConfig);
-  const [loading, setLoading] = useState<LoadingState>(initialLoading);
+  const [storedConfig, setStoredConfig, resetConfig] = useLocalStorage<StoredConfig>(
+    'da40ng-wb-config',
+    initialStoredConfig,
+  );
+  const [loading, setLoading, resetLoading] = useLocalStorage<LoadingState>(
+    'da40ng-wb-loading',
+    initialLoading,
+  );
+
+  const config = useMemo(() => toConfig(storedConfig), [storedConfig]);
 
   const setBemMass = useCallback((mass: number) => {
-    setConfig((c) => ({ ...c, bemMass: mass }));
-  }, []);
+    setStoredConfig((c) => ({ ...c, bemMass: mass }));
+  }, [setStoredConfig]);
 
   const setBemCg = useCallback((cg: number) => {
-    setConfig((c) => ({ ...c, bemCg: cg }));
-  }, []);
+    setStoredConfig((c) => ({ ...c, bemCg: cg }));
+  }, [setStoredConfig]);
 
   const toggleMod = useCallback((modId: ModificationId) => {
-    setConfig((prev) => {
-      const next = new Set(prev.activeMods);
-      if (next.has(modId)) {
-        next.delete(modId);
+    setStoredConfig((prev) => {
+      const mods = new Set(prev.activeMods);
+      if (mods.has(modId)) {
+        mods.delete(modId);
       } else {
-        next.add(modId);
+        mods.add(modId);
       }
-      return { ...prev, activeMods: next };
+      return { ...prev, activeMods: [...mods] };
     });
 
-    // Clear entries for stations that depend on the toggled mod
     setLoading((prev) => {
       const updatedEntries = prev.entries.map((entry) => {
         const station = da40ng.stations.find((s) => s.id === entry.stationId);
@@ -63,11 +93,11 @@ export function useCalculation() {
       });
       return { ...prev, entries: updatedEntries };
     });
-  }, []);
+  }, [setStoredConfig, setLoading]);
 
   const setTankConfig = useCallback((tank: TankConfig) => {
-    setConfig((c) => ({ ...c, tankConfig: tank }));
-  }, []);
+    setStoredConfig((c) => ({ ...c, tankConfig: tank }));
+  }, [setStoredConfig]);
 
   const setStationMass = useCallback((stationId: string, mass: number) => {
     setLoading((prev) => ({
@@ -76,15 +106,20 @@ export function useCalculation() {
         e.stationId === stationId ? { ...e, mass } : e,
       ),
     }));
-  }, []);
+  }, [setLoading]);
 
   const setTakeoffFuel = useCallback((usg: number) => {
     setLoading((prev) => ({ ...prev, takeoffFuelUsg: usg }));
-  }, []);
+  }, [setLoading]);
 
   const setTripFuel = useCallback((usg: number) => {
     setLoading((prev) => ({ ...prev, tripFuelUsg: usg }));
-  }, []);
+  }, [setLoading]);
+
+  const resetAll = useCallback(() => {
+    resetConfig();
+    resetLoading();
+  }, [resetConfig, resetLoading]);
 
   const visibleStations = useMemo(
     () => getVisibleStations(da40ng.stations, config.activeMods),
@@ -108,5 +143,6 @@ export function useCalculation() {
     setStationMass,
     setTakeoffFuel,
     setTripFuel,
+    resetAll,
   };
 }

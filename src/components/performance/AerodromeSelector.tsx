@@ -3,8 +3,9 @@ import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
 import { Input } from '@/components/ui/input';
 import { Label } from '@/components/ui/label';
 import { Switch } from '@/components/ui/switch';
-import { Plus, X } from 'lucide-react';
+import { Plus, X, Save, FolderOpen } from 'lucide-react';
 import type { TakeoffInputs, SurfaceType, GrassLength } from '@/lib/types';
+import { useLocalStorage } from '@/hooks/useLocalStorage';
 
 interface AerodromeSelectorProps {
   inputs: TakeoffInputs;
@@ -18,6 +19,20 @@ interface IntersectionEntry {
   tora: number;
   toda: number;
   asda: number;
+}
+
+interface SavedAerodrome {
+  name: string;
+  elevation: number;
+  runwayHeading: number;
+  thrElev: number;
+  derElev: number;
+  surface: SurfaceType;
+  grassLength: GrassLength;
+  fullTora: number;
+  fullToda: number;
+  fullAsda: number;
+  intersections: Omit<IntersectionEntry, 'id'>[];
 }
 
 function Pill({ active, onClick, children }: {
@@ -47,11 +62,16 @@ export function AerodromeSelector({ inputs, onUpdate, onDepartureChange }: Aerod
   const [fullToda, setFullToda] = useState(0);
   const [fullAsda, setFullAsda] = useState(0);
   const [intersections, setIntersections] = useState<IntersectionEntry[]>([]);
-  const [activeIntId, setActiveIntId] = useState<number | null>(null); // null = full length
+  const [activeIntId, setActiveIntId] = useState<number | null>(null);
 
-  // Reactively calculate slope whenever THR, DER, or TORA changes
+  // Saved aerodromes
+  const [savedAerodromes, setSavedAerodromes] = useLocalStorage<SavedAerodrome[]>('da40ng-saved-aerodromes', []);
+  const [saveName, setSaveName] = useState('');
+  const [showSaveInput, setShowSaveInput] = useState(false);
+  const [showLoadList, setShowLoadList] = useState(false);
+
+  // Slope calculation
   useEffect(() => {
-    const tora = activeIntId === null ? fullTora : inputs.tora;
     if (fullTora > 0 && (thrElev !== 0 || derElev !== 0)) {
       const slopePercent = ((derElev - thrElev) / fullTora) * 100;
       onUpdate('slope', Math.round(slopePercent * 10) / 10);
@@ -79,43 +99,150 @@ export function AerodromeSelector({ inputs, onUpdate, onDepartureChange }: Aerod
   const addIntersection = () => {
     const id = nextIntId++;
     setIntersections((prev) => [...prev, { id, name: '', tora: 0, toda: 0, asda: 0 }]);
-    // Don't auto-select — let user fill in values first
   };
 
   const updateIntersection = (id: number, field: keyof IntersectionEntry, value: string | number) => {
     setIntersections((prev) => prev.map((int) =>
       int.id === id ? { ...int, [field]: value } : int,
     ));
-    // If this intersection is active, update the calculation inputs
     if (activeIntId === id && field !== 'name') {
-      const key = field as 'tora' | 'toda' | 'asda';
-      onUpdate(key, value as number);
+      onUpdate(field as 'tora' | 'toda' | 'asda', value as number);
     }
   };
 
   const removeIntersection = (id: number) => {
     setIntersections((prev) => prev.filter((int) => int.id !== id));
-    if (activeIntId === id) {
-      selectFullLength();
-    }
+    if (activeIntId === id) selectFullLength();
   };
 
   const updateFullLength = (field: 'tora' | 'toda' | 'asda', value: number) => {
     if (field === 'tora') setFullTora(value);
     if (field === 'toda') setFullToda(value);
     if (field === 'asda') setFullAsda(value);
-    // If full length is active, update calculation inputs
-    if (activeIntId === null) {
-      onUpdate(field, value);
-    }
+    if (activeIntId === null) onUpdate(field, value);
+  };
+
+  // Save current config
+  const handleSave = () => {
+    if (!saveName.trim()) return;
+    const entry: SavedAerodrome = {
+      name: saveName.trim(),
+      elevation: inputs.elevation,
+      runwayHeading: inputs.runwayHeading,
+      thrElev, derElev,
+      surface: inputs.surface,
+      grassLength: inputs.grassLength,
+      fullTora, fullToda, fullAsda,
+      intersections: intersections.map(({ name, tora, toda, asda }) => ({ name, tora, toda, asda })),
+    };
+    setSavedAerodromes((prev) => [...prev.filter((a) => a.name !== entry.name), entry]);
+    setSaveName('');
+    setShowSaveInput(false);
+  };
+
+  // Load a saved config
+  const handleLoad = (saved: SavedAerodrome) => {
+    onUpdate('elevation', saved.elevation);
+    onUpdate('runwayHeading', saved.runwayHeading);
+    onUpdate('surface', saved.surface);
+    onUpdate('grassLength', saved.grassLength);
+    setThrElev(saved.thrElev);
+    setDerElev(saved.derElev);
+    setFullTora(saved.fullTora);
+    setFullToda(saved.fullToda);
+    setFullAsda(saved.fullAsda);
+    onUpdate('tora', saved.fullTora);
+    onUpdate('toda', saved.fullToda);
+    onUpdate('asda', saved.fullAsda);
+    const loaded = saved.intersections.map((int) => ({ ...int, id: nextIntId++ }));
+    setIntersections(loaded);
+    setActiveIntId(null);
+    onDepartureChange('Full length', saved.fullTora);
+    setShowLoadList(false);
+  };
+
+  const handleDeleteSaved = (name: string) => {
+    setSavedAerodromes((prev) => prev.filter((a) => a.name !== name));
   };
 
   return (
     <Card className="py-3">
       <CardHeader className="pb-0 pt-0">
-        <CardTitle className="text-sm">Aerodrome & Runway</CardTitle>
+        <div className="flex items-center justify-between">
+          <CardTitle className="text-sm">Aerodrome & Runway</CardTitle>
+          <div className="flex gap-1">
+            {savedAerodromes.length > 0 && (
+              <button
+                type="button"
+                className="flex items-center gap-1 px-2 py-1 text-xs rounded-md border border-input text-muted-foreground hover:bg-muted transition-colors"
+                onClick={() => { setShowLoadList(!showLoadList); setShowSaveInput(false); }}
+              >
+                <FolderOpen className="h-3 w-3" /> Load
+              </button>
+            )}
+            <button
+              type="button"
+              className="flex items-center gap-1 px-2 py-1 text-xs rounded-md border border-input text-muted-foreground hover:bg-muted transition-colors"
+              onClick={() => { setShowSaveInput(!showSaveInput); setShowLoadList(false); }}
+            >
+              <Save className="h-3 w-3" /> Save
+            </button>
+          </div>
+        </div>
       </CardHeader>
       <CardContent className="space-y-3">
+        {/* Save input */}
+        {showSaveInput && (
+          <div className="flex gap-2 items-end bg-muted/50 rounded-lg p-2">
+            <div className="flex-1">
+              <Label className="text-xs text-muted-foreground">Save as</Label>
+              <Input
+                placeholder="e.g. LOAN RWY 09"
+                value={saveName}
+                className="h-8 text-sm"
+                onChange={(e) => setSaveName(e.target.value)}
+                onKeyDown={(e) => e.key === 'Enter' && handleSave()}
+              />
+            </div>
+            <button
+              type="button"
+              className="h-8 px-3 text-xs rounded-md bg-primary text-primary-foreground hover:bg-primary/90 transition-colors"
+              onClick={handleSave}
+            >
+              Save
+            </button>
+          </div>
+        )}
+
+        {/* Load list */}
+        {showLoadList && (
+          <div className="bg-muted/50 rounded-lg p-2 space-y-1">
+            <div className="text-xs text-muted-foreground mb-1">Saved aerodromes</div>
+            {savedAerodromes.map((saved) => (
+              <div key={saved.name} className="flex items-center gap-2">
+                <button
+                  type="button"
+                  className="flex-1 text-left px-2 py-1.5 text-sm rounded-md hover:bg-muted transition-colors"
+                  onClick={() => handleLoad(saved)}
+                >
+                  <span className="font-semibold">{saved.name}</span>
+                  <span className="text-muted-foreground text-xs ml-2">
+                    {saved.elevation} ft · {String(saved.runwayHeading).padStart(3, '0')}° · {saved.surface} · TORA {saved.fullTora} m
+                  </span>
+                </button>
+                <button
+                  type="button"
+                  className="h-7 w-7 flex items-center justify-center rounded-md text-muted-foreground hover:bg-destructive/10 hover:text-destructive transition-colors"
+                  onClick={() => handleDeleteSaved(saved.name)}
+                  title="Delete"
+                >
+                  <X className="h-3 w-3" />
+                </button>
+              </div>
+            ))}
+          </div>
+        )}
+
         {/* Elevation + heading */}
         <div className="grid grid-cols-2 gap-3">
           <InputField label="Aerodrome elevation (ft)" id="elev" value={inputs.elevation}
@@ -178,7 +305,7 @@ export function AerodromeSelector({ inputs, onUpdate, onDepartureChange }: Aerod
           </div>
         )}
 
-        {/* Declared distances — full length */}
+        {/* Declared distances */}
         <div className="grid grid-cols-3 gap-3">
           <InputField label="TORA (m)" id="tora-full" value={fullTora} min={0}
             onChange={(v) => updateFullLength('tora', v)} />
@@ -188,12 +315,10 @@ export function AerodromeSelector({ inputs, onUpdate, onDepartureChange }: Aerod
             onChange={(v) => updateFullLength('asda', v)} />
         </div>
 
-        {/* Departure point selector */}
+        {/* Departure selector */}
         <div className="flex flex-wrap items-center gap-2">
           <span className="text-sm text-muted-foreground">Departure</span>
-          <Pill active={activeIntId === null} onClick={selectFullLength}>
-            Full length
-          </Pill>
+          <Pill active={activeIntId === null} onClick={selectFullLength}>Full length</Pill>
           {intersections.map((int) => (
             <Pill key={int.id} active={activeIntId === int.id}
               onClick={() => selectIntersection(int)}>
@@ -231,7 +356,7 @@ export function AerodromeSelector({ inputs, onUpdate, onDepartureChange }: Aerod
               type="button"
               className="h-8 w-8 flex items-center justify-center rounded-md border border-input text-muted-foreground hover:bg-destructive/10 hover:text-destructive transition-colors"
               onClick={() => removeIntersection(int.id)}
-              title="Remove intersection"
+              title="Remove"
             >
               <X className="h-3.5 w-3.5" />
             </button>

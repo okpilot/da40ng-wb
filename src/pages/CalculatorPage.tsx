@@ -9,7 +9,7 @@ import { useTourState } from '@/hooks/useTourState';
 import { tourSteps } from '@/data/tourSteps';
 import { Separator } from '@/components/ui/separator';
 import { Button } from '@/components/ui/button';
-import { BookOpen, HelpCircle, Gauge } from 'lucide-react';
+import { BookOpen, HelpCircle, Gauge, RotateCcw } from 'lucide-react';
 
 export function CalculatorPage() {
   const {
@@ -24,6 +24,7 @@ export function CalculatorPage() {
     setStationMass,
     setTakeoffFuel,
     setTripFuel,
+    resetAll,
   } = useCalculation();
 
   const tour = useTourState(tourSteps.length);
@@ -42,6 +43,9 @@ export function CalculatorPage() {
             </p>
           </div>
           <div className="flex items-center gap-2">
+            <Button variant="ghost" size="icon" onClick={resetAll} aria-label="Reset all data">
+              <RotateCcw className="h-5 w-5" />
+            </Button>
             <Button variant="ghost" size="icon" onClick={tour.start} aria-label="Start tour" data-tour="tour-button">
               <HelpCircle className="h-5 w-5" />
             </Button>
