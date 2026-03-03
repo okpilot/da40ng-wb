@@ -84,7 +84,7 @@ export function RunwayDiagram({ inputs, result, departureLabel, fullRunwayTora, 
 
           {/* Clearway */}
           {clearway > 0 && (
-            <rect x={x(tora)} y={rwyTop - 10} width={x(tora + clearway) - x(tora)} height={rwyH + 20} fill="none" stroke="#4b5563" strokeWidth={2} strokeDasharray="6,4" rx={3} />
+            <rect x={x(tora)} y={rwyTop - 6} width={x(tora + clearway) - x(tora)} height={rwyH + 12} fill="none" stroke="#4b5563" strokeWidth={2} strokeDasharray="6,4" rx={3} />
           )}
 
           {/* Threshold zebra stripes (at the actual runway start, not intersection) */}
@@ -183,12 +183,19 @@ export function RunwayDiagram({ inputs, result, departureLabel, fullRunwayTora, 
             <text x={(x(tora) + x(tora + clearway)) / 2} y={rwyTop - 13} textAnchor="middle" fontSize="9" fill="#4b5563" fontWeight="600">CWY</text>
           )}
 
-          {/* Departure label for full length — rendered after centerline so it's on top */}
-          {!isIntersection && (
-            <text x={x(tora / 2)} y={rwyTop + rwyH / 2 + 4} textAnchor="middle" fontSize="11" fill="#e5e7eb" fontWeight="700">
-              FULL LENGTH
-            </text>
-          )}
+          {/* Departure label for full length — background box to cover centerline */}
+          {!isIntersection && (() => {
+            const tx = x(tora / 2);
+            const ty = rwyTop + rwyH / 2;
+            return (
+              <g>
+                <rect x={tx - 40} y={ty - 7} width={80} height={14} fill="#4b5563" rx={2} />
+                <text x={tx} y={ty + 4} textAnchor="middle" fontSize="11" fill="#e5e7eb" fontWeight="700">
+                  FULL LENGTH
+                </text>
+              </g>
+            );
+          })()}
 
           {/* DECLARED DISTANCES — below runway */}
           <DimLineH y={declY} x1={x(0)} x2={x(tora)} label="TORA" value={`${tora} m`} color="#3b82f6" />

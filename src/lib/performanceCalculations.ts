@@ -123,17 +123,21 @@ function findWeightBracket(
   const effectiveMass = Math.max(mass, tables[tables.length - 1].weight);
   const clampedMass = Math.min(effectiveMass, tables[0].weight);
 
+  // Exact match — no interpolation needed
+  const exact = tables.find((t) => t.weight === clampedMass);
+  if (exact) return [exact, exact, 0];
+
   // Find bracket (tables are descending)
   for (let i = 0; i < tables.length - 1; i++) {
     const upper = tables[i];
     const lower = tables[i + 1];
-    if (clampedMass >= lower.weight && clampedMass <= upper.weight) {
+    if (clampedMass > lower.weight && clampedMass < upper.weight) {
       const frac = (clampedMass - lower.weight) / (upper.weight - lower.weight);
       return [lower, upper, frac];
     }
   }
 
-  // Edge case: exact match with lowest table
+  // Fallback
   const last = tables[tables.length - 1];
   return [last, last, 0];
 }

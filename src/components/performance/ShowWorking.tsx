@@ -31,8 +31,8 @@ export function ShowWorking({ result, inputs }: ShowWorkingProps) {
         onClick={() => setIsOpen(!isOpen)}
       >
         {isOpen ? <ChevronDown className="h-4 w-4" /> : <ChevronRight className="h-4 w-4" />}
-        <span className="font-semibold text-sm">Show Working</span>
-        <span className="text-xs text-muted-foreground ml-2">Step-by-step calculation with AFM tables</span>
+        <span className="font-semibold text-sm">Calculation Breakdown</span>
+        <span className="text-xs text-muted-foreground ml-2">Step-by-step with AFM tables</span>
       </button>
 
       {isOpen && (
