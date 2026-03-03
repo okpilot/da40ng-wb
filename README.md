@@ -1,6 +1,6 @@
-# DA40 NG Mass & Balance
+# DA40 NG Mass & Balance + Performance
 
-A free, open-source, client-side web app for **calculating** and **learning** mass & balance on the **Diamond DA40 NG**. Built for flight students and instructors at Egmont Aviation ATO — no login, no backend, everything runs in your browser.
+A free, open-source, client-side web app for **calculating** and **learning** mass & balance and **take-off performance** on the **Diamond DA40 NG**. Built for flight students and instructors at Egmont Aviation ATO — no login, no backend, everything runs in your browser.
 
 **[Open the app](https://okpilot.github.io/da40ng-wb/)**
 
@@ -15,6 +15,18 @@ Real-time mass & balance calculator matching the Egmont Aviation OM App 08.2 for
 - **Calculation breakdown** — every step with formulas for verification
 - **Guided tour** — spotlight walkthrough on first visit, replayable via header icon
 - **Fully offline** — no server, no database, no tracking
+
+## Take-off Performance
+
+Take-off distance calculator based on AFM Chapter 5.3.7, with full regulatory comparison.
+
+- **AFM table interpolation** — bilinear (PA x OAT) + linear (weight) across 4 digitised weight tables
+- **Correction factors** — surface (paved/grass), slope, wind, wheel fairings, applied in AFM order
+- **Aerodrome setup** — ICAO, runway designator, THR/DER elevations for slope, declared distances (TORA/TODA/ASDA), intersection departures — all saved to localStorage
+- **NCO runway diagram** — physical runway with SWY/CWY, TODR/TORR above, TORA (binding) below, green/amber/red colour coding
+- **Part CAT safety factors** (CAT.POL.A.305) — flipped math showing max allowable TODR per check (divide available distances down), with dedicated runway diagram showing factored limits and binding constraint
+- **Calculation breakdown** — step-by-step derivation, highlighted AFM tables, interpolation walkthrough, correction breakdown, regulatory comparison (Part NCO + Part CAT)
+- **V-speeds** — V_R and V_50 interpolated for mass
 
 ## Learn Module
 
@@ -39,8 +51,9 @@ Interactive teaching module with 32 slides across 7 sections, covering full M&B 
 
 ## Data Sources
 
-- Diamond DA40 NG AFM, Doc. #6.01.15-E, Rev. 3 (Section 6 — Mass & Balance)
+- Diamond DA40 NG AFM, Doc. #6.01.15-E, Rev. 3 (Section 5 — Performance, Section 6 — Mass & Balance)
 - Egmont Aviation OM, App 08.2
+- EASA Regulation (EU) No 965/2012, Annex IV — CAT.POL.A.305
 
 ## Aircraft Data
 
@@ -85,7 +98,7 @@ npm run dev
 
 ## Disclaimer
 
-**For training and reference purposes only.** Always verify mass & balance calculations against the official Aircraft Flight Manual for your specific aircraft. Oleksandr Konovalov bears no legal responsibility for the use of this calculator or training module. The pilot-in-command is solely responsible for verifying mass and balance before every flight.
+**For training and reference purposes only.** Always verify all calculations against the official Aircraft Flight Manual for your specific aircraft. Oleksandr Konovalov bears no legal responsibility for the use of this calculator or training module. The pilot-in-command is solely responsible for verifying mass & balance and performance before every flight.
 
 ## License
 
