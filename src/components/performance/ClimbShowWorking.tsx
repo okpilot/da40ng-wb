@@ -33,7 +33,7 @@ export function ClimbShowWorking({ result, inputs }: ClimbShowWorkingProps) {
           <StepByStep result={result} inputs={inputs} />
           <RocWalkthrough
             title="3. Take-Off Climb ROC (AFM 5.3.8)"
-            subtitle="Flaps T/O, 72 KIAS, Power 92%"
+            subtitle="Flaps T/O, V_Y 72 KIAS, Power 92%"
             detail={result.takeoffClimbDetail}
             cas={72}
             fairingsLabel="20 ft/min"
@@ -43,7 +43,7 @@ export function ClimbShowWorking({ result, inputs }: ClimbShowWorkingProps) {
           />
           <RocWalkthrough
             title="4. Cruise Climb ROC (AFM 5.3.9)"
-            subtitle="Flaps UP, 88 KIAS, Power 92%"
+            subtitle="Flaps UP, V_Y 88 KIAS, Power 92%"
             detail={result.cruiseClimbDetail}
             cas={88}
             fairingsLabel="40 ft/min"
@@ -213,7 +213,7 @@ function ClimbSegmentWalkthrough({ result }: { result: ClimbResult }) {
   return (
     <div>
       <SectionTitle>5. Time, Fuel & Distance to Climb (AFM 5.3.10)</SectionTitle>
-      <div className="text-xs text-muted-foreground mb-3">Flaps UP, 88 KIAS, Power 92% — subtraction method</div>
+      <div className="text-xs text-muted-foreground mb-3">Flaps UP, V_Y 88 KIAS, Power 92% — subtraction method</div>
       <div className="space-y-3">
         <div className="bg-muted rounded-lg p-3">
           <div className="text-xs font-semibold text-muted-foreground">

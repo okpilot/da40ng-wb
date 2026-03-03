@@ -46,7 +46,7 @@ export function ClimbResultsPanel({ result }: ClimbResultsProps) {
           <div className="grid grid-cols-3 lg:grid-cols-7 gap-3 items-stretch">
             <ResultBox
               label="T/O Climb ROC"
-              sublabel="Flaps T/O 72kt"
+              sublabel={<>Flaps T/O V<sub>Y</sub> 72kt</>}
               value={`${result.takeoffClimbRoc} fpm`}
               color={rocColor(result.takeoffClimbRoc)}
             />
@@ -58,7 +58,7 @@ export function ClimbResultsPanel({ result }: ClimbResultsProps) {
             />
             <ResultBox
               label="Cruise Climb ROC"
-              sublabel="Flaps UP 88kt"
+              sublabel={<>Flaps UP V<sub>Y</sub> 88kt</>}
               value={`${result.cruiseClimbRoc} fpm`}
               color={rocColor(result.cruiseClimbRoc)}
             />
@@ -104,7 +104,7 @@ export function ClimbResultsPanel({ result }: ClimbResultsProps) {
 }
 
 function ResultBox({ label, sublabel, value, color }: {
-  label: string; sublabel: string; value: string; color: string;
+  label: string; sublabel: React.ReactNode; value: string; color: string;
 }) {
   return (
     <div className="bg-muted rounded-lg px-3 py-3 text-center flex flex-col items-center justify-center">

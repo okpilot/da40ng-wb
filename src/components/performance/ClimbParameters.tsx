@@ -42,7 +42,7 @@ export function ClimbParameters({ inputs, onUpdate }: ClimbParametersProps) {
           </div>
         </div>
         <div className="text-xs text-muted-foreground bg-muted rounded px-2 py-1.5">
-          Below {inputs.flapRetractionHeight} ft AGL: Flaps T/O, 72 KIAS &middot; Above: Flaps UP, 88 KIAS
+          Below {inputs.flapRetractionHeight} ft AGL: Flaps T/O, V<sub>Y</sub> 72 KIAS &middot; Above: Flaps UP, V<sub>Y</sub> 88 KIAS
         </div>
       </CardContent>
     </Card>
