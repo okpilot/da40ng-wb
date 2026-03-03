@@ -1,4 +1,4 @@
-import { useState } from 'react';
+import { useState, useEffect } from 'react';
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
 import { Input } from '@/components/ui/input';
 import { Label } from '@/components/ui/label';
@@ -32,12 +32,15 @@ export function AerodromeSelector({ inputs, onUpdate }: AerodromeSelectorProps) 
   const [thrElev, setThrElev] = useState(0);
   const [derElev, setDerElev] = useState(0);
 
-  const updateSlopeFromElevations = (thr: number, der: number, toraM: number) => {
-    if (toraM > 0) {
-      const slopePercent = ((der - thr) / toraM) * 100;
+  // Reactively calculate slope whenever THR, DER, or TORA changes
+  useEffect(() => {
+    if (inputs.tora > 0 && (thrElev !== 0 || derElev !== 0)) {
+      const slopePercent = ((derElev - thrElev) / inputs.tora) * 100;
       onUpdate('slope', Math.round(slopePercent * 10) / 10);
+    } else if (thrElev === 0 && derElev === 0) {
+      onUpdate('slope', 0);
     }
-  };
+  }, [thrElev, derElev, inputs.tora]);
 
   return (
     <Card className="py-3">
@@ -56,9 +59,9 @@ export function AerodromeSelector({ inputs, onUpdate }: AerodromeSelectorProps) 
         {/* Slope from threshold elevations */}
         <div className="grid grid-cols-3 gap-3">
           <InputField label="THR elevation (m)" id="thr-elev" value={thrElev}
-            onChange={(v) => { setThrElev(v); updateSlopeFromElevations(v, derElev, inputs.tora); }} />
+            onChange={(v) => setThrElev(v)} />
           <InputField label="DER elevation (m)" id="der-elev" value={derElev}
-            onChange={(v) => { setDerElev(v); updateSlopeFromElevations(thrElev, v, inputs.tora); }} />
+            onChange={(v) => setDerElev(v)} />
           <Field label="Slope" value={inputs.slope === 0 ? 'Level' : `${inputs.slope > 0 ? '+' : ''}${inputs.slope.toFixed(1)}%`} />
         </div>
 
@@ -101,7 +104,7 @@ export function AerodromeSelector({ inputs, onUpdate }: AerodromeSelectorProps) 
         {/* Declared distances */}
         <div className="grid grid-cols-4 gap-3">
           <InputField label="TORA (m)" id="tora" value={inputs.tora} min={0}
-            onChange={(v) => { onUpdate('tora', v); updateSlopeFromElevations(thrElev, derElev, v); }} />
+            onChange={(v) => onUpdate('tora', v)} />
           <InputField label="TODA (m)" id="toda" value={inputs.toda} min={0}
             onChange={(v) => onUpdate('toda', v)} />
           <InputField label="ASDA (m)" id="asda" value={inputs.asda} min={0}
