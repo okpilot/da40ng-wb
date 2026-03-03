@@ -108,12 +108,14 @@ export function RunwayDiagram({ inputs, result, departureLabel, fullRunwayTora, 
             );
           })()}
 
-          {/* Runway designator — after threshold zebra */}
+          {/* Runway designator — rotated 90° clockwise, after threshold zebra */}
           {runwayDesignator && (() => {
             const zebraWidth = Math.min(18, (xAbs(rwyLength) - xAbs(0)) * 0.025);
-            const desigX = xAbs(0) + zebraWidth + 12;
+            const desigX = xAbs(0) + zebraWidth + 14;
+            const desigY = rwyTop + rwyH / 2;
             return (
-              <text x={desigX} y={rwyTop + rwyH / 2 + 5} textAnchor="middle" fontSize="14" fill="#d1d5db" fontWeight="700" letterSpacing="2">
+              <text x={desigX} y={desigY} textAnchor="middle" dominantBaseline="middle" fontSize="14" fill="#d1d5db" fontWeight="700" letterSpacing="2"
+                transform={`rotate(90, ${desigX}, ${desigY})`}>
                 {runwayDesignator}
               </text>
             );
@@ -152,20 +154,24 @@ export function RunwayDiagram({ inputs, result, departureLabel, fullRunwayTora, 
             </g>
           )}
 
-          {/* Centerline — clear of both zebra thresholds */}
+          {/* Centerline — clear of zebra thresholds and designator */}
           {(() => {
             const zebraWidth = Math.min(18, (xAbs(rwyLength) - xAbs(0)) * 0.025);
-            const clStart = x(0) + (behindDist > 0 ? 4 : zebraWidth + 8);
+            const desigSpace = runwayDesignator ? 30 : 0;
+            const clStart = x(0) + (behindDist > 0 ? 4 : zebraWidth + desigSpace + 8);
             const clEnd = xAbs(rwyLength) - zebraWidth - 8;
             return <line x1={clStart} y1={rwyTop + rwyH / 2} x2={clEnd} y2={rwyTop + rwyH / 2} stroke="#d1d5db" strokeWidth={1} strokeDasharray="12,8" />;
           })()}
 
-          {/* Slope indicator — outside runway, to the right of DER */}
-          {inputs.slope !== 0 && (
-            <text x={xAbs(rwyLength) + 8} y={rwyTop + rwyH / 2 + 4} textAnchor="start" fontSize="10" fill="#6b7280" fontWeight="600">
-              Slope {Math.abs(inputs.slope).toFixed(1)}% {inputs.slope > 0 ? 'uphill' : 'downhill'}
-            </text>
-          )}
+          {/* Slope indicator — outside runway, past stopway/clearway */}
+          {inputs.slope !== 0 && (() => {
+            const farthest = Math.max(xAbs(rwyLength), x(tora + stopway), x(tora + clearway));
+            return (
+              <text x={farthest + 8} y={rwyTop + rwyH / 2 + 4} textAnchor="start" fontSize="10" fill="#6b7280" fontWeight="600">
+                Slope {Math.abs(inputs.slope).toFixed(1)}% {inputs.slope > 0 ? 'uphill' : 'downhill'}
+              </text>
+            );
+          })()}
 
           {/* Feature labels */}
           {stopway > 0 && (
