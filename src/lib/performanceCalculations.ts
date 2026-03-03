@@ -13,7 +13,7 @@ import { takeoffTables } from '@/data/performance/takeoffDistance';
 // ── Atmospheric calculations ───────────────────────────────────────
 
 export function pressureAltitude(elevation: number, qnh: number): number {
-  return elevation + 30 * (1013.25 - qnh);
+  return elevation + 30 * (1013 - qnh);
 }
 
 export function isaTemperature(pa: number): number {

@@ -14,21 +14,21 @@ import type { TakeoffInputs } from './types';
 
 describe('pressureAltitude', () => {
   it('returns elevation when QNH is standard', () => {
-    expect(pressureAltitude(1000, 1013.25)).toBeCloseTo(1000, 0);
+    expect(pressureAltitude(1000, 1013)).toBeCloseTo(1000, 0);
   });
 
   it('increases PA when QNH is below standard', () => {
-    // QNH 1005 → PA = 1000 + 30 × (1013.25 - 1005) = 1000 + 247.5 = 1247.5
-    expect(pressureAltitude(1000, 1005)).toBeCloseTo(1247.5, 0);
+    // QNH 1005 → PA = 1000 + 30 × (1013 - 1005) = 1000 + 240 = 1240
+    expect(pressureAltitude(1000, 1005)).toBeCloseTo(1240, 0);
   });
 
   it('decreases PA when QNH is above standard', () => {
-    // QNH 1020 → PA = 1000 + 30 × (1013.25 - 1020) = 1000 - 202.5 = 797.5
-    expect(pressureAltitude(1000, 1020)).toBeCloseTo(797.5, 0);
+    // QNH 1020 → PA = 1000 + 30 × (1013 - 1020) = 1000 - 210 = 790
+    expect(pressureAltitude(1000, 1020)).toBeCloseTo(790, 0);
   });
 
   it('works at sea level', () => {
-    expect(pressureAltitude(0, 1013.25)).toBeCloseTo(0, 0);
+    expect(pressureAltitude(0, 1013)).toBeCloseTo(0, 0);
   });
 });
 
@@ -147,7 +147,7 @@ function makeInputs(overrides: Partial<TakeoffInputs> = {}): TakeoffInputs {
   return {
     mass: 1200,
     elevation: 0,
-    qnh: 1013.25,
+    qnh: 1013,
     oat: 15,
     windDirection: 0,
     windSpeed: 0,
@@ -192,7 +192,7 @@ describe('calculateTakeoff', () => {
     it('returns exact AFM value for 1280 kg, 4000ft, 30°C', () => {
       // 1280 kg table, 4000ft row, 30°C col: GR=585, D50=830
       const result = calculateTakeoff(makeInputs({
-        mass: 1280, elevation: 4000, qnh: 1013.25, oat: 30,
+        mass: 1280, elevation: 4000, qnh: 1013, oat: 30,
       }));
       expect(result.torr).toBe(585);
       expect(result.todr).toBe(830);
@@ -201,7 +201,7 @@ describe('calculateTakeoff', () => {
     it('returns exact AFM value for 1200 kg, 3000ft, 20°C', () => {
       // 1200 kg table, 3000ft row, 20°C col: GR=445, D50=650
       const result = calculateTakeoff(makeInputs({
-        mass: 1200, elevation: 3000, qnh: 1013.25, oat: 20,
+        mass: 1200, elevation: 3000, qnh: 1013, oat: 20,
       }));
       expect(result.torr).toBe(445);
       expect(result.todr).toBe(650);
@@ -313,8 +313,8 @@ describe('calculateTakeoff', () => {
   describe('derived conditions', () => {
     it('calculates correct pressure altitude', () => {
       const result = calculateTakeoff(makeInputs({ elevation: 896, qnh: 1005 }));
-      // PA = 896 + 30 × (1013.25 - 1005) = 896 + 247.5 = 1143.5
-      expect(result.pressureAltitude).toBeCloseTo(1143.5, 0);
+      // PA = 896 + 30 × (1013 - 1005) = 896 + 240 = 1136
+      expect(result.pressureAltitude).toBeCloseTo(1136, 0);
     });
 
     it('calculates correct wind components', () => {
@@ -330,7 +330,7 @@ describe('calculateTakeoff', () => {
   describe('warnings', () => {
     it('warns when TORR exceeds TORA', () => {
       const result = calculateTakeoff(makeInputs({
-        mass: 1310, oat: 40, elevation: 5000, qnh: 1013.25, tora: 300,
+        mass: 1310, oat: 40, elevation: 5000, qnh: 1013, tora: 300,
       }));
       expect(result.warnings.some(w => w.message.includes('TORR') && w.message.includes('TORA'))).toBe(true);
     });
@@ -352,7 +352,7 @@ describe('calculateTakeoff', () => {
     it('returns warning when table cells are N/A', () => {
       // At 10000 ft PA, 50°C, all tables have N/A
       const result = calculateTakeoff(makeInputs({
-        elevation: 10000, qnh: 1013.25, oat: 50,
+        elevation: 10000, qnh: 1013, oat: 50,
       }));
       expect(result.warnings.some(w => w.message.includes('N/A'))).toBe(true);
       expect(result.torr).toBe(0);

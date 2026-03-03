@@ -134,8 +134,8 @@ function StepByStep({ result, inputs }: { result: TakeoffResult; inputs: Takeoff
     {
       num: 1,
       title: 'Pressure Altitude',
-      formula: `PA = elevation + 30 × (1013.25 − QNH)`,
-      calc: `PA = ${inputs.elevation} + 30 × (1013.25 − ${inputs.qnh}) = ${Math.round(pa)} ft`,
+      formula: `PA = elevation + 30 × (1013 − QNH)`,
+      calc: `PA = ${inputs.elevation} + 30 × (1013 − ${inputs.qnh}) = ${Math.round(pa)} ft`,
     },
     {
       num: 2,
