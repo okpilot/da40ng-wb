@@ -1,4 +1,4 @@
-import { useState, useEffect } from 'react';
+import { useState, useEffect, useRef } from 'react';
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
 import { Input } from '@/components/ui/input';
 import { Label } from '@/components/ui/label';
@@ -6,6 +6,29 @@ import { Switch } from '@/components/ui/switch';
 import { Plus, X, Save, FolderOpen } from 'lucide-react';
 import type { TakeoffInputs, SurfaceType, GrassLength } from '@/lib/types';
 import { useLocalStorage } from '@/hooks/useLocalStorage';
+
+export const AERODROME_PERSIST_KEY = 'da40ng-perf-aerodrome';
+
+interface PersistedAerodromeState {
+  icao: string;
+  designator: string;
+  thrElev: number;
+  derElev: number;
+  fullTora: number;
+  fullToda: number;
+  fullAsda: number;
+  intersections: { name: string; tora: number; toda: number; asda: number }[];
+  activeIntIndex: number | null;
+}
+
+function loadAerodromeState(): PersistedAerodromeState | null {
+  try {
+    const raw = localStorage.getItem(AERODROME_PERSIST_KEY);
+    return raw ? JSON.parse(raw) : null;
+  } catch {
+    return null;
+  }
+}
 
 interface AerodromeSelectorProps {
   inputs: TakeoffInputs;
@@ -59,21 +82,60 @@ function Pill({ active, onClick, children }: {
 let nextIntId = 1;
 
 export function AerodromeSelector({ inputs, onUpdate, onDepartureChange, onDesignatorChange }: AerodromeSelectorProps) {
-  const [thrElev, setThrElev] = useState(0);
-  const [derElev, setDerElev] = useState(0);
-  const [fullTora, setFullTora] = useState(inputs.tora);
-  const [fullToda, setFullToda] = useState(inputs.toda);
-  const [fullAsda, setFullAsda] = useState(inputs.asda);
-  const [designator, setDesignator] = useState('');
-  const [intersections, setIntersections] = useState<IntersectionEntry[]>([]);
-  const [activeIntId, setActiveIntId] = useState<number | null>(null);
+  // Load persisted aerodrome state once on mount
+  const [initial] = useState(() => {
+    const loaded = loadAerodromeState();
+    if (!loaded) return null;
+    const ints = loaded.intersections.map(int => ({ ...int, id: nextIntId++ }));
+    const activeId = loaded.activeIntIndex != null ? ints[loaded.activeIntIndex]?.id ?? null : null;
+    return { ...loaded, ints, activeId };
+  });
 
-  const [icao, setIcao] = useState('');
+  const [thrElev, setThrElev] = useState(initial?.thrElev ?? 0);
+  const [derElev, setDerElev] = useState(initial?.derElev ?? 0);
+  const [fullTora, setFullTora] = useState(initial?.fullTora || inputs.tora);
+  const [fullToda, setFullToda] = useState(initial?.fullToda || inputs.toda);
+  const [fullAsda, setFullAsda] = useState(initial?.fullAsda || inputs.asda);
+  const [designator, setDesignator] = useState(initial?.designator ?? '');
+  const [intersections, setIntersections] = useState<IntersectionEntry[]>(initial?.ints ?? []);
+  const [activeIntId, setActiveIntId] = useState<number | null>(initial?.activeId ?? null);
+
+  const [icao, setIcao] = useState(initial?.icao ?? '');
 
   // Saved aerodromes
   const [savedAerodromes, setSavedAerodromes] = useLocalStorage<SavedAerodrome[]>('da40ng-saved-aerodromes', []);
   const [showLoadList, setShowLoadList] = useState(false);
   const [confirmOverwrite, setConfirmOverwrite] = useState(false);
+
+  // Restore parent state on mount from persisted aerodrome data
+  const mountedRef = useRef(false);
+  useEffect(() => {
+    if (mountedRef.current || !initial) return;
+    mountedRef.current = true;
+    onDesignatorChange(initial.designator || '');
+    if (initial.activeId != null) {
+      const int = initial.ints.find(e => e.id === initial.activeId);
+      if (int) onDepartureChange(int.name || 'Intersection', initial.fullTora);
+    } else if (initial.fullTora > 0) {
+      onDepartureChange('Full length', initial.fullTora);
+    }
+  }, []); // eslint-disable-line react-hooks/exhaustive-deps
+
+  // Persist aerodrome state on every change
+  useEffect(() => {
+    const activeIndex = activeIntId != null
+      ? intersections.findIndex(i => i.id === activeIntId)
+      : null;
+    const state: PersistedAerodromeState = {
+      icao, designator, thrElev, derElev,
+      fullTora, fullToda, fullAsda,
+      intersections: intersections.map(({ name, tora, toda, asda }) => ({ name, tora, toda, asda })),
+      activeIntIndex: activeIndex === -1 ? null : activeIndex,
+    };
+    try {
+      localStorage.setItem(AERODROME_PERSIST_KEY, JSON.stringify(state));
+    } catch { /* quota error */ }
+  }, [icao, designator, thrElev, derElev, fullTora, fullToda, fullAsda, intersections, activeIntId]);
 
   // Slope calculation
   useEffect(() => {

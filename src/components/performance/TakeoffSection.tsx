@@ -71,7 +71,13 @@ export function TakeoffSection() {
             />
           )}
 
-          <CatFactors result={result} inputs={inputs} />
+          <CatFactors
+            result={result}
+            inputs={inputs}
+            departureLabel={departureLabel}
+            fullRunwayTora={fullRunwayTora}
+            runwayDesignator={runwayDesignator}
+          />
 
           <ShowWorking result={result} inputs={inputs} />
         </div>

@@ -18,6 +18,7 @@ export function PerformancePage() {
           <div className="flex items-center gap-2">
             <Button variant="ghost" size="sm" onClick={() => {
               localStorage.removeItem('da40ng-perf-inputs');
+              localStorage.removeItem('da40ng-perf-aerodrome');
               window.location.reload();
             }}>
               <RotateCcw className="mr-2 h-4 w-4" />
