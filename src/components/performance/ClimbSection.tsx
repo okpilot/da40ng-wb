@@ -4,6 +4,7 @@ import { ClimbInputsPanel } from './ClimbInputs';
 import { ClimbParameters } from './ClimbParameters';
 import { ClimbDerivedConditions } from './ClimbDerivedConditions';
 import { ClimbResultsPanel } from './ClimbResults';
+import { ClimbProfileDiagram } from './ClimbProfileDiagram';
 import { ClimbShowWorking } from './ClimbShowWorking';
 
 export function ClimbSection() {
@@ -34,6 +35,7 @@ export function ClimbSection() {
       </div>
 
       <ClimbResultsPanel result={result} />
+      <ClimbProfileDiagram result={result} />
 
       <ClimbShowWorking result={result} inputs={inputs} />
     </div>
