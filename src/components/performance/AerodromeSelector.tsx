@@ -21,10 +21,26 @@ interface PersistedAerodromeState {
   activeIntIndex: number | null;
 }
 
+function isPersistedAerodromeState(value: unknown): value is PersistedAerodromeState {
+  if (!value || typeof value !== 'object') return false;
+  const v = value as Partial<PersistedAerodromeState>;
+  return (
+    typeof v.icao === 'string' &&
+    typeof v.designator === 'string' &&
+    typeof v.thrElev === 'number' &&
+    typeof v.derElev === 'number' &&
+    typeof v.fullTora === 'number' &&
+    typeof v.fullToda === 'number' &&
+    typeof v.fullAsda === 'number' &&
+    Array.isArray(v.intersections)
+  );
+}
+
 function loadAerodromeState(): PersistedAerodromeState | null {
   try {
     const raw = localStorage.getItem(AERODROME_PERSIST_KEY);
-    return raw ? JSON.parse(raw) : null;
+    const parsed: unknown = raw ? JSON.parse(raw) : null;
+    return isPersistedAerodromeState(parsed) ? parsed : null;
   } catch {
     return null;
   }
@@ -494,7 +510,7 @@ function InputField({ label, id, value, min, max, step, onChange }: {
         step={step}
         value={value || ''}
         className="h-8 text-sm"
-        onChange={(e) => { const n = Number(e.target.value); onChange(e.target.value === '' || isNaN(n) ? 0 : n); }}
+        onChange={(e) => { const n = Number(e.target.value); onChange(e.target.value === '' || !Number.isFinite(n) ? 0 : n); }}
       />
     </div>
   );

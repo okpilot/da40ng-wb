@@ -7,7 +7,7 @@ function stubInputs(overrides: Partial<TakeoffInputs> = {}): TakeoffInputs {
   return {
     mass: 1150, elevation: 0, qnh: 1013, oat: 15,
     windDirection: 0, windSpeed: 0, runwayHeading: 0,
-    surface: 'paved', grassLength: 'short', rwycc: 6,
+    surface: 'paved', grassLength: 'lte5cm', rwycc: 6,
     softGround: false, slope: 0, wheelFairings: false,
     tora: 1200, toda: 1200, asda: 1200, lda: 1200,
     ...overrides,
