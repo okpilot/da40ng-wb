@@ -34,7 +34,7 @@ export function AerodromeSelector({ inputs, onUpdate }: AerodromeSelectorProps) 
 
   const updateSlopeFromElevations = (thr: number, der: number, toraM: number) => {
     if (toraM > 0) {
-      const slopePercent = ((der - thr) * 0.3048 / toraM) * 100;
+      const slopePercent = ((der - thr) / toraM) * 100;
       onUpdate('slope', Math.round(slopePercent * 10) / 10);
     }
   };
@@ -55,9 +55,9 @@ export function AerodromeSelector({ inputs, onUpdate }: AerodromeSelectorProps) 
 
         {/* Slope from threshold elevations */}
         <div className="grid grid-cols-3 gap-3">
-          <InputField label="THR elevation (ft)" id="thr-elev" value={thrElev}
+          <InputField label="THR elevation (m)" id="thr-elev" value={thrElev}
             onChange={(v) => { setThrElev(v); updateSlopeFromElevations(v, derElev, inputs.tora); }} />
-          <InputField label="DER elevation (ft)" id="der-elev" value={derElev}
+          <InputField label="DER elevation (m)" id="der-elev" value={derElev}
             onChange={(v) => { setDerElev(v); updateSlopeFromElevations(thrElev, v, inputs.tora); }} />
           <Field label="Slope" value={inputs.slope === 0 ? 'Level' : `${inputs.slope > 0 ? '+' : ''}${inputs.slope.toFixed(1)}%`} />
         </div>
