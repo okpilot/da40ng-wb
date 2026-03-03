@@ -8,6 +8,8 @@ interface AircraftConfigStripProps {
   onMassChange: (value: number) => void;
   wheelFairings: boolean;
   onWheelFairingsChange: (value: boolean) => void;
+  flapsLabel?: string;
+  fairingsPenalty?: string;
 }
 
 export function AircraftConfigStrip({
@@ -15,6 +17,8 @@ export function AircraftConfigStrip({
   onMassChange,
   wheelFairings,
   onWheelFairingsChange,
+  flapsLabel = 'T/O (5°)',
+  fairingsPenalty = 'GR +20, D50 +30',
 }: AircraftConfigStripProps) {
   return (
     <Card className="py-3">
@@ -37,11 +41,11 @@ export function AircraftConfigStrip({
             />
           </div>
 
-          {/* Flap setting — fixed for now */}
+          {/* Flap setting */}
           <div>
             <Label className="text-xs text-muted-foreground">Flaps</Label>
             <div className="h-8 flex items-center px-3 rounded-md border bg-muted/50 text-sm font-mono w-28">
-              T/O (5°)
+              {flapsLabel}
             </div>
           </div>
 
@@ -56,7 +60,7 @@ export function AircraftConfigStrip({
               Wheel fairings
             </Label>
             {!wheelFairings && (
-              <span className="text-[10px] text-amber-500">GR +20, D50 +30</span>
+              <span className="text-[10px] text-amber-500">{fairingsPenalty}</span>
             )}
           </div>
         </div>

@@ -4,6 +4,7 @@ import { Tabs, TabsContent, TabsList, TabsTrigger } from '@/components/ui/tabs';
 import { Calculator, BookOpen, RotateCcw } from 'lucide-react';
 import { Separator } from '@/components/ui/separator';
 import { TakeoffSection } from '@/components/performance/TakeoffSection';
+import { ClimbSection } from '@/components/performance/ClimbSection';
 
 export function PerformancePage() {
   return (
@@ -20,6 +21,7 @@ export function PerformancePage() {
             <Button variant="ghost" size="sm" onClick={() => {
               localStorage.removeItem('da40ng-perf-inputs');
               localStorage.removeItem('da40ng-perf-aerodrome');
+              localStorage.removeItem('da40ng-perf-climb-inputs');
               window.location.reload();
             }}>
               <RotateCcw className="mr-2 h-4 w-4" />
@@ -45,7 +47,7 @@ export function PerformancePage() {
         <Tabs defaultValue="takeoff">
           <TabsList className="w-full justify-start">
             <TabsTrigger value="takeoff">Take Off</TabsTrigger>
-            <TabsTrigger value="climb" disabled>Climb</TabsTrigger>
+            <TabsTrigger value="climb">Climb</TabsTrigger>
             <TabsTrigger value="cruise" disabled>Cruise</TabsTrigger>
             <TabsTrigger value="landing" disabled>Landing</TabsTrigger>
           </TabsList>
@@ -55,7 +57,7 @@ export function PerformancePage() {
           </TabsContent>
 
           <TabsContent value="climb" className="mt-6">
-            <p className="text-sm text-muted-foreground">Coming soon</p>
+            <ClimbSection />
           </TabsContent>
 
           <TabsContent value="cruise" className="mt-6">

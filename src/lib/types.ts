@@ -231,3 +231,118 @@ export interface TakeoffResult {
   oatClamped: boolean;
   clampedOat: number;
 }
+
+// ── Climb performance types ──────────────────────────────────────
+
+/** A single cell in a climb ROC table: ROC in ft/min or null if N/A */
+export type ClimbRocCell = number | null;
+
+/** One weight table for climb ROC: PA rows × OAT columns */
+export interface ClimbRocTable {
+  weight: number;
+  pressureAltitudes: number[];
+  oats: number[];
+  /** rows[paIndex][oatIndex] — ROC in ft/min, null = N/A */
+  rows: ClimbRocCell[][];
+}
+
+/** One row in a climb profile table (cumulative from SL at ISA) */
+export interface ClimbProfileRow {
+  pressureAltitude: number;
+  oat: number;
+  tas: number;
+  roc: number;
+  rocMs: number;
+  time: number;
+  fuel: number;
+  distance: number;
+}
+
+/** One weight table for time/fuel/distance to climb */
+export interface ClimbProfileTable {
+  weight: number;
+  rows: ClimbProfileRow[];
+}
+
+export interface ClimbInputs {
+  mass: number;
+  elevation: number;
+  qnh: number;
+  oat: number;
+  wheelFairings: boolean;
+  flapRetractionHeight: number;
+  cruiseAltitude: number;
+}
+
+/** Interpolation detail for a single ROC lookup */
+export interface ClimbRocDetail {
+  lowerWeight: number;
+  upperWeight: number;
+  weightFraction: number;
+  lowerPa: number;
+  upperPa: number;
+  paFraction: number;
+  lowerOat: number;
+  upperOat: number;
+  oatFraction: number;
+  lowerTableRoc: number;
+  upperTableRoc: number;
+  baseRoc: number;
+  fairingsPenalty: number;
+  finalRoc: number;
+}
+
+/** Climb segment result from 5.3.10 subtraction method */
+export interface ClimbSegmentResult {
+  departurePa: number;
+  cruisePa: number;
+  /** Interpolated row at departure PA */
+  departureTime: number;
+  departureFuel: number;
+  departureDistance: number;
+  /** Interpolated row at cruise PA */
+  cruiseTime: number;
+  cruiseFuel: number;
+  cruiseDistance: number;
+  /** Subtracted raw values */
+  rawTime: number;
+  rawFuel: number;
+  rawDistance: number;
+  /** ISA deviation used for correction */
+  isaDev: number;
+  /** ISA correction factors applied */
+  isaTimeFuelFactor: number;
+  isaDistanceFactor: number;
+  /** Final corrected values */
+  time: number;
+  fuel: number;
+  distance: number;
+}
+
+export interface ClimbWarning {
+  level: 'amber' | 'red';
+  message: string;
+}
+
+export interface ClimbResult {
+  // Derived conditions
+  pressureAltitude: number;
+  densityAltitude: number;
+  isaTemperature: number;
+  isaDeviation: number;
+  cruisePa: number;
+  // T/O climb ROC (5.3.8)
+  takeoffClimbRoc: number;
+  takeoffClimbGradient: number;
+  takeoffClimbTas: number;
+  takeoffClimbDetail: ClimbRocDetail | null;
+  // Cruise climb ROC (5.3.9)
+  cruiseClimbRoc: number;
+  cruiseClimbGradient: number;
+  cruiseClimbTas: number;
+  cruiseClimbDetail: ClimbRocDetail | null;
+  // Climb segment (5.3.10)
+  climbSegment: ClimbSegmentResult | null;
+  // Warnings
+  warnings: ClimbWarning[];
+}
