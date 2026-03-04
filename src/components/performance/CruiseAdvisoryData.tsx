@@ -135,8 +135,9 @@ export function CruiseAdvisoryData({ result, inputs, onUpdate, climbSegment }: C
                 value={inputs.alternateDistance || ''}
                 className="h-8 text-sm"
                 onChange={(e) => {
+                  if (e.target.value === '') { onUpdate('alternateDistance', 0); return; }
                   const n = Number(e.target.value);
-                  onUpdate('alternateDistance', e.target.value === '' || !Number.isFinite(n) ? 0 : n);
+                  if (Number.isFinite(n)) onUpdate('alternateDistance', n);
                 }}
               />
             </div>
@@ -149,8 +150,9 @@ export function CruiseAdvisoryData({ result, inputs, onUpdate, climbSegment }: C
                 value={inputs.alternateAltitude || ''}
                 className="h-8 text-sm"
                 onChange={(e) => {
+                  if (e.target.value === '') { onUpdate('alternateAltitude', 0); return; }
                   const n = Number(e.target.value);
-                  onUpdate('alternateAltitude', e.target.value === '' || !Number.isFinite(n) ? 0 : n);
+                  if (Number.isFinite(n)) onUpdate('alternateAltitude', n);
                 }}
               />
             </div>

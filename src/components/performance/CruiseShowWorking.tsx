@@ -81,7 +81,7 @@ export function CruiseShowWorking({ result, inputs, climbSegment }: CruiseShowWo
                   {interp.lowerIsaDev === interp.upperIsaDev ? (
                     <span>Exact match at ISA{interp.lowerIsaDev >= 0 ? '+' : ''}{interp.lowerIsaDev}</span>
                   ) : (
-                    <span>ISA{interp.lowerIsaDev >= 0 ? '+' : ''}{interp.lowerIsaDev} — ISA+{interp.upperIsaDev} (fraction: {interp.isaDevFraction.toFixed(3)})</span>
+                    <span>ISA{interp.lowerIsaDev >= 0 ? '+' : ''}{interp.lowerIsaDev} — ISA{interp.upperIsaDev >= 0 ? '+' : ''}{interp.upperIsaDev} (fraction: {interp.isaDevFraction.toFixed(3)})</span>
                   )}
                 </div>
 
@@ -137,7 +137,7 @@ export function CruiseShowWorking({ result, inputs, climbSegment }: CruiseShowWo
                   <>
                     <Step label="Alternate distance" value={`${inputs.alternateDistance} NM at ${inputs.alternateAltitude} ft`} />
                     <Step label="Alternate TAS / FF" value={`${Math.round(result.alternateTas)} kt / ${result.alternateFf.toFixed(1)} USG/h`} />
-                    <Step label="Alternate time" value={`${inputs.alternateDistance} / ${Math.round(result.alternateTas)} = ${result.alternateTas > 0 ? (inputs.alternateDistance / result.alternateTas).toFixed(2) : '0'} h`} />
+                    <Step label="Alternate time" value={`${inputs.alternateDistance} / ${result.alternateTas.toFixed(1)} = ${result.alternateTas > 0 ? (inputs.alternateDistance / result.alternateTas).toFixed(2) : '0'} h`} />
                     <Step label="Alternate fuel" value={`${result.alternateFuelUsg.toFixed(1)} USG`} />
                   </>
                 ) : (

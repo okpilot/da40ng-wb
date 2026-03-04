@@ -110,7 +110,7 @@ export function LandingShowWorking({ result, inputs }: LandingShowWorkingProps) 
           )}
 
           {/* Corrections */}
-          {result.corrections.length > 0 && (
+          {!hasNa && result.corrections.length > 0 && (
             <section>
               <SectionTitle>Corrections</SectionTitle>
               <div className="space-y-1.5">

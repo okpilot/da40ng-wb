@@ -25,7 +25,7 @@ export function ClimbParameters({ inputs, onUpdate }: ClimbParametersProps) {
               max={5000}
               value={inputs.flapRetractionHeight || ''}
               className="h-8 text-sm"
-              onChange={(e) => { const n = Number(e.target.value); onUpdate('flapRetractionHeight', e.target.value === '' || !Number.isFinite(n) ? 0 : n); }}
+              onChange={(e) => { if (e.target.value === '') { onUpdate('flapRetractionHeight', 0); return; } const n = Number(e.target.value); if (Number.isFinite(n)) onUpdate('flapRetractionHeight', n); }}
             />
           </div>
           <div>
@@ -37,7 +37,7 @@ export function ClimbParameters({ inputs, onUpdate }: ClimbParametersProps) {
               max={20000}
               value={inputs.cruiseAltitude || ''}
               className="h-8 text-sm"
-              onChange={(e) => { const n = Number(e.target.value); onUpdate('cruiseAltitude', e.target.value === '' || !Number.isFinite(n) ? 0 : n); }}
+              onChange={(e) => { if (e.target.value === '') { onUpdate('cruiseAltitude', 0); return; } const n = Number(e.target.value); if (Number.isFinite(n)) onUpdate('cruiseAltitude', n); }}
             />
           </div>
         </div>

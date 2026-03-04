@@ -33,7 +33,7 @@ export const takeoffTourSteps: TourStep[] = [
     target: '[data-tour="to-surface"]',
     title: 'Runway Surface',
     content:
-      'Select the runway surface. Grass runways get additional corrections — short grass (≤5 cm) adds 30%, long grass (>5 cm) adds 45%. Soft ground adds a further 20%.',
+      'Select the runway surface. Grass runways get additional corrections — short grass (≤5 cm) adds 30%, long grass (>5 cm) adds 45%. Soft ground adds a further 50%.',
     placement: 'right',
   },
   {
