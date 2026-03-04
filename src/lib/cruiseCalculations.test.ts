@@ -12,10 +12,14 @@ const baseInputs: CruiseInputs = {
   reserveMinutes: 30,
   alternateDistance: 0,
   alternateAltitude: 3000,
+  includeClimb: false,
 };
 
-function calc(overrides: Partial<CruiseInputs> = {}) {
-  return calculateCruise({ ...baseInputs, ...overrides });
+function calc(
+  overrides: Partial<CruiseInputs> = {},
+  climbData?: { fuel: number; time: number; distance: number },
+) {
+  return calculateCruise({ ...baseInputs, ...overrides }, climbData);
 }
 
 // ── Derived conditions ───────────────────────────────────────────
@@ -289,5 +293,66 @@ describe('fuel planning — alternate', () => {
   it('no warning when fuel is sufficient', () => {
     const r = calc({ reserveMinutes: 30, alternateDistance: 50 });
     expect(r.warnings.some((w) => w.message.includes('exceeds usable fuel'))).toBe(false);
+  });
+});
+
+// ── Climb segment integration ────────────────────────────────────
+
+describe('climb segment integration', () => {
+  const climbData = { fuel: 3.8, time: 12, distance: 42 };
+
+  it('deducts climb fuel from trip fuel when included', () => {
+    const r = calc({ includeClimb: true, reserveMinutes: 30 }, climbData);
+    // reserve = 2.0, climb = 3.8, alternate = 0 → trip = 28 - 2.0 - 3.8 = 22.2
+    expect(r.climbFuelUsg).toBeCloseTo(3.8, 2);
+    expect(r.tripFuel).toBeCloseTo(22.2, 1);
+  });
+
+  it('computes total trip range as climb + cruise', () => {
+    const r = calc({ includeClimb: true, reserveMinutes: 30 }, climbData);
+    expect(r.climbDistanceNm).toBe(42);
+    expect(r.totalTripRange).toBeCloseTo(r.climbDistanceNm + r.rangeWithAll, 0);
+  });
+
+  it('computes total trip time as climb + cruise', () => {
+    const r = calc({ includeClimb: true, reserveMinutes: 30 }, climbData);
+    // climbTimeHours = 12/60 = 0.2 h
+    expect(r.climbTimeHours).toBeCloseTo(0.2, 3);
+    expect(r.totalTripTime).toBeCloseTo(r.climbTimeHours + r.enduranceWithAll, 4);
+  });
+
+  it('returns zero climb values when includeClimb is false', () => {
+    const r = calc({ includeClimb: false }, climbData);
+    expect(r.climbFuelUsg).toBe(0);
+    expect(r.climbTimeHours).toBe(0);
+    expect(r.climbDistanceNm).toBe(0);
+    expect(r.totalTripRange).toBeCloseTo(r.rangeWithAll, 0);
+    expect(r.totalTripTime).toBeCloseTo(r.enduranceWithAll, 4);
+  });
+
+  it('returns zero climb values when includeClimb is true but no climbData', () => {
+    const r = calc({ includeClimb: true });
+    expect(r.climbFuelUsg).toBe(0);
+    expect(r.climbTimeHours).toBe(0);
+    expect(r.climbDistanceNm).toBe(0);
+    expect(r.totalTripRange).toBeCloseTo(r.rangeWithAll, 0);
+  });
+
+  it('warns when climb + reserve + alternate exceeds usable', () => {
+    // usable = 6, reserve = 2.0, climb = 3.8, alternate ~2 → total > 6
+    const r = calc(
+      { includeClimb: true, usableFuelUsg: 6, reserveMinutes: 30, alternateDistance: 50, alternateAltitude: 3000 },
+      climbData,
+    );
+    expect(r.warnings.some((w) => w.message.includes('exceeds usable fuel'))).toBe(true);
+    expect(r.warnings.some((w) => w.message.includes('climb'))).toBe(true);
+  });
+
+  it('trip fuel never goes negative', () => {
+    const r = calc(
+      { includeClimb: true, usableFuelUsg: 4, reserveMinutes: 30 },
+      climbData,
+    );
+    expect(r.tripFuel).toBeGreaterThanOrEqual(0);
   });
 });

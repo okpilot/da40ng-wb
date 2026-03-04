@@ -1,13 +1,14 @@
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
 import { Input } from '@/components/ui/input';
 import { Label } from '@/components/ui/label';
-import type { CruiseResult, CruiseInputs } from '@/lib/types';
+import type { CruiseResult, CruiseInputs, ClimbSegmentResult } from '@/lib/types';
 import { RESERVE_FF_USG } from '@/lib/cruiseCalculations';
 
 interface CruiseAdvisoryDataProps {
   result: CruiseResult;
   inputs: CruiseInputs;
   onUpdate: <K extends keyof CruiseInputs>(key: K, value: CruiseInputs[K]) => void;
+  climbSegment: ClimbSegmentResult | null;
 }
 
 function Pill({ active, onClick, children }: {
@@ -29,7 +30,7 @@ function Pill({ active, onClick, children }: {
   );
 }
 
-export function CruiseAdvisoryData({ result, inputs, onUpdate }: CruiseAdvisoryDataProps) {
+export function CruiseAdvisoryData({ result, inputs, onUpdate, climbSegment }: CruiseAdvisoryDataProps) {
   return (
     <Card className="py-3">
       <CardHeader className="pb-0 pt-0">
@@ -81,6 +82,28 @@ export function CruiseAdvisoryData({ result, inputs, onUpdate }: CruiseAdvisoryD
               </div>
             )}
           </div>
+        </div>
+
+        {/* Climb segment */}
+        <div className="border-t pt-3 space-y-2">
+          <h4 className="text-xs font-semibold text-muted-foreground uppercase tracking-wider">Climb Segment</h4>
+          <div className="flex items-center gap-2">
+            <Pill active={!inputs.includeClimb} onClick={() => onUpdate('includeClimb', false)}>
+              Off
+            </Pill>
+            <Pill active={inputs.includeClimb} onClick={() => onUpdate('includeClimb', true)}>
+              On
+            </Pill>
+          </div>
+          {inputs.includeClimb && (
+            climbSegment ? (
+              <div className="text-xs font-mono text-muted-foreground space-y-0.5">
+                <div>Climb fuel: {climbSegment.fuel.toFixed(1)} USG ({climbSegment.time.toFixed(0)} min, {Math.round(climbSegment.distance)} NM — from Climb tab)</div>
+              </div>
+            ) : (
+              <div className="text-xs text-amber-500">Configure Climb tab first</div>
+            )
+          )}
         </div>
 
         {/* Final reserve */}

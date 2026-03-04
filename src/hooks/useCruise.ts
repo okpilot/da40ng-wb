@@ -1,6 +1,7 @@
 import { useCallback, useMemo } from 'react';
-import type { CruiseInputs, CruiseResult } from '@/lib/types';
+import type { CruiseInputs, CruiseResult, ClimbInputs, ClimbSegmentResult } from '@/lib/types';
 import { calculateCruise } from '@/lib/cruiseCalculations';
+import { pressureAltitude, isaTemperature } from '@/lib/performanceCalculations';
 import { useLocalStorage } from './useLocalStorage';
 
 const defaultInputs: CruiseInputs = {
@@ -13,6 +14,7 @@ const defaultInputs: CruiseInputs = {
   reserveMinutes: 30,
   alternateDistance: 0,
   alternateAltitude: 3000,
+  includeClimb: false,
 };
 
 /**
@@ -56,11 +58,37 @@ function getInitialInputs(): CruiseInputs {
   return defaultInputs;
 }
 
-export function useCruise() {
-  const [inputs, setInputs, resetInputs] = useLocalStorage<CruiseInputs>(
+/**
+ * Compute OAT at cruise altitude from climb departure conditions.
+ * ISA deviation is constant throughout the atmosphere for a given day,
+ * so OAT_cruise = ISA_temp(cruise_PA) + (departure_OAT − ISA_temp(departure_PA)).
+ */
+function oatAtCruise(climbInputs: ClimbInputs): number {
+  const depPa = pressureAltitude(climbInputs.elevation, climbInputs.qnh);
+  const isaDev = climbInputs.oat - isaTemperature(depPa);
+  const cruisePa = pressureAltitude(climbInputs.cruiseAltitude, climbInputs.qnh);
+  return Math.round((isaTemperature(cruisePa) + isaDev) * 10) / 10;
+}
+
+export function useCruise(
+  climbSegment?: ClimbSegmentResult | null,
+  climbInputs?: ClimbInputs,
+) {
+  const [storedInputs, setInputs, resetInputs] = useLocalStorage<CruiseInputs>(
     'da40ng-perf-cruise-inputs',
     getInitialInputs(),
   );
+
+  // When climb is included, override altitude/QNH/OAT from climb tab
+  const inputs: CruiseInputs = useMemo(() => {
+    if (!storedInputs.includeClimb || !climbInputs) return storedInputs;
+    return {
+      ...storedInputs,
+      cruiseAltitude: climbInputs.cruiseAltitude,
+      qnh: climbInputs.qnh,
+      oat: oatAtCruise(climbInputs),
+    };
+  }, [storedInputs, climbInputs]);
 
   const updateInput = useCallback(<K extends keyof CruiseInputs>(
     key: K,
@@ -69,26 +97,15 @@ export function useCruise() {
     setInputs((prev) => ({ ...prev, [key]: value }));
   }, [setInputs]);
 
-  const syncFromClimb = useCallback(() => {
-    try {
-      const climb = localStorage.getItem('da40ng-perf-climb-inputs');
-      if (climb) {
-        const c = JSON.parse(climb);
-        setInputs((prev) => ({
-          ...prev,
-          cruiseAltitude: c.cruiseAltitude ?? prev.cruiseAltitude,
-          qnh: c.qnh ?? prev.qnh,
-          oat: c.oat ?? prev.oat,
-          wheelFairings: c.wheelFairings ?? prev.wheelFairings,
-        }));
-      }
-    } catch { /* ignore */ }
-  }, [setInputs]);
+  const climbData = useMemo(() => {
+    if (!inputs.includeClimb || !climbSegment) return undefined;
+    return { fuel: climbSegment.fuel, time: climbSegment.time, distance: climbSegment.distance };
+  }, [inputs.includeClimb, climbSegment]);
 
   const result: CruiseResult = useMemo(
-    () => calculateCruise(inputs),
-    [inputs],
+    () => calculateCruise(inputs, climbData),
+    [inputs, climbData],
   );
 
-  return { inputs, updateInput, resetInputs, syncFromClimb, result };
+  return { inputs, updateInput, resetInputs, result };
 }

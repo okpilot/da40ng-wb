@@ -32,7 +32,7 @@ export function TakeoffResultsPanel({ result, inputs, departureLabel }: TakeoffR
   const isIntersection = departureLabel !== 'Full length';
 
   return (
-    <Card className="py-3">
+    <Card className="py-3" data-tour="to-results">
       <CardContent className="space-y-3">
         {/* Warnings */}
         {result.warnings.length > 0 && (

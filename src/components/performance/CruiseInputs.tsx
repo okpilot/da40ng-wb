@@ -1,9 +1,7 @@
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
-import { Button } from '@/components/ui/button';
 import { Input } from '@/components/ui/input';
 import { Label } from '@/components/ui/label';
 import { Switch } from '@/components/ui/switch';
-import { RefreshCw } from 'lucide-react';
 import type { CruiseInputs as CruiseInputsType, CruisePower } from '@/lib/types';
 
 const POWER_OPTIONS: CruisePower[] = [92, 75, 60, 45];
@@ -11,10 +9,9 @@ const POWER_OPTIONS: CruisePower[] = [92, 75, 60, 45];
 interface CruiseInputsPanelProps {
   inputs: CruiseInputsType;
   onUpdate: <K extends keyof CruiseInputsType>(key: K, value: CruiseInputsType[K]) => void;
-  onSyncFromClimb: () => void;
 }
 
-export function CruiseInputsPanel({ inputs, onUpdate, onSyncFromClimb }: CruiseInputsPanelProps) {
+export function CruiseInputsPanel({ inputs, onUpdate }: CruiseInputsPanelProps) {
   return (
     <div className="space-y-4">
       {/* Aircraft config */}
@@ -56,22 +53,31 @@ export function CruiseInputsPanel({ inputs, onUpdate, onSyncFromClimb }: CruiseI
       {/* Cruise conditions */}
       <Card className="py-3">
         <CardHeader className="pb-0 pt-0">
-          <div className="flex items-center justify-between">
-            <CardTitle className="text-sm">Cruise Conditions</CardTitle>
-            <Button variant="outline" size="sm" className="h-6 text-xs" onClick={onSyncFromClimb}>
-              <RefreshCw className="mr-1 h-3 w-3" />
-              Sync from Climb
-            </Button>
-          </div>
+          <CardTitle className="text-sm">Cruise Conditions</CardTitle>
         </CardHeader>
         <CardContent className="space-y-3">
+          {inputs.includeClimb && (
+            <div className="text-[10px] text-muted-foreground">
+              Locked to Climb tab values. OAT calculated at cruise altitude.
+            </div>
+          )}
           <div className="grid grid-cols-2 sm:grid-cols-3 gap-2">
-            <InputField label="Cruise Altitude (ft)" id="cruise-alt" value={inputs.cruiseAltitude}
-              onChange={(v) => onUpdate('cruiseAltitude', v)} />
-            <InputField label="QNH (hPa)" id="cruise-qnh" value={inputs.qnh} step={0.01}
-              onChange={(v) => onUpdate('qnh', v)} />
-            <InputField label="OAT (°C)" id="cruise-oat" value={inputs.oat}
-              onChange={(v) => onUpdate('oat', v)} />
+            {inputs.includeClimb ? (
+              <>
+                <LockedField label="Cruise Altitude (ft)" value={`${inputs.cruiseAltitude}`} />
+                <LockedField label="QNH (hPa)" value={`${inputs.qnh}`} />
+                <LockedField label="OAT (°C)" value={`${inputs.oat}`} />
+              </>
+            ) : (
+              <>
+                <InputField label="Cruise Altitude (ft)" id="cruise-alt" value={inputs.cruiseAltitude}
+                  onChange={(v) => onUpdate('cruiseAltitude', v)} />
+                <InputField label="QNH (hPa)" id="cruise-qnh" value={inputs.qnh} step={0.01}
+                  onChange={(v) => onUpdate('qnh', v)} />
+                <InputField label="OAT (°C)" id="cruise-oat" value={inputs.oat}
+                  onChange={(v) => onUpdate('oat', v)} />
+              </>
+            )}
           </div>
 
           {/* Power setting */}
@@ -151,6 +157,17 @@ function InputField({ label, id, value, step, onChange }: {
         className="h-8 text-sm"
         onChange={(e) => { const n = Number(e.target.value); onChange(e.target.value === '' || !Number.isFinite(n) ? 0 : n); }}
       />
+    </div>
+  );
+}
+
+function LockedField({ label, value }: { label: string; value: string }) {
+  return (
+    <div>
+      <Label className="text-xs text-muted-foreground">{label}</Label>
+      <div className="h-8 flex items-center px-3 rounded-md border bg-muted/50 text-sm font-mono">
+        {value}
+      </div>
     </div>
   );
 }

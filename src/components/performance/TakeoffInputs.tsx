@@ -10,7 +10,7 @@ interface TakeoffInputsProps {
 
 export function TakeoffInputsPanel({ inputs, onUpdate }: TakeoffInputsProps) {
   return (
-    <Card className="py-3">
+    <Card className="py-3" data-tour="to-weather">
       <CardHeader className="pb-0 pt-0">
         <CardTitle className="text-sm">Weather Conditions</CardTitle>
       </CardHeader>

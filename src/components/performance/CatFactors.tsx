@@ -83,7 +83,7 @@ export function CatFactors({ result, inputs, departureLabel, fullRunwayTora, run
   const binding = checks.reduce((min, c) => (c.limit < min.limit ? c : min), checks[0]);
 
   return (
-    <Card>
+    <Card data-tour="to-cat-factors">
       <button
         type="button"
         className="w-full px-6 py-4 flex items-center gap-2 text-left"

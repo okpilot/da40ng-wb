@@ -24,7 +24,7 @@ export function ShowWorking({ result, inputs }: ShowWorkingProps) {
   if (hasNa) return null;
 
   return (
-    <Card>
+    <Card data-tour="to-show-working">
       <button
         type="button"
         className="w-full px-6 py-4 flex items-center gap-2 text-left"

@@ -38,111 +38,83 @@ export function LandingResultsPanel({ result, inputs }: LandingResultsProps) {
   const lgrr = Math.round(result.lgrr);
 
   return (
-    <div className="space-y-4">
-      {/* Main results card */}
-      <Card className="py-3">
-        <CardContent className="space-y-3">
-          {/* Warnings */}
-          {result.warnings.length > 0 && (
-            <div className="space-y-1">
-              {result.warnings.map((w, i) => (
-                <Badge
-                  key={i}
-                  variant={w.level === 'red' ? 'destructive' : 'outline'}
-                  className={`block w-full text-left py-1 text-xs ${
-                    w.level === 'amber' ? 'border-amber-500 text-amber-500' : ''
-                  }`}
-                >
-                  {w.level === 'red' ? '\u26d4' : '\u26a0\ufe0f'} {w.message}
-                </Badge>
-              ))}
-            </div>
-          )}
-
-          {!hasNa && (
-            <div className="grid grid-cols-2 sm:grid-cols-4 gap-3">
-              <ResultBox
-                label="LGRR"
-                sublabel="Ground Roll"
-                value={`${lgrr} m`}
-                color=""
-              />
-              <ResultBox
-                label="LDR"
-                sublabel="Over 50 ft"
-                value={`${ldr} m`}
-                color={distanceColor(ldr, inputs.lda)}
-                margin={inputs.lda > 0 ? marginInfo(ldr, inputs.lda) : null}
-              />
-              <ResultBox
-                label={<>V<sub>Ref</sub></>}
-                sublabel={`Flaps ${result.flap}`}
-                value={`${result.vSpeeds.vRef} KIAS`}
-                color=""
-              />
-              <WindBox
-                windDir={inputs.windDirection}
-                windSpeed={inputs.windSpeed}
-                rwyHdg={inputs.runwayHeading}
-                headwind={result.headwind}
-                crosswind={result.crosswind}
-              />
-            </div>
-          )}
-
-          {/* Derived conditions */}
-          <div className="grid grid-cols-2 sm:grid-cols-4 gap-x-4 gap-y-1 text-xs text-muted-foreground pt-1 border-t">
-            <div>PA: <span className="font-mono">{Math.round(result.pressureAltitude)} ft</span></div>
-            <div>DA: <span className="font-mono">{Math.round(result.densityAltitude)} ft</span></div>
-            <div>ISA: <span className="font-mono">{result.isaTemperature.toFixed(1)}°C</span></div>
-            <div>ISA dev: <span className={`font-mono ${result.isaDeviation > 0 ? 'text-amber-500' : ''}`}>
-              {result.isaDeviation > 0 ? '+' : ''}{result.isaDeviation.toFixed(1)}°C
-            </span></div>
+    <Card className="py-3">
+      <CardContent className="space-y-3">
+        {/* Warnings */}
+        {result.warnings.length > 0 && (
+          <div className="space-y-1">
+            {result.warnings.map((w, i) => (
+              <Badge
+                key={i}
+                variant={w.level === 'red' ? 'destructive' : 'outline'}
+                className={`block w-full text-left py-1 text-xs ${
+                  w.level === 'amber' ? 'border-amber-500 text-amber-500' : ''
+                }`}
+              >
+                {w.level === 'red' ? '\u26d4' : '\u26a0\ufe0f'} {w.message}
+              </Badge>
+            ))}
           </div>
-        </CardContent>
-      </Card>
+        )}
 
-      {/* Go-around card */}
-      <Card className="py-3">
-        <CardContent>
-          <div className="text-xs font-semibold text-muted-foreground uppercase tracking-wider mb-2">
-            Go-Around Performance (AFM 5.3.14)
+        {!hasNa && (
+          <div className="grid grid-cols-3 lg:grid-cols-6 gap-3 items-stretch">
+            <ResultBox
+              label="LR"
+              sublabel="Landing Roll"
+              value={`${lgrr} m`}
+              color=""
+            />
+            <ResultBox
+              label="LDR"
+              sublabel="Over 50 ft"
+              value={`${ldr} m`}
+              color={distanceColor(ldr, inputs.lda)}
+              margin={inputs.lda > 0 ? marginInfo(ldr, inputs.lda) : null}
+            />
+            <ResultBox
+              label={<>V<sub>Ref</sub></>}
+              sublabel={`Flaps ${result.flap}`}
+              value={`${result.vSpeeds.vRef} KIAS`}
+              color=""
+            />
+            {/* Go-around ROC */}
+            {result.goAround.isNa ? (
+              <ResultBox
+                label="Go-Around"
+                sublabel="ROC"
+                value="N/A"
+                color="text-destructive font-bold"
+              />
+            ) : (
+              <ResultBox
+                label="Go-Around"
+                sublabel="ROC"
+                value={`${result.goAround.roc} fpm`}
+                color={rocColor(result.goAround.roc)}
+              />
+            )}
+            {/* Go-around gradient */}
+            {!result.goAround.isNa && (
+              <ResultBox
+                label="GA Gradient"
+                sublabel="AFM 5.3.14"
+                value={`${result.goAround.gradient.toFixed(1)}%`}
+                color={result.goAround.gradient < 3.3 ? 'text-amber-500 font-semibold' : 'text-green-600 font-semibold'}
+              />
+            )}
+            {/* Wind */}
+            <WindBox
+              windDir={inputs.windDirection}
+              windSpeed={inputs.windSpeed}
+              rwyHdg={inputs.runwayHeading}
+              headwind={result.headwind}
+              crosswind={result.crosswind}
+            />
           </div>
-          {result.goAround.isNa ? (
-            <div className="text-sm text-destructive font-semibold">
-              N/A — conditions outside certified go-around envelope
-            </div>
-          ) : (
-            <div className="grid grid-cols-3 gap-4">
-              <div className="text-center">
-                <div className="text-[10px] text-muted-foreground">ROC</div>
-                <div className={`font-mono text-lg ${rocColor(result.goAround.roc)}`}>
-                  {result.goAround.roc}
-                  <span className="text-xs font-normal text-muted-foreground ml-1">fpm</span>
-                </div>
-              </div>
-              <div className="text-center">
-                <div className="text-[10px] text-muted-foreground">Gradient</div>
-                <div className={`font-mono text-lg ${result.goAround.gradient < 3.3 ? 'text-amber-500' : 'text-green-600'}`}>
-                  {result.goAround.gradient.toFixed(1)}
-                  <span className="text-xs font-normal text-muted-foreground ml-0.5">%</span>
-                </div>
-              </div>
-              <div className="text-center">
-                <div className="text-[10px] text-muted-foreground">TAS</div>
-                <div className="font-mono text-lg text-muted-foreground">
-                  {Math.round(result.goAround.tas)}
-                  <span className="text-xs font-normal ml-1">kt</span>
-                </div>
-              </div>
-            </div>
-          )}
-          <div className="text-[10px] text-muted-foreground mt-2">
-            Power MAX, Flaps LDG, V<sub>Ref</sub> {result.vSpeeds.vRef} KIAS
-          </div>
-        </CardContent>
-      </Card>
-    </div>
+        )}
+      </CardContent>
+    </Card>
   );
 }
 

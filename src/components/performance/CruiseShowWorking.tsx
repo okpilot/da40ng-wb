@@ -1,7 +1,7 @@
 import { useState } from 'react';
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
 import { ChevronDown, ChevronRight } from 'lucide-react';
-import type { CruiseResult, CruiseInputs, CruiseIsaDev } from '@/lib/types';
+import type { CruiseResult, CruiseInputs, CruiseIsaDev, ClimbSegmentResult } from '@/lib/types';
 import { cruisePerformanceTable } from '@/data/performance/cruisePerformance';
 
 const ISA_DEVS: CruiseIsaDev[] = [-10, 0, 10, 30];
@@ -9,9 +9,10 @@ const ISA_DEVS: CruiseIsaDev[] = [-10, 0, 10, 30];
 interface CruiseShowWorkingProps {
   result: CruiseResult;
   inputs: CruiseInputs;
+  climbSegment?: ClimbSegmentResult | null;
 }
 
-export function CruiseShowWorking({ result, inputs }: CruiseShowWorkingProps) {
+export function CruiseShowWorking({ result, inputs, climbSegment }: CruiseShowWorkingProps) {
   const [open, setOpen] = useState(false);
   const interp = result.interpolation;
 
@@ -129,6 +130,9 @@ export function CruiseShowWorking({ result, inputs }: CruiseShowWorkingProps) {
               <SectionTitle>Fuel Planning</SectionTitle>
               <div className="space-y-1 text-xs font-mono">
                 <Step label="Final reserve" value={`${inputs.reserveMinutes} min × (4.0 USG/h / 60) = ${result.reserveFuelUsg.toFixed(1)} USG`} />
+                {result.climbFuelUsg > 0 && climbSegment && (
+                  <Step label="Climb fuel" value={`${result.climbFuelUsg.toFixed(1)} USG (${climbSegment.time.toFixed(0)} min, ${Math.round(climbSegment.distance)} NM — AFM 5.3.10)`} />
+                )}
                 {inputs.alternateDistance > 0 ? (
                   <>
                     <Step label="Alternate distance" value={`${inputs.alternateDistance} NM at ${inputs.alternateAltitude} ft`} />
@@ -140,10 +144,17 @@ export function CruiseShowWorking({ result, inputs }: CruiseShowWorkingProps) {
                   <Step label="Alternate" value="None" />
                 )}
                 <div className="mt-1 pt-1 border-t font-semibold">
-                  <Step label="Trip fuel" value={`${inputs.usableFuelUsg} − ${result.reserveFuelUsg.toFixed(1)} − ${result.alternateFuelUsg.toFixed(1)} = ${result.tripFuel.toFixed(1)} USG`} />
-                  <Step label="Trip endurance" value={`${result.tripFuel.toFixed(1)} / ${result.fuelFlow.toFixed(2)} = ${result.enduranceWithAll.toFixed(2)} h`} />
-                  <Step label="Trip range" value={`${result.enduranceWithAll.toFixed(2)} × ${Math.round(result.tas)} = ${Math.round(result.rangeWithAll)} NM`} />
+                  <Step label="Trip fuel" value={`${inputs.usableFuelUsg} − ${result.reserveFuelUsg.toFixed(1)}${result.climbFuelUsg > 0 ? ` − ${result.climbFuelUsg.toFixed(1)}` : ''} − ${result.alternateFuelUsg.toFixed(1)} = ${result.tripFuel.toFixed(1)} USG`} />
+                  <Step label="Cruise endurance" value={`${result.tripFuel.toFixed(1)} / ${result.fuelFlow.toFixed(2)} = ${result.enduranceWithAll.toFixed(2)} h`} />
+                  <Step label="Cruise range" value={`${result.enduranceWithAll.toFixed(2)} × ${Math.round(result.tas)} = ${Math.round(result.rangeWithAll)} NM`} />
                 </div>
+                {result.climbFuelUsg > 0 && (
+                  <div className="mt-1 pt-1 border-t">
+                    <div className="font-semibold text-muted-foreground mb-0.5">Trip Summary</div>
+                    <Step label="Total trip time" value={`${climbSegment ? climbSegment.time.toFixed(0) : '0'} min + ${formatHm(result.enduranceWithAll)} = ${formatHm(result.totalTripTime)}`} />
+                    <Step label="Total trip range" value={`${Math.round(result.climbDistanceNm)} + ${Math.round(result.rangeWithAll)} = ${Math.round(result.totalTripRange)} NM`} />
+                  </div>
+                )}
               </div>
             </section>
           )}
@@ -228,4 +239,12 @@ function Step({ label, value }: { label: string; value: string }) {
       <span>{value}</span>
     </div>
   );
+}
+
+function formatHm(hours: number): string {
+  if (hours <= 0) return '0h 00m';
+  const totalMinutes = Math.floor(hours * 60 + 0.5);
+  const h = Math.floor(totalMinutes / 60);
+  const m = totalMinutes - h * 60;
+  return `${h}h ${m.toString().padStart(2, '0')}m`;
 }

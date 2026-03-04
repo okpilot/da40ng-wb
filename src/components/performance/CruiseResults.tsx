@@ -9,6 +9,15 @@ interface CruiseResultsProps {
 
 export function CruiseResultsPanel({ result, inputs }: CruiseResultsProps) {
   const hasAlternate = inputs.alternateDistance > 0;
+  const hasClimb = result.climbFuelUsg > 0;
+
+  const rangeSubValue = hasClimb
+    ? `Trip: ${Math.round(result.totalTripRange)} NM (climb ${Math.round(result.climbDistanceNm)} + cruise ${Math.round(result.rangeWithAll)})`
+    : `Total: ${Math.round(result.range)} NM`;
+
+  const enduranceSubValue = hasClimb
+    ? `Trip: ${formatHoursMinutes(result.totalTripTime)} (climb ${formatMinutes(result.climbTimeHours)} + cruise ${formatHoursMinutes(result.enduranceWithAll)})`
+    : `Total: ${formatHoursMinutes(result.endurance)}`;
 
   return (
     <Card className="py-3">
@@ -45,16 +54,16 @@ export function CruiseResultsPanel({ result, inputs }: CruiseResultsProps) {
             subValue={`${result.fuelFlowLph.toFixed(1)} L/h`}
           />
           <ResultBox
-            sublabel="Trip Range"
+            sublabel={hasClimb ? 'Cruise Range' : 'Trip Range'}
             label="Range"
-            value={`${Math.round(result.rangeWithAll)} NM`}
-            subValue={`Total: ${Math.round(result.range)} NM`}
+            value={`${Math.round(hasClimb ? result.totalTripRange : result.rangeWithAll)} NM`}
+            subValue={rangeSubValue}
           />
           <ResultBox
-            sublabel="Trip Endurance"
+            sublabel={hasClimb ? 'Total Trip' : 'Trip Endurance'}
             label="Endurance"
-            value={formatHoursMinutes(result.enduranceWithAll)}
-            subValue={`Total: ${formatHoursMinutes(result.endurance)}`}
+            value={formatHoursMinutes(hasClimb ? result.totalTripTime : result.enduranceWithAll)}
+            subValue={enduranceSubValue}
           />
         </div>
 
@@ -62,6 +71,7 @@ export function CruiseResultsPanel({ result, inputs }: CruiseResultsProps) {
         <div className="flex flex-wrap items-center justify-center gap-x-4 gap-y-1 text-[10px] font-mono text-muted-foreground">
           <span>Usable: {inputs.usableFuelUsg} USG</span>
           <span>Reserve: {result.reserveFuelUsg.toFixed(1)} USG ({inputs.reserveMinutes} min)</span>
+          {hasClimb && <span>Climb: {result.climbFuelUsg.toFixed(1)} USG</span>}
           {hasAlternate && <span>Alternate: {result.alternateFuelUsg.toFixed(1)} USG</span>}
           <span>Trip fuel: {result.tripFuel.toFixed(1)} USG</span>
         </div>
@@ -89,4 +99,9 @@ function formatHoursMinutes(hours: number): string {
   const h = Math.floor(totalMinutes / 60);
   const m = totalMinutes - h * 60;
   return `${h}h ${m.toString().padStart(2, '0')}m`;
+}
+
+function formatMinutes(hours: number): string {
+  const m = Math.round(hours * 60);
+  return `${m}m`;
 }

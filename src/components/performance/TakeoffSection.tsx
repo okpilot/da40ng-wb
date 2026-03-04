@@ -49,13 +49,15 @@ export function TakeoffSection() {
       <TakeoffResultsPanel result={result} inputs={inputs} departureLabel={departureLabel} />
 
       {showDiagram && (
-        <RunwayDiagram
-          inputs={inputs}
-          result={result}
-          departureLabel={departureLabel}
-          fullRunwayTora={fullRunwayTora}
-          runwayDesignator={runwayDesignator}
-        />
+        <div data-tour="to-runway-diagram">
+          <RunwayDiagram
+            inputs={inputs}
+            result={result}
+            departureLabel={departureLabel}
+            fullRunwayTora={fullRunwayTora}
+            runwayDesignator={runwayDesignator}
+          />
+        </div>
       )}
 
       <CatFactors

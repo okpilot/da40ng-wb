@@ -384,6 +384,7 @@ export interface CruiseInputs {
   reserveMinutes: 30 | 45;
   alternateDistance: number;
   alternateAltitude: number;
+  includeClimb: boolean;
 }
 
 export interface CruiseInterpolationDetail {
@@ -426,6 +427,12 @@ export interface CruiseResult {
   enduranceWithReserve: number;
   rangeWithAll: number;
   enduranceWithAll: number;
+  // Climb segment (from Climb tab)
+  climbFuelUsg: number;
+  climbTimeHours: number;
+  climbDistanceNm: number;
+  totalTripTime: number;
+  totalTripRange: number;
   // Interpolation detail
   interpolation: CruiseInterpolationDetail | null;
   // Warnings

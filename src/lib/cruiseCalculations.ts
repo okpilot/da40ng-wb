@@ -72,7 +72,10 @@ function interpolateFfTas(
 
 // ── Main calculation ──────────────────────────────────────────────
 
-export function calculateCruise(inputs: CruiseInputs): CruiseResult {
+export function calculateCruise(
+  inputs: CruiseInputs,
+  climbData?: { fuel: number; time: number; distance: number },
+): CruiseResult {
   const warnings: CruiseWarning[] = [];
 
   // Derived conditions
@@ -153,6 +156,11 @@ export function calculateCruise(inputs: CruiseInputs): CruiseResult {
   // ── Fuel planning ──────────────────────────────────────────────
   const reserveFuelUsg = (inputs.reserveMinutes / 60) * RESERVE_FF_USG;
 
+  // Climb fuel (from Climb tab)
+  const climbFuelUsg = inputs.includeClimb && climbData ? climbData.fuel : 0;
+  const climbTimeHours = inputs.includeClimb && climbData ? climbData.time / 60 : 0;
+  const climbDistanceNm = inputs.includeClimb && climbData ? climbData.distance : 0;
+
   // Alternate fuel: interpolate at alternate altitude with same power/OAT/QNH
   let alternateFuelUsg = 0;
   let alternateTas = 0;
@@ -174,18 +182,23 @@ export function calculateCruise(inputs: CruiseInputs): CruiseResult {
   }
 
   const fuelAfterReserve = Math.max(0, inputs.usableFuelUsg - reserveFuelUsg);
-  const tripFuel = Math.max(0, fuelAfterReserve - alternateFuelUsg);
+  const tripFuel = Math.max(0, fuelAfterReserve - climbFuelUsg - alternateFuelUsg);
 
   const enduranceWithReserve = baseFf > 0 ? fuelAfterReserve / baseFf : 0;
   const rangeWithReserve = enduranceWithReserve * baseTas;
   const enduranceWithAll = baseFf > 0 ? tripFuel / baseFf : 0;
   const rangeWithAll = enduranceWithAll * baseTas;
 
+  // Trip totals (climb + cruise)
+  const totalTripTime = climbTimeHours + enduranceWithAll;
+  const totalTripRange = climbDistanceNm + rangeWithAll;
+
   // Warning if reserves exceed usable
-  if (reserveFuelUsg + alternateFuelUsg > inputs.usableFuelUsg) {
+  const totalOverhead = reserveFuelUsg + climbFuelUsg + alternateFuelUsg;
+  if (totalOverhead > inputs.usableFuelUsg) {
     warnings.push({
       level: 'red',
-      message: `Reserve + alternate fuel (${(reserveFuelUsg + alternateFuelUsg).toFixed(1)} USG) exceeds usable fuel (${inputs.usableFuelUsg} USG)`,
+      message: `Reserve${climbFuelUsg > 0 ? ' + climb' : ''} + alternate fuel (${totalOverhead.toFixed(1)} USG) exceeds usable fuel (${inputs.usableFuelUsg} USG)`,
     });
   }
 
@@ -220,6 +233,11 @@ export function calculateCruise(inputs: CruiseInputs): CruiseResult {
     enduranceWithReserve,
     rangeWithAll,
     enduranceWithAll,
+    climbFuelUsg,
+    climbTimeHours,
+    climbDistanceNm,
+    totalTripTime,
+    totalTripRange,
     interpolation,
     warnings,
   };

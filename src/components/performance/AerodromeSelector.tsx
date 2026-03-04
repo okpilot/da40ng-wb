@@ -265,11 +265,11 @@ export function AerodromeSelector({ inputs, onUpdate, onDepartureChange, onDesig
   };
 
   return (
-    <Card className="py-3">
+    <Card className="py-3" data-tour="to-aerodrome">
       <CardHeader className="pb-0 pt-0">
         <div className="flex items-center justify-between">
           <CardTitle className="text-sm">Aerodrome & Runway</CardTitle>
-          <div className="flex gap-1">
+          <div className="flex gap-1" data-tour="to-save-load">
             {savedAerodromes.length > 0 && (
               <button
                 type="button"
@@ -398,7 +398,7 @@ export function AerodromeSelector({ inputs, onUpdate, onDepartureChange, onDesig
         </div>
 
         {/* Surface */}
-        <div className="flex items-center gap-2">
+        <div className="flex items-center gap-2" data-tour="to-surface">
           <span className="text-sm text-muted-foreground">Surface</span>
           {(['paved', 'grass'] as SurfaceType[]).map((s) => (
             <Pill key={s} active={inputs.surface === s}
@@ -434,7 +434,7 @@ export function AerodromeSelector({ inputs, onUpdate, onDepartureChange, onDesig
         )}
 
         {/* Declared distances */}
-        <div className="grid grid-cols-3 gap-3">
+        <div className="grid grid-cols-3 gap-3" data-tour="to-distances">
           <InputField label="TORA (m)" id="tora-full" value={fullTora} min={0}
             onChange={(v) => updateFullLength('tora', v)} />
           <InputField label="TODA (m)" id="toda-full" value={fullToda} min={0}
@@ -444,7 +444,7 @@ export function AerodromeSelector({ inputs, onUpdate, onDepartureChange, onDesig
         </div>
 
         {/* Departure selector */}
-        <div className="flex flex-wrap items-center gap-2">
+        <div className="flex flex-wrap items-center gap-2" data-tour="to-departure">
           <span className="text-sm text-muted-foreground">Departure</span>
           <Pill active={activeIntId === null} onClick={selectFullLength}>Full length</Pill>
           {intersections.map((int) => (

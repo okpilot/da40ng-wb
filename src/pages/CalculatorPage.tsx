@@ -43,11 +43,13 @@ export function CalculatorPage() {
             </p>
           </div>
           <div className="flex items-center gap-2">
-            <Button variant="ghost" size="icon" onClick={resetAll} aria-label="Reset all data">
-              <RotateCcw className="h-5 w-5" />
+            <Button variant="ghost" size="sm" onClick={resetAll} aria-label="Reset all data">
+              <RotateCcw className="mr-2 h-4 w-4" />
+              Reset
             </Button>
-            <Button variant="ghost" size="icon" onClick={tour.start} aria-label="Start tour" data-tour="tour-button">
-              <HelpCircle className="h-5 w-5" />
+            <Button variant="ghost" size="sm" onClick={tour.start} aria-label="Start tour" data-tour="tour-button">
+              <HelpCircle className="mr-2 h-4 w-4" />
+              How to use
             </Button>
             <Button variant="outline" asChild>
               <Link to="/performance">
@@ -115,6 +117,7 @@ export function CalculatorPage() {
       </main>
 
       <SpotlightTour
+        steps={tourSteps}
         isActive={tour.isActive}
         currentStep={tour.currentStep}
         totalSteps={tour.totalSteps}

@@ -21,7 +21,7 @@ export function AircraftConfigStrip({
   fairingsPenalty = 'GR +20, D50 +30',
 }: AircraftConfigStripProps) {
   return (
-    <Card className="py-3">
+    <Card className="py-3" data-tour="to-aircraft-config">
       <CardHeader className="pb-0 pt-0">
         <CardTitle className="text-sm">Aircraft Configuration</CardTitle>
       </CardHeader>

@@ -129,7 +129,7 @@ export function LandingShowWorking({ result, inputs }: LandingShowWorkingProps) 
                 ))}
                 <div className="flex justify-between text-xs font-mono bg-primary/10 rounded px-3 py-1.5 font-bold">
                   <span>Final</span>
-                  <span>LGRR {Math.round(result.lgrr)} m | LDR {Math.round(result.ldr)} m</span>
+                  <span>LR {Math.round(result.lgrr)} m | LDR {Math.round(result.ldr)} m</span>
                 </div>
               </div>
             </section>
