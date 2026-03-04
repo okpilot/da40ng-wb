@@ -1,4 +1,4 @@
-import type { ClimbResult } from '@/lib/types';
+import type { ClimbResult, ClimbPointResult } from '@/lib/types';
 import { Card, CardContent } from '@/components/ui/card';
 import { Badge } from '@/components/ui/badge';
 
@@ -16,6 +16,35 @@ function gradientColor(gradient: number): string {
   if (gradient < 2) return 'text-destructive font-bold';
   if (gradient < 3.3) return 'text-amber-500 font-semibold';
   return 'text-green-600 font-semibold';
+}
+
+interface RowData {
+  label: string;
+  sublabel: string;
+  point: ClimbPointResult;
+}
+
+function ClimbRow({ label, sublabel, point }: RowData) {
+  return (
+    <tr className="border-b last:border-b-0">
+      <td className="py-1.5 pr-3">
+        <div className="text-xs font-semibold">{label}</div>
+        <div className="text-[10px] text-muted-foreground">{sublabel}</div>
+      </td>
+      <td className="py-1.5 px-2 text-right font-mono text-xs text-muted-foreground">
+        {Math.round(point.pa)}
+      </td>
+      <td className={`py-1.5 px-2 text-right font-mono text-sm ${rocColor(point.roc)}`}>
+        {point.roc}
+      </td>
+      <td className={`py-1.5 px-2 text-right font-mono text-sm ${gradientColor(point.gradient)}`}>
+        {point.gradient.toFixed(1)}%
+      </td>
+      <td className="py-1.5 pl-2 text-right font-mono text-xs text-muted-foreground">
+        {point.tas.toFixed(0)}
+      </td>
+    </tr>
+  );
 }
 
 export function ClimbResultsPanel({ result }: ClimbResultsProps) {
@@ -43,74 +72,74 @@ export function ClimbResultsPanel({ result }: ClimbResultsProps) {
         )}
 
         {!hasNa && (
-          <div className="grid grid-cols-3 lg:grid-cols-7 gap-3 items-stretch">
-            <ResultBox
-              label="T/O Climb ROC"
-              sublabel={<>Flaps T/O V<sub>Y</sub> 72kt</>}
-              value={`${result.takeoffClimbRoc} fpm`}
-              color={rocColor(result.takeoffClimbRoc)}
-            />
-            <ResultBox
-              label="T/O Gradient"
-              sublabel="at dep PA"
-              value={`${result.takeoffClimbGradient.toFixed(1)}%`}
-              color={gradientColor(result.takeoffClimbGradient)}
-            />
-            <ResultBox
-              label="Cruise Climb ROC"
-              sublabel={<>Flaps UP V<sub>Y</sub> 88kt</>}
-              value={`${result.cruiseClimbRoc} fpm`}
-              color={rocColor(result.cruiseClimbRoc)}
-            />
-            <ResultBox
-              label="Cruise Gradient"
-              sublabel="at dep PA"
-              value={`${result.cruiseClimbGradient.toFixed(1)}%`}
-              color={gradientColor(result.cruiseClimbGradient)}
-            />
-            {seg ? (
-              <>
-                <ResultBox
-                  label="Time"
-                  sublabel={`→ FL${String(Math.round(result.cruisePa / 100)).padStart(3, '0')}`}
-                  value={`${Math.round(seg.time)} min`}
-                  color=""
-                />
-                <ResultBox
-                  label="Fuel"
-                  sublabel={`(${(seg.fuel * 3.785).toFixed(1)} L)`}
-                  value={`${seg.fuel.toFixed(1)} USG`}
-                  color=""
-                />
-                <ResultBox
-                  label="Distance"
-                  sublabel=""
-                  value={`${Math.round(seg.distance)} NM`}
-                  color=""
-                />
-              </>
-            ) : (
-              <>
-                <ResultBox label="Time" sublabel="" value="—" color="text-muted-foreground" />
-                <ResultBox label="Fuel" sublabel="" value="—" color="text-muted-foreground" />
-                <ResultBox label="Distance" sublabel="" value="—" color="text-muted-foreground" />
-              </>
-            )}
+          <div className="grid grid-cols-1 lg:grid-cols-[1fr_auto] gap-4">
+            {/* Left: ROC / Gradient table */}
+            <div className="overflow-x-auto">
+              <table className="w-full text-left">
+                <thead>
+                  <tr className="border-b text-[10px] font-semibold text-muted-foreground uppercase tracking-wider">
+                    <th className="py-1 pr-3">Segment</th>
+                    <th className="py-1 px-2 text-right">PA ft</th>
+                    <th className="py-1 px-2 text-right">ROC fpm</th>
+                    <th className="py-1 px-2 text-right">Gradient</th>
+                    <th className="py-1 pl-2 text-right">TAS kt</th>
+                  </tr>
+                </thead>
+                <tbody>
+                  <ClimbRow
+                    label="T/O Climb"
+                    sublabel="Flaps T/O, Vy 72 KIAS"
+                    point={result.takeoffClimb}
+                  />
+                  <ClimbRow
+                    label="CC Start"
+                    sublabel="Flaps UP, Vy 88 KIAS"
+                    point={result.cruiseClimbStart}
+                  />
+                  <ClimbRow
+                    label="CC Average"
+                    sublabel=""
+                    point={result.cruiseClimbAvg}
+                  />
+                  <ClimbRow
+                    label="CC TOC"
+                    sublabel=""
+                    point={result.cruiseClimbToc}
+                  />
+                </tbody>
+              </table>
+            </div>
+
+            {/* Right: Time / Fuel / Distance */}
+            <div className="bg-muted rounded-lg px-5 py-3 flex flex-col justify-center min-w-[180px]">
+              <div className="text-xs font-semibold text-muted-foreground uppercase tracking-wider mb-2">
+                DEP → TOC
+              </div>
+              {seg ? (
+                <div className="space-y-2">
+                  <div className="flex justify-between gap-4">
+                    <span className="text-xs text-muted-foreground">Time</span>
+                    <span className="font-mono text-sm font-semibold">{Math.round(seg.time)} min</span>
+                  </div>
+                  <div className="flex justify-between gap-4">
+                    <span className="text-xs text-muted-foreground">Fuel</span>
+                    <div className="text-right">
+                      <div className="font-mono text-sm font-semibold">{seg.fuel.toFixed(1)} USG</div>
+                      <div className="text-[10px] text-muted-foreground">({(seg.fuel * 3.785).toFixed(1)} L)</div>
+                    </div>
+                  </div>
+                  <div className="flex justify-between gap-4">
+                    <span className="text-xs text-muted-foreground">Distance</span>
+                    <span className="font-mono text-sm font-semibold">{Math.round(seg.distance)} NM</span>
+                  </div>
+                </div>
+              ) : (
+                <div className="text-sm text-muted-foreground">—</div>
+              )}
+            </div>
           </div>
         )}
       </CardContent>
     </Card>
-  );
-}
-
-function ResultBox({ label, sublabel, value, color }: {
-  label: string; sublabel: React.ReactNode; value: string; color: string;
-}) {
-  return (
-    <div className="bg-muted rounded-lg px-3 py-3 text-center flex flex-col items-center justify-center">
-      {sublabel && <div className="text-[10px] text-muted-foreground uppercase tracking-wider">{sublabel}</div>}
-      <div className={`text-xl font-mono leading-tight mt-0.5 ${color}`}>{value}</div>
-      <div className="text-[10px] font-semibold text-muted-foreground mt-0.5">{label}</div>
-    </div>
   );
 }

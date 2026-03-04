@@ -1,18 +1,22 @@
-import type { ClimbResult } from '@/lib/types';
+import type { ClimbResult, ClimbInputs } from '@/lib/types';
 import { Card, CardContent } from '@/components/ui/card';
 
 interface ClimbProfileDiagramProps {
   result: ClimbResult;
+  inputs: ClimbInputs;
 }
 
 /* ── Constants ────────────────────────────────────────────────────── */
 
-const W = 600;
-const H = 260;
-const margin = { left: 60, right: 80, top: 30, bottom: 30 };
+const W = 640;
+const H = 280;
+const margin = { left: 120, right: 100, top: 30, bottom: 30 };
 const plotW = W - margin.left - margin.right;
 const plotH = H - margin.top - margin.bottom;
 const FT_PER_NM = 6076.12;
+const MIN_LABEL_GAP = 22;
+const FONT = 'ui-monospace, monospace';
+const FS = 8;
 
 /* ── Helpers ──────────────────────────────────────────────────────── */
 
@@ -20,6 +24,19 @@ function gradientHex(gradient: number): string {
   if (gradient < 2) return '#ef4444';
   if (gradient < 3.3) return '#f59e0b';
   return '#22c55e';
+}
+
+function spreadLabels(positions: number[]): number[] {
+  const result = [...positions];
+  const indices = result.map((_, i) => i).sort((a, b) => result[a] - result[b]);
+  for (let i = 1; i < indices.length; i++) {
+    const prev = indices[i - 1];
+    const curr = indices[i];
+    if (result[curr] - result[prev] < MIN_LABEL_GAP) {
+      result[curr] = result[prev] + MIN_LABEL_GAP;
+    }
+  }
+  return result;
 }
 
 /* ── Sub-components ───────────────────────────────────────────────── */
@@ -32,7 +49,7 @@ function GroundBlock({ xEnd, yGround }: { xEnd: number; yGround: number }) {
       width={xEnd - margin.left}
       height={H - margin.bottom - yGround}
       fill="#4b5563"
-      opacity={0.3}
+      opacity={0.25}
     />
   );
 }
@@ -44,66 +61,68 @@ function ClimbPath({
 }) {
   return (
     <g>
-      <line x1={x1} y1={y1} x2={x2} y2={y2} stroke={color} strokeWidth={3} strokeLinecap="round" />
-      <circle cx={x1} cy={y1} r={4} fill={color} />
-      <circle cx={x2} cy={y2} r={4} fill={color} />
+      <line x1={x1} y1={y1} x2={x2} y2={y2} stroke={color} strokeWidth={2.5} strokeLinecap="round" />
+      <circle cx={x1} cy={y1} r={3} fill={color} />
+      <circle cx={x2} cy={y2} r={3} fill={color} />
     </g>
   );
 }
 
-function AltitudeLabel({
-  y, label, align,
+function AltitudeRef({
+  y, labelY, pointName, altText, paText,
 }: {
-  y: number; label: string; align: 'left' | 'right';
+  y: number; labelY: number; pointName: string; altText: string; paText: string;
 }) {
   const x1 = margin.left;
   const x2 = W - margin.right;
-  const textX = align === 'left' ? margin.left - 6 : W - margin.right + 6;
-  const anchor = align === 'left' ? 'end' : 'start';
+  const textX = margin.left - 6;
 
   return (
     <g>
       <line x1={x1} y1={y} x2={x2} y2={y} stroke="#6b7280" strokeWidth={0.5} strokeDasharray="4,4" />
+      {Math.abs(labelY - y) > 2 && (
+        <line x1={textX + 2} y1={labelY} x2={x1} y2={y} stroke="#6b7280" strokeWidth={0.5} strokeDasharray="2,2" />
+      )}
       <text
-        x={textX} y={y + 4}
-        textAnchor={anchor} fontSize="10"
-        fontFamily="ui-monospace, monospace" fill="#6b7280"
+        x={textX} y={labelY + 3}
+        textAnchor="end" fontSize={FS}
+        fontFamily={FONT} fill="#6b7280"
       >
-        {label}
+        <tspan fontWeight="700">{pointName}</tspan>
+        {' '}{altText}
+      </text>
+      <text
+        x={textX} y={labelY + 13}
+        textAnchor="end" fontSize={FS}
+        fontFamily={FONT} fill="#9ca3af"
+      >
+        ({paText})
       </text>
     </g>
   );
 }
 
-function SegmentLabel({
-  x, y, gradient, roc, vy, angle,
+function SegmentAnnotation({
+  x, y, gradient, roc, vy,
 }: {
-  x: number; y: number; gradient: number; roc: number; vy: number; angle: number;
+  x: number; y: number; gradient: number; roc: number; vy: number;
 }) {
   const color = gradientHex(gradient);
-  // Offset text perpendicular to the line (above-left)
-  const perpX = Math.sin(angle) * 14;
-  const perpY = -Math.cos(angle) * 14;
 
   return (
-    <g transform={`translate(${x + perpX}, ${y + perpY})`}>
+    <g transform={`translate(${x}, ${y})`}>
       <text
-        textAnchor="middle" fontSize="10"
-        fontFamily="ui-monospace, monospace" fill={color} fontWeight="600"
+        textAnchor="middle" fontSize={FS}
+        fontFamily={FONT} fill={color} fontWeight="600"
       >
-        {gradient.toFixed(1)}%
+        <tspan>{gradient.toFixed(1)}%</tspan>
+        <tspan fill="#6b7280" fontWeight="400"> {roc} fpm</tspan>
       </text>
       <text
-        y={13} textAnchor="middle" fontSize="9"
-        fontFamily="ui-monospace, monospace" fill="#6b7280"
+        y={11} textAnchor="middle" fontSize={FS}
+        fontFamily={FONT} fill="#6b7280"
       >
-        {roc} fpm
-      </text>
-      <text
-        y={24} textAnchor="middle" fontSize="9"
-        fontFamily="ui-monospace, monospace" fill="#6b7280"
-      >
-        V_Y {vy} kt
+        Vy {vy} kt
       </text>
     </g>
   );
@@ -114,16 +133,16 @@ function HeightBracket({
 }: {
   x: number; y1: number; y2: number; label: string;
 }) {
-  const tickW = 5;
+  const tickW = 4;
   return (
     <g>
-      <line x1={x} y1={y1} x2={x} y2={y2} stroke="#9ca3af" strokeWidth={1} />
-      <line x1={x - tickW} y1={y1} x2={x} y2={y1} stroke="#9ca3af" strokeWidth={1} />
-      <line x1={x - tickW} y1={y2} x2={x} y2={y2} stroke="#9ca3af" strokeWidth={1} />
+      <line x1={x} y1={y1} x2={x} y2={y2} stroke="#9ca3af" strokeWidth={0.75} />
+      <line x1={x - tickW} y1={y1} x2={x} y2={y1} stroke="#9ca3af" strokeWidth={0.75} />
+      <line x1={x - tickW} y1={y2} x2={x} y2={y2} stroke="#9ca3af" strokeWidth={0.75} />
       <text
-        x={x + 5} y={(y1 + y2) / 2 + 4}
-        textAnchor="start" fontSize="9"
-        fontFamily="ui-monospace, monospace" fill="#9ca3af"
+        x={x + 4} y={(y1 + y2) / 2 + 3}
+        textAnchor="start" fontSize={FS}
+        fontFamily={FONT} fill="#9ca3af"
       >
         {label}
       </text>
@@ -131,35 +150,9 @@ function HeightBracket({
   );
 }
 
-function DistanceLabel({ x, y, label }: { x: number; y: number; label: string }) {
-  return (
-    <text
-      x={x} y={y}
-      textAnchor="middle" fontSize="9"
-      fontFamily="ui-monospace, monospace" fill="#6b7280"
-    >
-      {label}
-    </text>
-  );
-}
-
-function PointLabel({ x, y, label, anchor }: {
-  x: number; y: number; label: string; anchor: 'start' | 'end' | 'middle';
-}) {
-  return (
-    <text
-      x={x} y={y}
-      textAnchor={anchor} fontSize="10"
-      fontFamily="ui-monospace, monospace" fill="#6b7280" fontWeight="600"
-    >
-      {label}
-    </text>
-  );
-}
-
 /* ── Main component ───────────────────────────────────────────────── */
 
-export function ClimbProfileDiagram({ result }: ClimbProfileDiagramProps) {
+export function ClimbProfileDiagram({ result, inputs }: ClimbProfileDiagramProps) {
   const hasNa = result.warnings.some((w) => w.message.includes('N/A'));
   if (hasNa) return null;
 
@@ -167,7 +160,10 @@ export function ClimbProfileDiagram({ result }: ClimbProfileDiagramProps) {
   const frPa = result.flapRetractionPa;
   const tocPa = result.cruisePa;
 
-  // Skip degenerate cases
+  const depElev = inputs.elevation;
+  const fraAlt = inputs.elevation + inputs.flapRetractionHeight;
+  const tocAlt = inputs.cruiseAltitude;
+
   if (tocPa <= depPa) return null;
   if (frPa >= tocPa) return null;
 
@@ -175,49 +171,43 @@ export function ClimbProfileDiagram({ result }: ClimbProfileDiagramProps) {
   const ccGradient = result.cruiseClimbAvg.gradient;
   if (toGradient <= 0 && ccGradient <= 0) return null;
 
-  // Heights
-  const toHeight = frPa - depPa; // ft
-  const ccHeight = tocPa - frPa; // ft
+  const toHeight = frPa - depPa;
+  const ccHeight = tocPa - frPa;
   const totalHeight = tocPa - depPa;
 
-  // Horizontal distances (NM)
   const toDistNm = toGradient > 0 ? toHeight / (toGradient / 100) / FT_PER_NM : 0;
   const ccDistNm = ccGradient > 0 ? ccHeight / (ccGradient / 100) / FT_PER_NM : 0;
   const totalDistNm = toDistNm + ccDistNm;
 
-  // Apply minimum 15% width to T/O segment
   let toFraction = totalDistNm > 0 ? toDistNm / totalDistNm : 0.15;
   if (toFraction < 0.15 && toFraction > 0) toFraction = 0.15;
   const ccFraction = 1 - toFraction;
 
-  // X coordinates
   const xDep = margin.left;
   const xFr = margin.left + toFraction * plotW;
   const xToc = margin.left + plotW;
 
-  // Y coordinate mapper
-  const y = (pa: number) => margin.top + plotH - ((pa - depPa) / totalHeight) * plotH;
+  const yAt = (pa: number) => margin.top + plotH - ((pa - depPa) / totalHeight) * plotH;
+  const yDep = yAt(depPa);
+  const yFr = yAt(frPa);
+  const yToc = yAt(tocPa);
 
-  const yDep = y(depPa);
-  const yFr = y(frPa);
-  const yToc = y(tocPa);
+  const [adjToc, adjFr, adjDep] = spreadLabels([yToc, yFr, yDep]);
 
-  // Line angles for label placement
-  const toAngle = Math.atan2(yDep - yFr, xFr - xDep);
+  // T/O annotation: above FRA line (2 lines × 11px + 8px clearance)
+  const toAnnotX = (xDep + xFr) / 2;
+  const toAnnotY = yFr - 22;
+
+  // CC annotation: perpendicular offset above cruise climb line
   const ccAngle = Math.atan2(yFr - yToc, xToc - xFr);
-
-  // Segment midpoints
-  const toMidX = (xDep + xFr) / 2;
-  const toMidY = (yDep + yFr) / 2;
   const ccMidX = (xFr + xToc) / 2;
   const ccMidY = (yFr + yToc) / 2;
+  const ccAnnotX = ccMidX + Math.sin(ccAngle) * 36;
+  const ccAnnotY = ccMidY - Math.cos(ccAngle) * 36;
 
-  // Colors
   const toColor = gradientHex(toGradient);
   const ccColor = gradientHex(ccGradient);
-
-  // Height bracket x position
-  const bracketX = W - margin.right + 8;
+  const bracketX = W - margin.right + 6;
 
   return (
     <Card className="py-2">
@@ -229,45 +219,44 @@ export function ClimbProfileDiagram({ result }: ClimbProfileDiagramProps) {
           role="img"
           aria-label="Side-view climb profile diagram showing departure, flap retraction, and top of climb"
         >
-          {/* Altitude reference lines */}
-          <AltitudeLabel y={yDep} label={`${Math.round(depPa)} ft`} align="left" />
-          <AltitudeLabel y={yFr} label={`${Math.round(frPa)} ft`} align="left" />
-          <AltitudeLabel y={yToc} label={`${Math.round(tocPa)} ft`} align="left" />
+          <AltitudeRef
+            y={yDep} labelY={adjDep}
+            pointName="DEP"
+            altText={`${Math.round(depElev)} ft`}
+            paText={`${Math.round(depPa)} PA`}
+          />
+          <AltitudeRef
+            y={yFr} labelY={adjFr}
+            pointName="FRA"
+            altText={`${Math.round(fraAlt)} ft`}
+            paText={`${Math.round(frPa)} PA`}
+          />
+          <AltitudeRef
+            y={yToc} labelY={adjToc}
+            pointName="TOC"
+            altText={`${Math.round(tocAlt)} ft`}
+            paText={`${Math.round(tocPa)} PA`}
+          />
 
-          {/* Ground block */}
-          <GroundBlock xEnd={xDep + 20} yGround={yDep} />
-
-          {/* T/O climb path */}
+          <GroundBlock xEnd={xDep + 16} yGround={yDep} />
           <ClimbPath x1={xDep} y1={yDep} x2={xFr} y2={yFr} color={toColor} />
-
-          {/* Cruise climb path */}
           <ClimbPath x1={xFr} y1={yFr} x2={xToc} y2={yToc} color={ccColor} />
 
-          {/* Segment labels */}
-          <SegmentLabel
-            x={toMidX} y={toMidY}
+          <SegmentAnnotation
+            x={toAnnotX} y={toAnnotY}
             gradient={toGradient}
             roc={result.takeoffClimb.roc}
             vy={72}
-            angle={toAngle}
           />
-          {/* Only show CC label if there's enough vertical space */}
           {ccFraction > 0.2 && (
-            <SegmentLabel
-              x={ccMidX} y={ccMidY}
+            <SegmentAnnotation
+              x={ccAnnotX} y={ccAnnotY}
               gradient={ccGradient}
               roc={result.cruiseClimbAvg.roc}
               vy={88}
-              angle={ccAngle}
             />
           )}
 
-          {/* Point labels */}
-          <PointLabel x={xDep} y={yDep + 16} label="DEP" anchor="start" />
-          <PointLabel x={xFr} y={yFr - 10} label="FR" anchor="middle" />
-          <PointLabel x={xToc} y={yToc - 10} label="TOC" anchor="end" />
-
-          {/* Height brackets — stacked vertically at same x */}
           {toHeight > 0 && (
             <HeightBracket x={bracketX} y1={yFr} y2={yDep} label={`${Math.round(toHeight)} ft`} />
           )}
@@ -275,13 +264,15 @@ export function ClimbProfileDiagram({ result }: ClimbProfileDiagramProps) {
             <HeightBracket x={bracketX} y1={yToc} y2={yFr} label={`${Math.round(ccHeight)} ft`} />
           )}
 
-          {/* Distance label along bottom */}
           {result.climbSegment && (
-            <DistanceLabel
+            <text
               x={margin.left + plotW / 2}
-              y={H - margin.bottom + 18}
-              label={`Total: ${Math.round(result.climbSegment.distance)} NM`}
-            />
+              y={H - margin.bottom + 16}
+              textAnchor="middle" fontSize={FS}
+              fontFamily={FONT} fill="#6b7280"
+            >
+              Total: {Math.round(result.climbSegment.distance)} NM
+            </text>
           )}
         </svg>
       </CardContent>

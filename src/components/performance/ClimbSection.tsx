@@ -2,7 +2,7 @@ import { useClimb } from '@/hooks/useClimb';
 import { AircraftConfigStrip } from './AircraftConfigStrip';
 import { ClimbInputsPanel } from './ClimbInputs';
 import { ClimbParameters } from './ClimbParameters';
-import { ClimbDerivedConditions } from './ClimbDerivedConditions';
+import { ClimbAdvisoryData } from './ClimbDerivedConditions';
 import { ClimbResultsPanel } from './ClimbResults';
 import { ClimbProfileDiagram } from './ClimbProfileDiagram';
 import { ClimbShowWorking } from './ClimbShowWorking';
@@ -27,15 +27,15 @@ export function ClimbSection() {
             onUpdate={updateInput}
             onSyncFromTakeoff={syncFromTakeoff}
           />
+          <ClimbParameters inputs={inputs} onUpdate={updateInput} />
         </div>
         <div className="space-y-4">
-          <ClimbParameters inputs={inputs} onUpdate={updateInput} />
-          <ClimbDerivedConditions result={result} />
+          <ClimbAdvisoryData result={result} inputs={inputs} />
         </div>
       </div>
 
       <ClimbResultsPanel result={result} />
-      <ClimbProfileDiagram result={result} />
+      <ClimbProfileDiagram result={result} inputs={inputs} />
 
       <ClimbShowWorking result={result} inputs={inputs} />
     </div>
