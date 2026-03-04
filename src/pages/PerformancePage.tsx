@@ -2,7 +2,7 @@ import { useState } from 'react';
 import { Link } from 'react-router-dom';
 import { Button } from '@/components/ui/button';
 import { Tabs, TabsContent, TabsList, TabsTrigger } from '@/components/ui/tabs';
-import { Calculator, BookOpen, RotateCcw, HelpCircle } from 'lucide-react';
+import { Calculator, BookOpen, RotateCcw, HelpCircle, Home } from 'lucide-react';
 import { Separator } from '@/components/ui/separator';
 import { SpotlightTour } from '@/components/tour/SpotlightTour';
 import { useTourState } from '@/hooks/useTourState';
@@ -74,6 +74,12 @@ export function PerformancePage() {
               <Link to="/learn">
                 <BookOpen className="mr-2 h-4 w-4" />
                 Learn
+              </Link>
+            </Button>
+            <Button variant="outline" size="sm" asChild>
+              <Link to="/">
+                <Home className="mr-2 h-4 w-4" />
+                Home
               </Link>
             </Button>
           </div>
