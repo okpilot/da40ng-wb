@@ -1,6 +1,7 @@
 import { useState, useCallback, useEffect } from 'react';
 import { useNavigate } from 'react-router-dom';
 import { FlightComputer } from '@/components/cr3/FlightComputer';
+import type { Annotation, DrawMode, AnnotateAction } from '@/components/cr3/FlightComputer';
 import { useZoomPan } from '@/hooks/useZoomPan';
 import {
   RefreshCw as FlipIcon,
@@ -8,6 +9,11 @@ import {
   Home,
   ZoomIn,
   ZoomOut,
+  MousePointer,
+  Circle,
+  Minus,
+  Eraser,
+  Trash2,
 } from 'lucide-react';
 
 type Side = 'calculator' | 'wind';
@@ -39,10 +45,14 @@ function useViewportSize() {
 const btnClass =
   'flex items-center gap-1.5 rounded-lg bg-zinc-700 px-3 py-2 text-sm font-medium text-zinc-100 transition hover:bg-zinc-600 active:bg-zinc-500';
 
+let nextId = 1;
+
 export function CR3Page() {
   const navigate = useNavigate();
   const [side, setSide] = useState<Side>('calculator');
   const [rotations, setRotations] = useState(INITIAL_ROTATIONS);
+  const [annotations, setAnnotations] = useState<Annotation[]>([]);
+  const [drawMode, setDrawMode] = useState<DrawMode>('rotate');
   const size = useViewportSize();
   const { state: zoom, reset: resetZoom, zoomIn, zoomOut, setPanX, setPanY, transform } =
     useZoomPan(size);
@@ -51,8 +61,30 @@ export function CR3Page() {
     setRotations((prev) => ({ ...prev, [key]: angle }));
   }, []);
 
-  const handleFlip = () =>
+  const handleAnnotate = useCallback((action: AnnotateAction) => {
+    switch (action.action) {
+      case 'addDot':
+        setAnnotations((prev) => [
+          ...prev,
+          { type: 'dot', id: `a${nextId++}`, x: action.x, y: action.y },
+        ]);
+        break;
+      case 'addLine':
+        setAnnotations((prev) => [
+          ...prev,
+          { type: 'line', id: `a${nextId++}`, x1: action.x1, y1: action.y1, x2: action.x2, y2: action.y2 },
+        ]);
+        break;
+      case 'remove':
+        setAnnotations((prev) => prev.filter((a) => a.id !== action.id));
+        break;
+    }
+  }, []);
+
+  const handleFlip = () => {
     setSide((s) => (s === 'calculator' ? 'wind' : 'calculator'));
+    setDrawMode('rotate');
+  };
 
   const handleReset = () => {
     setRotations(INITIAL_ROTATIONS);
@@ -91,6 +123,9 @@ export function CR3Page() {
             rotations={rotations}
             onRotate={handleRotate}
             size={size}
+            annotations={annotations}
+            drawMode={drawMode}
+            onAnnotate={handleAnnotate}
           />
         </div>
       </div>
@@ -142,6 +177,39 @@ export function CR3Page() {
             />
             <span className="w-4">D</span>
           </label>
+        </div>
+      )}
+
+      {side === 'wind' && (
+        <div className="relative z-50 mt-2 flex items-center gap-1 rounded-xl bg-zinc-900/90 px-2 py-1.5 backdrop-blur-sm">
+          {([
+            { mode: 'rotate' as DrawMode, icon: MousePointer, label: 'Rotate' },
+            { mode: 'dot' as DrawMode, icon: Circle, label: 'Dot' },
+            { mode: 'line' as DrawMode, icon: Minus, label: 'Line' },
+            { mode: 'erase' as DrawMode, icon: Eraser, label: 'Erase' },
+          ]).map(({ mode, icon: Icon, label }) => (
+            <button
+              key={mode}
+              onClick={() => setDrawMode(mode)}
+              className={`flex items-center gap-1 rounded-md px-2.5 py-1.5 text-xs font-medium transition ${
+                drawMode === mode
+                  ? 'bg-blue-600 text-white'
+                  : 'bg-zinc-700 text-zinc-300 hover:bg-zinc-600'
+              }`}
+            >
+              <Icon className="h-3.5 w-3.5" />
+              {label}
+            </button>
+          ))}
+          {annotations.length > 0 && (
+            <button
+              onClick={() => setAnnotations([])}
+              className="ml-1 flex items-center gap-1 rounded-md bg-red-700 px-2.5 py-1.5 text-xs font-medium text-white transition hover:bg-red-600"
+            >
+              <Trash2 className="h-3.5 w-3.5" />
+              Clear
+            </button>
+          )}
         </div>
       )}
 

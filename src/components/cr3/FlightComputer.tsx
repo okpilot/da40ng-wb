@@ -2,6 +2,17 @@ import { useRef, useCallback, useEffect, useState } from 'react';
 
 const BASE = import.meta.env.BASE_URL + 'cr3/';
 
+export type DrawMode = 'rotate' | 'dot' | 'line' | 'erase';
+
+export type Annotation =
+  | { type: 'dot'; id: string; x: number; y: number }
+  | { type: 'line'; id: string; x1: number; y1: number; x2: number; y2: number };
+
+export type AnnotateAction =
+  | { action: 'addDot'; x: number; y: number }
+  | { action: 'addLine'; x1: number; y1: number; x2: number; y2: number }
+  | { action: 'remove'; id: string };
+
 interface LayerDef {
   key: string;
   src: string;
@@ -28,6 +39,9 @@ interface FlightComputerProps {
   rotations: Record<string, number>;
   onRotate: (key: string, angle: number) => void;
   size: number;
+  annotations?: Annotation[];
+  drawMode?: DrawMode;
+  onAnnotate?: (action: AnnotateAction) => void;
 }
 
 /** Load an image into an offscreen canvas for pixel sampling */
@@ -74,11 +88,47 @@ function hitTest(
   return imageData.data[idx + 3] > alphaThreshold;
 }
 
+/** Convert click fraction to overlay-local coords by undoing overlay rotation */
+function clickToOverlayLocal(
+  fracX: number,
+  fracY: number,
+  overlayRotationDeg: number,
+): { x: number; y: number } {
+  const dx = fracX - 0.5;
+  const dy = fracY - 0.5;
+  const rad = (-overlayRotationDeg * Math.PI) / 180;
+  return {
+    x: dx * Math.cos(rad) - dy * Math.sin(rad),
+    y: dx * Math.sin(rad) + dy * Math.cos(rad),
+  };
+}
+
+/** Distance between two points */
+function dist(ax: number, ay: number, bx: number, by: number) {
+  return Math.sqrt((ax - bx) ** 2 + (ay - by) ** 2);
+}
+
+/** Distance from point to line segment */
+function pointToSegmentDist(
+  px: number, py: number,
+  x1: number, y1: number, x2: number, y2: number,
+) {
+  const dx = x2 - x1;
+  const dy = y2 - y1;
+  const lenSq = dx * dx + dy * dy;
+  if (lenSq === 0) return dist(px, py, x1, y1);
+  const t = Math.max(0, Math.min(1, ((px - x1) * dx + (py - y1) * dy) / lenSq));
+  return dist(px, py, x1 + t * dx, y1 + t * dy);
+}
+
 export function FlightComputer({
   side,
   rotations,
   onRotate,
   size,
+  annotations = [],
+  drawMode = 'rotate',
+  onAnnotate,
 }: FlightComputerProps) {
   const layers = side === 'calculator' ? CALC_LAYERS : WIND_LAYERS;
 
@@ -101,11 +151,25 @@ export function FlightComputer({
   const startAngle = useRef(0);
   const startRotation = useRef(0);
 
+  // Line drawing state
+  const pendingLineStart = useRef<{ x: number; y: number } | null>(null);
+  const [linePreview, setLinePreview] = useState<{ x1: number; y1: number; x2: number; y2: number } | null>(null);
+
+  // Reset pending line when mode changes away from line
+  useEffect(() => {
+    if (drawMode !== 'line') {
+      pendingLineStart.current = null;
+      setLinePreview(null);
+    }
+  }, [drawMode]);
+
   const getAngle = (clientX: number, clientY: number, rect: DOMRect) => {
     const cx = rect.left + rect.width / 2;
     const cy = rect.top + rect.height / 2;
     return Math.atan2(clientY - cy, clientX - cx) * (180 / Math.PI);
   };
+
+  const overlayRotation = rotations['wind-overlay'] ?? 0;
 
   const onPointerDown = useCallback(
     (e: React.PointerEvent<HTMLDivElement>) => {
@@ -114,7 +178,54 @@ export function FlightComputer({
       const fracX = (e.clientX - rect.left) / rect.width;
       const fracY = (e.clientY - rect.top) / rect.height;
 
-      // Check layers top-to-bottom (reverse order) for first alpha hit
+      // Drawing modes — handle on wind side only
+      if (side === 'wind' && drawMode !== 'rotate' && onAnnotate) {
+        const local = clickToOverlayLocal(fracX, fracY, overlayRotation);
+        const r = Math.sqrt(local.x * local.x + local.y * local.y);
+        const MAX_DRAW_RADIUS = 0.355; // inner plotting grid boundary
+
+        if (drawMode === 'dot') {
+          if (r > MAX_DRAW_RADIUS) return;
+          onAnnotate({ action: 'addDot', x: local.x, y: local.y });
+          return;
+        }
+
+        if (drawMode === 'line') {
+          if (r > MAX_DRAW_RADIUS) return;
+          if (!pendingLineStart.current) {
+            pendingLineStart.current = local;
+            setLinePreview(null);
+          } else {
+            const start = pendingLineStart.current;
+            onAnnotate({ action: 'addLine', x1: start.x, y1: start.y, x2: local.x, y2: local.y });
+            pendingLineStart.current = null;
+            setLinePreview(null);
+          }
+          return;
+        }
+
+        if (drawMode === 'erase') {
+          const THRESHOLD = 0.03; // in normalized coords
+          let closest: { id: string; dist: number } | null = null;
+          for (const ann of annotations) {
+            let d: number;
+            if (ann.type === 'dot') {
+              d = dist(local.x, local.y, ann.x, ann.y);
+            } else {
+              d = pointToSegmentDist(local.x, local.y, ann.x1, ann.y1, ann.x2, ann.y2);
+            }
+            if (d < THRESHOLD && (!closest || d < closest.dist)) {
+              closest = { id: ann.id, dist: d };
+            }
+          }
+          if (closest) {
+            onAnnotate({ action: 'remove', id: closest.id });
+          }
+          return;
+        }
+      }
+
+      // Default: rotate mode
       const draggable = layers.filter((l) => l.draggable);
       for (let i = draggable.length - 1; i >= 0; i--) {
         const layer = draggable[i];
@@ -129,11 +240,21 @@ export function FlightComputer({
         }
       }
     },
-    [layers, rotations, imageDataMap],
+    [layers, rotations, imageDataMap, side, drawMode, onAnnotate, overlayRotation, annotations],
   );
 
   const onPointerMove = useCallback(
     (e: React.PointerEvent<HTMLDivElement>) => {
+      // Line preview
+      if (side === 'wind' && drawMode === 'line' && pendingLineStart.current) {
+        const rect = e.currentTarget.getBoundingClientRect();
+        const fracX = (e.clientX - rect.left) / rect.width;
+        const fracY = (e.clientY - rect.top) / rect.height;
+        const local = clickToOverlayLocal(fracX, fracY, overlayRotation);
+        const start = pendingLineStart.current;
+        setLinePreview({ x1: start.x, y1: start.y, x2: local.x, y2: local.y });
+      }
+
       if (!activeLayer.current) return;
       e.preventDefault();
       const rect = e.currentTarget.getBoundingClientRect();
@@ -141,7 +262,7 @@ export function FlightComputer({
       const delta = currentAngle - startAngle.current;
       onRotate(activeLayer.current, startRotation.current + delta);
     },
-    [onRotate],
+    [onRotate, side, drawMode, overlayRotation],
   );
 
   const onPointerUp = useCallback(
@@ -152,6 +273,9 @@ export function FlightComputer({
     },
     [],
   );
+
+  const cursorForMode = drawMode === 'rotate' ? 'grab' :
+    drawMode === 'erase' ? 'pointer' : 'crosshair';
 
   return (
     <div className="relative" style={{ width: size, height: size }}>
@@ -178,6 +302,55 @@ export function FlightComputer({
         </div>
       ))}
 
+      {/* Annotation SVG — above all image layers, below interaction overlay */}
+      {side === 'wind' && (annotations.length > 0 || linePreview) && (
+        <svg
+          className="absolute"
+          style={{
+            width: size,
+            height: size,
+            zIndex: 99,
+            transform: `rotate(${overlayRotation}deg)`,
+            transformOrigin: 'center',
+            pointerEvents: 'none',
+          }}
+          viewBox={`0 0 ${size} ${size}`}
+        >
+          {annotations.map((ann) =>
+            ann.type === 'dot' ? (
+              <circle
+                key={ann.id}
+                cx={(ann.x + 0.5) * size}
+                cy={(ann.y + 0.5) * size}
+                r={4}
+                fill="#ef4444"
+              />
+            ) : (
+              <line
+                key={ann.id}
+                x1={(ann.x1 + 0.5) * size}
+                y1={(ann.y1 + 0.5) * size}
+                x2={(ann.x2 + 0.5) * size}
+                y2={(ann.y2 + 0.5) * size}
+                stroke="#ef4444"
+                strokeWidth={2}
+              />
+            ),
+          )}
+          {linePreview && (
+            <line
+              x1={(linePreview.x1 + 0.5) * size}
+              y1={(linePreview.y1 + 0.5) * size}
+              x2={(linePreview.x2 + 0.5) * size}
+              y2={(linePreview.y2 + 0.5) * size}
+              stroke="#ef4444"
+              strokeWidth={2}
+              strokeDasharray="6 4"
+            />
+          )}
+        </svg>
+      )}
+
       {/* Invisible interaction overlay */}
       <div
         className="absolute"
@@ -186,7 +359,7 @@ export function FlightComputer({
           height: size,
           zIndex: 100,
           touchAction: 'none',
-          cursor: 'grab',
+          cursor: cursorForMode,
         }}
         onPointerDown={onPointerDown}
         onPointerMove={onPointerMove}
