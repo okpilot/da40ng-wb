@@ -134,7 +134,7 @@ export function CruiseAdvisoryData({ result, inputs, onUpdate }: CruiseAdvisoryD
           </div>
           {inputs.alternateDistance > 0 && result.alternateFuelUsg > 0 && (
             <div className="text-xs font-mono text-muted-foreground space-y-0.5">
-              <div>TAS {Math.round(result.alternateTas)} kt, FF {result.alternateFf.toFixed(1)} USG/h at PA {Math.round(result.pressureAltitude)} ft</div>
+              <div>TAS {Math.round(result.alternateTas)} kt, FF {result.alternateFf.toFixed(1)} USG/h at {inputs.alternateAltitude} ft</div>
               <div>Alternate fuel: {result.alternateFuelUsg.toFixed(1)} USG</div>
             </div>
           )}

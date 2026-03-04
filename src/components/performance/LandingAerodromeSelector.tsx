@@ -117,7 +117,7 @@ export function LandingAerodromeSelector({ inputs, onUpdate, onSyncFromTakeoff, 
     if (lda > 0 && (thrElev !== 0 || endElev !== 0)) {
       const slopePercent = ((endElev - thrElev) / lda) * 100;
       onUpdate('slope', Math.round(slopePercent * 10) / 10);
-    } else if (thrElev === 0 && endElev === 0) {
+    } else {
       onUpdate('slope', 0);
     }
   }, [thrElev, endElev, lda]); // eslint-disable-line react-hooks/exhaustive-deps
@@ -135,7 +135,7 @@ export function LandingAerodromeSelector({ inputs, onUpdate, onSyncFromTakeoff, 
   const buildEntry = (): SavedLandingAerodrome => ({
     icao: icao.trim().toUpperCase(),
     elevation: inputs.elevation,
-    designator,
+    designator: designator.trim(),
     runwayHeading: inputs.runwayHeading,
     thrElev, endElev,
     surface: inputs.surface,
@@ -276,6 +276,7 @@ export function LandingAerodromeSelector({ inputs, onUpdate, onSyncFromTakeoff, 
                     className="h-7 w-7 flex items-center justify-center rounded-md text-muted-foreground hover:bg-destructive/10 hover:text-destructive transition-colors"
                     onClick={() => handleDeleteSaved(key)}
                     title="Delete"
+                    aria-label={`Delete ${key}`}
                   >
                     <X className="h-3 w-3" />
                   </button>

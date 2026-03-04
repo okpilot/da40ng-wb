@@ -318,6 +318,9 @@ export function calculateLanding(inputs: LandingInputs): LandingResult {
 
   // Go-around table supports wider OAT range [-20, 50]
   const goAroundOat = clamp(inputs.oat, -20, 50);
+  if (inputs.oat < -20) {
+    warnings.push({ level: 'amber', message: 'OAT below −20°C — using −20°C for go-around tables' });
+  }
 
   // PA warnings
   if (pa < 0) {

@@ -85,8 +85,8 @@ function ResultBox({ label, sublabel, value, subValue, highlight }: {
 
 function formatHoursMinutes(hours: number): string {
   if (hours <= 0) return '0h 00m';
-  const totalMinutes = Math.round(hours * 60);
+  const totalMinutes = Math.floor(hours * 60 + 0.5);
   const h = Math.floor(totalMinutes / 60);
-  const m = totalMinutes % 60;
+  const m = totalMinutes - h * 60;
   return `${h}h ${m.toString().padStart(2, '0')}m`;
 }

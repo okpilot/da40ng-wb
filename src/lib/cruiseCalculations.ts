@@ -160,6 +160,12 @@ export function calculateCruise(inputs: CruiseInputs): CruiseResult {
   if (inputs.alternateDistance > 0) {
     const altPa = pressureAltitude(inputs.alternateAltitude, inputs.qnh);
     const altIsaDev = isaDeviation(inputs.oat, altPa);
+    if (altPa < minPa || altPa > maxPa) {
+      warnings.push({
+        level: 'amber',
+        message: `Alternate PA ${Math.round(altPa)} ft outside table range (${minPa}–${maxPa} ft) — clamped`,
+      });
+    }
     const alt = interpolateFfTas(altPa, altIsaDev, inputs.power, inputs.wheelFairings);
     alternateTas = alt.tas;
     alternateFf = alt.ff;
