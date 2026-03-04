@@ -9,7 +9,7 @@ import { useTourState } from '@/hooks/useTourState';
 import { tourSteps } from '@/data/tourSteps';
 import { Separator } from '@/components/ui/separator';
 import { Button } from '@/components/ui/button';
-import { BookOpen, HelpCircle, Gauge, RotateCcw } from 'lucide-react';
+import { BookOpen, HelpCircle, Gauge, RotateCcw, Home } from 'lucide-react';
 
 export function CalculatorPage() {
   const {
@@ -61,6 +61,12 @@ export function CalculatorPage() {
               <Link to="/learn">
                 <BookOpen className="mr-2 h-4 w-4" />
                 Learn M&B
+              </Link>
+            </Button>
+            <Button variant="outline" asChild>
+              <Link to="/">
+                <Home className="mr-2 h-4 w-4" />
+                Home
               </Link>
             </Button>
           </div>
