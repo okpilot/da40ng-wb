@@ -15,7 +15,7 @@ const CALC_LAYERS: LayerDef[] = [
 ];
 
 const WIND_LAYERS: LayerDef[] = [
-  { key: 'wind-rear', src: BASE + 'wind-rear.png', draggable: false },
+  { key: 'wind-rear', src: BASE + 'wind-rear.png', draggable: true },
   { key: 'wind-inner', src: BASE + 'wind-inner.png', draggable: true },
   { key: 'wind-overlay', src: BASE + 'wind-overlay.png', draggable: true },
   { key: 'wind-center', src: BASE + 'wind-center.png', draggable: false },
