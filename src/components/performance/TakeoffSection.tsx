@@ -10,7 +10,7 @@ import { ShowWorking } from './ShowWorking';
 import { CatFactors } from './CatFactors';
 
 export function TakeoffSection() {
-  const { inputs, updateInput, resetInputs, result } = useTakeoff();
+  const { inputs, updateInput, result } = useTakeoff();
 
   const [departureLabel, setDepartureLabel] = useState('Full length');
   const [fullRunwayTora, setFullRunwayTora] = useState(0);

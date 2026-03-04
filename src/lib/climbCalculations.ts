@@ -1,7 +1,7 @@
 import type {
   ClimbRocTable,
-  ClimbRocCell,
   ClimbRocDetail,
+  ClimbPointResult,
   ClimbProfileTable,
   ClimbProfileRow,
   ClimbSegmentResult,
@@ -140,6 +140,33 @@ function lookupRoc(
   return { roc: finalRoc, detail, isNa: false };
 }
 
+/**
+ * Compute a single climb data point (ROC + TAS + gradient) at a given PA.
+ * Clamps PA to [0, 16400] for ROC table lookup.
+ */
+function computeClimbPoint(
+  tables: ClimbRocTable[],
+  mass: number,
+  pa: number,
+  oat: number,
+  cas: number,
+  fairingsPenalty: number,
+  hasFairings: boolean,
+): ClimbPointResult {
+  const clampedPa = clamp(pa, 0, 16400);
+  const result = lookupRoc(tables, mass, clampedPa, oat, fairingsPenalty, hasFairings);
+  const tas = casToTas(cas, clampedPa);
+  const gradient = result.roc > 0 ? calculateGradient(result.roc, tas) : 0;
+  return {
+    pa,
+    roc: Math.round(result.roc),
+    tas,
+    gradient,
+    detail: result.detail,
+    isNa: result.isNa,
+  };
+}
+
 // ── Climb profile interpolation (5.3.10) ─────────────────────────
 
 /**
@@ -249,6 +276,9 @@ export function calculateClimb(inputs: ClimbInputs): ClimbResult {
   // Cruise PA (same QNH correction applies)
   const cruisePa = inputs.cruiseAltitude + 30 * (1013 - inputs.qnh);
 
+  // Flap retraction PA = departure PA + flap retraction height (AGL)
+  const flapRetractionPa = pa + inputs.flapRetractionHeight;
+
   // Clamp OAT for ROC table lookup [-20, 50]
   let clampedOat = inputs.oat;
   if (inputs.oat < -20) {
@@ -266,8 +296,7 @@ export function calculateClimb(inputs: ClimbInputs): ClimbResult {
     });
   }
 
-  // Clamp PA for ROC table lookup [0, 16400]
-  const clampedPa = clamp(pa, 0, 16400);
+  // PA range warnings (based on departure PA)
   if (pa < 0) {
     warnings.push({
       level: 'amber',
@@ -295,66 +324,80 @@ export function calculateClimb(inputs: ClimbInputs): ClimbResult {
     });
   }
 
-  // T/O climb ROC (5.3.8) — Flaps T/O, 72 KIAS, fairings -20 ft/min
-  const toClimb = lookupRoc(
-    takeoffClimbRocTables, inputs.mass, clampedPa, clampedOat,
-    20, inputs.wheelFairings,
+  // T/O climb ROC (5.3.8) — at flap retraction PA
+  // Flaps T/O, 72 KIAS, fairings -20 ft/min
+  const takeoffClimb = computeClimbPoint(
+    takeoffClimbRocTables, inputs.mass, flapRetractionPa, clampedOat,
+    72, 20, inputs.wheelFairings,
   );
 
-  if (toClimb.isNa) {
+  if (takeoffClimb.isNa) {
     warnings.push({
       level: 'red',
       message: 'T/O climb ROC: conditions outside certified envelope (N/A cells)',
     });
   }
 
-  const toClimbTas = casToTas(72, clampedPa);
-  const toClimbGradient = toClimb.roc > 0 ? calculateGradient(toClimb.roc, toClimbTas) : 0;
-
-  // Cruise climb ROC (5.3.9) — Flaps UP, 88 KIAS, fairings -40 ft/min
-  const ccClimb = lookupRoc(
-    cruiseClimbRocTables, inputs.mass, clampedPa, clampedOat,
-    40, inputs.wheelFairings,
+  // Cruise climb ROC (5.3.9) — at three PAs
+  // Flaps UP, 88 KIAS, fairings -40 ft/min
+  const cruiseClimbStart = computeClimbPoint(
+    cruiseClimbRocTables, inputs.mass, flapRetractionPa, clampedOat,
+    88, 40, inputs.wheelFairings,
+  );
+  const cruiseClimbToc = computeClimbPoint(
+    cruiseClimbRocTables, inputs.mass, cruisePa, clampedOat,
+    88, 40, inputs.wheelFairings,
   );
 
-  if (ccClimb.isNa) {
+  // Average: computed from averaged components
+  const avgRoc = (cruiseClimbStart.roc + cruiseClimbToc.roc) / 2;
+  const avgTas = (cruiseClimbStart.tas + cruiseClimbToc.tas) / 2;
+  const avgGradient = avgTas > 0 ? (avgRoc / avgTas) * 0.98 : 0;
+  const cruiseClimbAvg: ClimbPointResult = {
+    pa: (flapRetractionPa + cruisePa) / 2,
+    roc: Math.round(avgRoc),
+    tas: avgTas,
+    gradient: avgGradient,
+    detail: null,
+    isNa: cruiseClimbStart.isNa || cruiseClimbToc.isNa,
+  };
+
+  if (cruiseClimbStart.isNa || cruiseClimbToc.isNa) {
     warnings.push({
       level: 'red',
       message: 'Cruise climb ROC: conditions outside certified envelope (N/A cells)',
     });
   }
 
-  const ccClimbTas = casToTas(88, clampedPa);
-  const ccClimbGradient = ccClimb.roc > 0 ? calculateGradient(ccClimb.roc, ccClimbTas) : 0;
-
-  // ROC warnings
-  if (toClimb.roc > 0 && toClimb.roc < 100) {
+  // ROC warnings (based on takeoff climb)
+  if (takeoffClimb.roc > 0 && takeoffClimb.roc < 100) {
     warnings.push({
       level: 'red',
-      message: `T/O climb ROC ${Math.round(toClimb.roc)} ft/min — marginal climb performance`,
+      message: `T/O climb ROC ${takeoffClimb.roc} ft/min — marginal climb performance`,
     });
-  } else if (toClimb.roc > 0 && toClimb.roc < 300) {
+  } else if (takeoffClimb.roc > 0 && takeoffClimb.roc < 300) {
     warnings.push({
       level: 'amber',
-      message: `T/O climb ROC ${Math.round(toClimb.roc)} ft/min — reduced climb performance`,
+      message: `T/O climb ROC ${takeoffClimb.roc} ft/min — reduced climb performance`,
     });
   }
-  if (toClimb.roc <= 0 && !toClimb.isNa) {
+  if (takeoffClimb.roc <= 0 && !takeoffClimb.isNa) {
     warnings.push({
       level: 'red',
       message: 'T/O climb ROC is zero or negative — unable to climb',
     });
   }
 
-  if (ccClimb.roc > 0 && ccClimb.roc < 100) {
+  // ROC warnings (based on cruise climb average)
+  if (cruiseClimbAvg.roc > 0 && cruiseClimbAvg.roc < 100) {
     warnings.push({
       level: 'red',
-      message: `Cruise climb ROC ${Math.round(ccClimb.roc)} ft/min — marginal climb performance`,
+      message: `Cruise climb ROC ${cruiseClimbAvg.roc} ft/min — marginal climb performance`,
     });
-  } else if (ccClimb.roc > 0 && ccClimb.roc < 300) {
+  } else if (cruiseClimbAvg.roc > 0 && cruiseClimbAvg.roc < 300) {
     warnings.push({
       level: 'amber',
-      message: `Cruise climb ROC ${Math.round(ccClimb.roc)} ft/min — reduced climb performance`,
+      message: `Cruise climb ROC ${cruiseClimbAvg.roc} ft/min — reduced climb performance`,
     });
   }
 
@@ -385,14 +428,11 @@ export function calculateClimb(inputs: ClimbInputs): ClimbResult {
     isaTemperature: isaTmp,
     isaDeviation: isaDev,
     cruisePa,
-    takeoffClimbRoc: Math.round(toClimb.roc),
-    takeoffClimbGradient: toClimbGradient,
-    takeoffClimbTas: toClimbTas,
-    takeoffClimbDetail: toClimb.detail,
-    cruiseClimbRoc: Math.round(ccClimb.roc),
-    cruiseClimbGradient: ccClimbGradient,
-    cruiseClimbTas: ccClimbTas,
-    cruiseClimbDetail: ccClimb.detail,
+    flapRetractionPa,
+    takeoffClimb,
+    cruiseClimbStart,
+    cruiseClimbAvg,
+    cruiseClimbToc,
     climbSegment,
     warnings,
   };
