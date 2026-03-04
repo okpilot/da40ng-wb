@@ -52,7 +52,7 @@ export function ClimbResultsPanel({ result }: ClimbResultsProps) {
   const seg = result.climbSegment;
 
   return (
-    <Card className="py-3">
+    <Card className="py-3" data-tour="cl-results">
       <CardContent className="space-y-3">
         {/* Warnings */}
         {result.warnings.length > 0 && (

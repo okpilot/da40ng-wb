@@ -10,6 +10,7 @@ interface AircraftConfigStripProps {
   onWheelFairingsChange: (value: boolean) => void;
   flapsLabel?: string;
   fairingsPenalty?: string;
+  tourId?: string;
 }
 
 export function AircraftConfigStrip({
@@ -19,9 +20,10 @@ export function AircraftConfigStrip({
   onWheelFairingsChange,
   flapsLabel = 'Take-off',
   fairingsPenalty = 'GR +20, D50 +30',
+  tourId = 'to-aircraft-config',
 }: AircraftConfigStripProps) {
   return (
-    <Card className="py-3" data-tour="to-aircraft-config">
+    <Card className="py-3" data-tour={tourId}>
       <CardHeader className="pb-0 pt-0">
         <CardTitle className="text-sm">Aircraft Configuration</CardTitle>
       </CardHeader>

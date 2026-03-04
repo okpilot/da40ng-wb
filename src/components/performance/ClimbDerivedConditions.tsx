@@ -12,7 +12,7 @@ export function ClimbAdvisoryData({ result, inputs }: ClimbAdvisoryDataProps) {
   const isaAbove = result.isaDeviation > 0;
 
   return (
-    <Card className="py-3">
+    <Card className="py-3" data-tour="cl-correction-factors">
       <CardHeader className="pb-0 pt-0">
         <CardTitle className="text-sm">Correction Factors Applied</CardTitle>
       </CardHeader>

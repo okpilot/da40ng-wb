@@ -13,7 +13,7 @@ interface ClimbInputsPanelProps {
 
 export function ClimbInputsPanel({ inputs, onUpdate, onSyncFromTakeoff }: ClimbInputsPanelProps) {
   return (
-    <Card className="py-3">
+    <Card className="py-3" data-tour="cl-departure">
       <CardHeader className="pb-0 pt-0">
         <div className="flex items-center justify-between">
           <CardTitle className="text-sm">Departure Conditions</CardTitle>

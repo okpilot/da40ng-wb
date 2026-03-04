@@ -210,7 +210,7 @@ export function ClimbProfileDiagram({ result, inputs }: ClimbProfileDiagramProps
   const bracketX = W - margin.right + 6;
 
   return (
-    <Card className="py-2">
+    <Card className="py-2" data-tour="cl-diagram">
       <CardContent>
         <svg
           viewBox={`0 0 ${W} ${H}`}

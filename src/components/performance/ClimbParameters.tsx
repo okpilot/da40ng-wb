@@ -10,7 +10,7 @@ interface ClimbParametersProps {
 
 export function ClimbParameters({ inputs, onUpdate }: ClimbParametersProps) {
   return (
-    <Card className="py-3">
+    <Card className="py-3" data-tour="cl-parameters">
       <CardHeader className="pb-0 pt-0">
         <CardTitle className="text-sm">Climb Parameters</CardTitle>
       </CardHeader>

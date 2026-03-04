@@ -21,6 +21,7 @@ export function ClimbSection() {
             onWheelFairingsChange={(v) => updateInput('wheelFairings', v)}
             flapsLabel="T/O → UP"
             fairingsPenalty="ROC −20/−40 fpm"
+            tourId="cl-aircraft-config"
           />
           <ClimbInputsPanel
             inputs={inputs}

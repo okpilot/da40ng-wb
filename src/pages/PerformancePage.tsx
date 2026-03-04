@@ -7,6 +7,7 @@ import { Separator } from '@/components/ui/separator';
 import { SpotlightTour } from '@/components/tour/SpotlightTour';
 import { useTourState } from '@/hooks/useTourState';
 import { takeoffTourSteps } from '@/data/takeoffTourSteps';
+import { climbTourSteps } from '@/data/climbTourSteps';
 import type { TourStep } from '@/data/tourSteps';
 import { TakeoffSection } from '@/components/performance/TakeoffSection';
 import { ClimbSection } from '@/components/performance/ClimbSection';
@@ -15,7 +16,7 @@ import { LandingSection } from '@/components/performance/LandingSection';
 
 const tourConfig: Record<string, { steps: TourStep[]; storageKey: string } | null> = {
   takeoff: { steps: takeoffTourSteps, storageKey: 'da40ng-perf-takeoff-tour-seen' },
-  climb: null,
+  climb: { steps: climbTourSteps, storageKey: 'da40ng-perf-climb-tour-seen' },
   cruise: null,
   landing: null,
 };
