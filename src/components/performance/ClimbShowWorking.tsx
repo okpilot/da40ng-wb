@@ -1,7 +1,9 @@
 import { useState } from 'react';
-import type { ClimbResult, ClimbInputs, ClimbRocDetail } from '@/lib/types';
+import type { ClimbResult, ClimbInputs, ClimbRocDetail, ClimbPointResult, ClimbRocTable, ClimbRocCell } from '@/lib/types';
 import { Card, CardContent } from '@/components/ui/card';
 import { ChevronDown, ChevronRight } from 'lucide-react';
+import { takeoffClimbRocTables } from '@/data/performance/takeoffClimbRoc';
+import { cruiseClimbRocTables } from '@/data/performance/cruiseClimbRoc';
 
 interface ClimbShowWorkingProps {
   result: ClimbResult;
@@ -24,33 +26,59 @@ export function ClimbShowWorking({ result, inputs }: ClimbShowWorkingProps) {
       >
         {isOpen ? <ChevronDown className="h-4 w-4" /> : <ChevronRight className="h-4 w-4" />}
         <span className="font-semibold text-sm">Calculation Breakdown</span>
-        <span className="text-xs text-muted-foreground ml-2">Step-by-step climb calculations</span>
+        <span className="text-xs text-muted-foreground ml-2">Step-by-step with AFM tables</span>
       </button>
 
       {isOpen && (
         <CardContent className="space-y-6 pt-0">
-          <BaseConditions inputs={inputs} />
           <StepByStep result={result} inputs={inputs} />
+
+          {/* AFM 5.3.8 table */}
+          {result.takeoffClimb.detail && (
+            <AfmRocTables
+              title="2. AFM 5.3.8 — T/O Climb ROC Tables"
+              subtitle="Flaps T/O, Vy 72 KIAS, Power 92%"
+              tables={takeoffClimbRocTables}
+              detail={result.takeoffClimb.detail}
+            />
+          )}
+
           <RocWalkthrough
-            title="3. Take-Off Climb ROC (AFM 5.3.8)"
-            subtitle="Flaps T/O, V_Y 72 KIAS, Power 92%"
-            detail={result.takeoffClimbDetail}
+            title="3. T/O Climb ROC Interpolation"
+            subtitle={`Flaps T/O, Vy 72 KIAS, Power 92% — at flap retraction PA (${Math.round(result.flapRetractionPa)} ft)`}
+            detail={result.takeoffClimb.detail}
             cas={72}
             fairingsLabel="20 ft/min"
-            roc={result.takeoffClimbRoc}
-            gradient={result.takeoffClimbGradient}
-            tas={result.takeoffClimbTas}
+            point={result.takeoffClimb}
           />
+
+          {/* AFM 5.3.9 table */}
+          {result.cruiseClimbStart.detail && (
+            <AfmRocTables
+              title="4. AFM 5.3.9 — Cruise Climb ROC Tables"
+              subtitle="Flaps UP, Vy 88 KIAS, Power 92%"
+              tables={cruiseClimbRocTables}
+              detail={result.cruiseClimbStart.detail}
+            />
+          )}
+
           <RocWalkthrough
-            title="4. Cruise Climb ROC (AFM 5.3.9)"
-            subtitle="Flaps UP, V_Y 88 KIAS, Power 92%"
-            detail={result.cruiseClimbDetail}
+            title="5a. Cruise Climb ROC — Start"
+            subtitle={`Flaps UP, Vy 88 KIAS, Power 92% — at flap retraction PA (${Math.round(result.flapRetractionPa)} ft)`}
+            detail={result.cruiseClimbStart.detail}
             cas={88}
             fairingsLabel="40 ft/min"
-            roc={result.cruiseClimbRoc}
-            gradient={result.cruiseClimbGradient}
-            tas={result.cruiseClimbTas}
+            point={result.cruiseClimbStart}
           />
+          <RocWalkthrough
+            title="5b. Cruise Climb ROC — TOC"
+            subtitle={`Flaps UP, Vy 88 KIAS, Power 92% — at cruise PA (${Math.round(result.cruisePa)} ft)`}
+            detail={result.cruiseClimbToc.detail}
+            cas={88}
+            fairingsLabel="40 ft/min"
+            point={result.cruiseClimbToc}
+          />
+          <AverageWalkthrough result={result} />
           {result.climbSegment && (
             <ClimbSegmentWalkthrough result={result} />
           )}
@@ -62,26 +90,6 @@ export function ClimbShowWorking({ result, inputs }: ClimbShowWorkingProps) {
 
 function SectionTitle({ children }: { children: React.ReactNode }) {
   return <h4 className="text-sm font-semibold border-b pb-1 mb-3">{children}</h4>;
-}
-
-function BaseConditions({ inputs }: { inputs: ClimbInputs }) {
-  return (
-    <div>
-      <SectionTitle>1. Base Conditions</SectionTitle>
-      <div className="space-y-1 text-sm">
-        <div className="flex justify-between bg-muted rounded px-3 py-1.5">
-          <span className="text-muted-foreground">AFM assumes</span>
-          <span className="font-mono">ISA conditions, paved/level, wheel fairings installed</span>
-        </div>
-        <div className="flex justify-between bg-muted rounded px-3 py-1.5">
-          <span className="text-muted-foreground">Wheel fairings</span>
-          <span className={`font-mono ${!inputs.wheelFairings ? 'text-amber-500' : ''}`}>
-            {inputs.wheelFairings ? 'Installed' : 'Not installed (ROC penalty applied)'}
-          </span>
-        </div>
-      </div>
-    </div>
-  );
 }
 
 function StepByStep({ result, inputs }: { result: ClimbResult; inputs: ClimbInputs }) {
@@ -113,6 +121,12 @@ function StepByStep({ result, inputs }: { result: ClimbResult; inputs: ClimbInpu
     },
     {
       num: 5,
+      title: 'Flap Retraction PA',
+      formula: 'FR PA = departure PA + flap retraction height',
+      calc: `FR PA = ${Math.round(pa)} + ${inputs.flapRetractionHeight} = ${Math.round(result.flapRetractionPa)} ft`,
+    },
+    {
+      num: 6,
       title: 'Cruise Pressure Altitude',
       formula: 'Cruise PA = cruise alt + 30 × (1013 − QNH)',
       calc: `Cruise PA = ${inputs.cruiseAltitude} + 30 × (1013 − ${inputs.qnh}) = ${Math.round(result.cruisePa)} ft`,
@@ -121,7 +135,7 @@ function StepByStep({ result, inputs }: { result: ClimbResult; inputs: ClimbInpu
 
   return (
     <div>
-      <SectionTitle>2. Step-by-Step Calculation</SectionTitle>
+      <SectionTitle>1. Derived Conditions</SectionTitle>
       <div className="space-y-3">
         {steps.map((step) => (
           <div key={step.num} className="bg-muted rounded-lg p-3">
@@ -135,9 +149,102 @@ function StepByStep({ result, inputs }: { result: ClimbResult; inputs: ClimbInpu
   );
 }
 
-function RocWalkthrough({ title, subtitle, detail, cas, fairingsLabel, roc, gradient, tas }: {
+/* ── AFM ROC Table Display ──────────────────────────────────────── */
+
+function AfmRocTables({
+  title, subtitle, tables, detail,
+}: {
+  title: string; subtitle: string; tables: ClimbRocTable[]; detail: ClimbRocDetail;
+}) {
+  const lowerTable = tables.find((t) => t.weight === detail.lowerWeight);
+  const upperTable = tables.find((t) => t.weight === detail.upperWeight);
+  if (!lowerTable || !upperTable) return null;
+
+  const tablesToShow = lowerTable === upperTable ? [lowerTable] : [upperTable, lowerTable];
+
+  return (
+    <div>
+      <SectionTitle>{title}</SectionTitle>
+      <div className="text-xs text-muted-foreground mb-3">{subtitle}</div>
+      <div className="space-y-4">
+        {tablesToShow.map((table) => (
+          <RocTableDisplay
+            key={table.weight}
+            table={table}
+            highlightPaLow={detail.lowerPa}
+            highlightPaHigh={detail.upperPa}
+            highlightOatLow={detail.lowerOat}
+            highlightOatHigh={detail.upperOat}
+          />
+        ))}
+      </div>
+    </div>
+  );
+}
+
+function RocTableDisplay({
+  table, highlightPaLow, highlightPaHigh, highlightOatLow, highlightOatHigh,
+}: {
+  table: ClimbRocTable;
+  highlightPaLow: number; highlightPaHigh: number;
+  highlightOatLow: number; highlightOatHigh: number;
+}) {
+  return (
+    <div className="overflow-x-auto">
+      <div className="text-xs font-semibold mb-1">{table.weight} kg</div>
+      <table className="text-[11px] border-collapse w-full">
+        <thead>
+          <tr>
+            <th className="border px-1.5 py-1 bg-muted text-left">PA (ft)</th>
+            {table.oats.map((oat) => (
+              <th
+                key={oat}
+                className={`border px-1.5 py-1 text-center ${
+                  oat >= highlightOatLow && oat <= highlightOatHigh ? 'bg-blue-100 dark:bg-blue-900/30' : 'bg-muted'
+                }`}
+              >
+                {oat}°C
+              </th>
+            ))}
+          </tr>
+        </thead>
+        <tbody>
+          {table.pressureAltitudes.map((pa, paIdx) => {
+            const isHighlightedPa = pa >= highlightPaLow && pa <= highlightPaHigh;
+            return (
+              <tr key={pa}>
+                <td className={`border px-1.5 py-0.5 font-mono font-medium ${isHighlightedPa ? 'bg-blue-100 dark:bg-blue-900/30' : ''}`}>
+                  {pa === 0 ? 'SL' : pa.toLocaleString()}
+                </td>
+                {table.oats.map((oat, oatIdx) => {
+                  const cell: ClimbRocCell = table.rows[paIdx][oatIdx];
+                  const isHighlighted = isHighlightedPa && oat >= highlightOatLow && oat <= highlightOatHigh;
+                  return (
+                    <td
+                      key={oat}
+                      className={`border px-1.5 py-0.5 font-mono text-center ${
+                        isHighlighted ? 'bg-blue-200 dark:bg-blue-800/50 font-semibold' : ''
+                      }`}
+                    >
+                      {cell !== null ? cell : <span className="text-muted-foreground">N/A</span>}
+                    </td>
+                  );
+                })}
+              </tr>
+            );
+          })}
+        </tbody>
+      </table>
+      <div className="text-[10px] text-muted-foreground mt-1">ROC in ft/min. Without wheel fairings: subtract penalty from result.</div>
+    </div>
+  );
+}
+
+/* ── ROC Interpolation Walkthrough ───────────────────────────────── */
+
+function RocWalkthrough({ title, subtitle, detail, cas, fairingsLabel, point }: {
   title: string; subtitle: string; detail: ClimbRocDetail | null;
-  cas: number; fairingsLabel: string; roc: number; gradient: number; tas: number;
+  cas: number; fairingsLabel: string; point: ClimbPointResult;
 }) {
   if (!detail) return null;
   const sameTable = detail.lowerWeight === detail.upperWeight;
@@ -196,10 +303,45 @@ function RocWalkthrough({ title, subtitle, detail, cas, fairingsLabel, roc, grad
         <div className="bg-muted rounded-lg p-3">
           <div className="text-xs font-semibold text-muted-foreground">Gradient calculation</div>
           <div className="text-xs text-muted-foreground mt-1 font-mono">
-            TAS = CAS × (1 + 0.02 × PA/1000) = {cas} × (1 + 0.02 × {Math.round(detail.lowerPa)}/1000) = {tas.toFixed(1)} kt
+            TAS = CAS × (1 + 0.02 × PA/1000) = {cas} × (1 + 0.02 × {Math.round(point.pa)}/1000) = {point.tas.toFixed(1)} kt
           </div>
           <div className="text-sm font-mono mt-1">
-            Gradient = ROC / TAS × 0.98 = {roc} / {tas.toFixed(1)} × 0.98 = {gradient.toFixed(1)}%
+            Gradient = ROC / TAS × 0.98 = {point.roc} / {point.tas.toFixed(1)} × 0.98 = {point.gradient.toFixed(1)}%
+          </div>
+        </div>
+      </div>
+    </div>
+  );
+}
+
+function AverageWalkthrough({ result }: { result: ClimbResult }) {
+  const start = result.cruiseClimbStart;
+  const toc = result.cruiseClimbToc;
+  const avg = result.cruiseClimbAvg;
+
+  return (
+    <div>
+      <SectionTitle>5c. Cruise Climb — Average</SectionTitle>
+      <div className="text-xs text-muted-foreground mb-3">
+        Average computed from start and TOC components
+      </div>
+      <div className="space-y-3">
+        <div className="bg-muted rounded-lg p-3">
+          <div className="text-xs font-semibold text-muted-foreground">Average ROC</div>
+          <div className="text-sm font-mono mt-1">
+            ({start.roc} + {toc.roc}) / 2 = {avg.roc} fpm
+          </div>
+        </div>
+        <div className="bg-muted rounded-lg p-3">
+          <div className="text-xs font-semibold text-muted-foreground">Average TAS</div>
+          <div className="text-sm font-mono mt-1">
+            ({start.tas.toFixed(1)} + {toc.tas.toFixed(1)}) / 2 = {avg.tas.toFixed(1)} kt
+          </div>
+        </div>
+        <div className="bg-muted rounded-lg p-3">
+          <div className="text-xs font-semibold text-muted-foreground">Average gradient (from averaged components)</div>
+          <div className="text-sm font-mono mt-1">
+            Gradient = avg ROC / avg TAS × 0.98 = {avg.roc} / {avg.tas.toFixed(1)} × 0.98 = {avg.gradient.toFixed(1)}%
           </div>
         </div>
       </div>
@@ -212,8 +354,8 @@ function ClimbSegmentWalkthrough({ result }: { result: ClimbResult }) {
 
   return (
     <div>
-      <SectionTitle>5. Time, Fuel & Distance to Climb (AFM 5.3.10)</SectionTitle>
-      <div className="text-xs text-muted-foreground mb-3">Flaps UP, V_Y 88 KIAS, Power 92% — subtraction method</div>
+      <SectionTitle>6. Time, Fuel & Distance to Climb (AFM 5.3.10)</SectionTitle>
+      <div className="text-xs text-muted-foreground mb-3">Flaps UP, Vy 88 KIAS, Power 92% — subtraction method</div>
       <div className="space-y-3">
         <div className="bg-muted rounded-lg p-3">
           <div className="text-xs font-semibold text-muted-foreground">
