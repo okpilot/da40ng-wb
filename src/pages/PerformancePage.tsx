@@ -65,7 +65,7 @@ export function PerformancePage() {
               </Button>
             )}
             <Button variant="outline" size="sm" asChild>
-              <Link to="/">
+              <Link to="/calculator">
                 <Calculator className="mr-2 h-4 w-4" />
                 M&B
               </Link>
@@ -112,7 +112,6 @@ export function PerformancePage() {
             For training purposes only. Always verify all data with the Aircraft Flight Manual for your specific aircraft.
           </p>
           <p>
-            Oleksandr Konovalov bears no legal responsibility for the use of this calculator.
             The pilot-in-command is solely responsible for verifying performance before every flight.
           </p>
         </footer>

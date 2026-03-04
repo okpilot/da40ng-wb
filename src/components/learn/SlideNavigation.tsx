@@ -57,7 +57,7 @@ export function SlideNavigation({
 
       {isLast ? (
         <Button asChild>
-          <Link to="/">
+          <Link to="/calculator">
             Go to Calculator
             <ChevronRight className="ml-1 h-4 w-4" />
           </Link>

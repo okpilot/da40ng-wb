@@ -1,12 +1,12 @@
-# DA40 NG Mass & Balance + Performance
+# Flight Training Tools
 
-A free, open-source, client-side web app for the **Diamond DA40 NG**. What started as a mass & balance calculator has grown into a performance sandbox — and will keep evolving with whatever tools and experiments seem useful. Built for flight students and instructors at Egmont Aviation ATO — no login, no backend, everything runs in your browser.
+A free, open-source, client-side web app — a sandbox for flight training tools and experiments. Started with DA40 NG mass & balance, grew into performance calculators and a CR-3 flight computer emulator, and will keep evolving with whatever seems useful. Built for flight students and instructors — no login, no backend, everything runs in your browser.
 
-**[Open the app](https://okpilot.github.io/da40ng-wb/)**
+**[Open the app](https://okpilot.github.io/flight-training-tools/)**
 
 ## Calculator
 
-Real-time mass & balance calculator matching the Egmont Aviation OM App 08.2 form layout.
+Real-time mass & balance calculator for the Diamond DA40 NG.
 
 - **M&B loading sheet** with inline limit checks (MTOM, MLM, MZFM)
 - **CG envelope chart** (SVG) with ZFM, TOM, and LM plotted in real time
@@ -78,7 +78,6 @@ Interactive teaching module with 32 slides across 7 sections, covering full M&B 
 ## Data Sources
 
 - Diamond DA40 NG AFM, Doc. #6.01.15-E, Rev. 3 (Section 5 — Performance: 5.3.7–5.3.14, Section 6 — Mass & Balance)
-- Egmont Aviation OM, App 08.2
 - EASA Regulation (EU) No 965/2012, Annex IV — CAT.POL.A.305
 
 ## Aircraft Data
@@ -116,15 +115,15 @@ Interactive teaching module with 32 slides across 7 sections, covering full M&B 
 ## Development
 
 ```bash
-git clone https://github.com/okpilot/da40ng-wb.git
-cd da40ng-wb
+git clone https://github.com/okpilot/flight-training-tools.git
+cd flight-training-tools
 npm install
 npm run dev
 ```
 
 ## Disclaimer
 
-**For training and reference purposes only.** Always verify all calculations against the official Aircraft Flight Manual for your specific aircraft. Oleksandr Konovalov bears no legal responsibility for the use of this calculator or training module. The pilot-in-command is solely responsible for verifying mass & balance and performance before every flight.
+**For training and reference purposes only.** Always verify all calculations against the official Aircraft Flight Manual for your specific aircraft. The pilot-in-command is solely responsible for verifying mass & balance and performance before every flight.
 
 ## License
 

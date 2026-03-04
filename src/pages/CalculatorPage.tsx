@@ -39,7 +39,7 @@ export function CalculatorPage() {
           <div>
             <h1 className="text-xl font-bold">DA40 NG Mass & Balance</h1>
             <p className="text-sm text-muted-foreground">
-              Egmont Aviation ATO — AFM Doc. #6.01.15-E Rev.3 / OM App 08.2
+              AFM Doc. #6.01.15-E Rev.3
             </p>
           </div>
           <div className="flex items-center gap-2">
@@ -110,7 +110,6 @@ export function CalculatorPage() {
             For training purposes only. Always verify all data with the Aircraft Flight Manual for your specific aircraft.
           </p>
           <p>
-            Oleksandr Konovalov bears no legal responsibility for the use of this calculator.
             The pilot-in-command is solely responsible for verifying mass and balance before every flight.
           </p>
         </footer>

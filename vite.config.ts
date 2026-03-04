@@ -5,7 +5,7 @@ import tailwindcss from '@tailwindcss/vite'
 import path from 'path'
 
 export default defineConfig({
-  base: '/da40ng-wb/',
+  base: '/flight-training-tools/',
   plugins: [react(), tailwindcss()],
   resolve: {
     alias: {
