@@ -324,6 +324,16 @@ export interface ClimbWarning {
   message: string;
 }
 
+/** A single ROC/TAS/gradient data point at a specific PA */
+export interface ClimbPointResult {
+  pa: number;
+  roc: number;
+  tas: number;
+  gradient: number;
+  detail: ClimbRocDetail | null;
+  isNa: boolean;
+}
+
 export interface ClimbResult {
   // Derived conditions
   pressureAltitude: number;
@@ -331,18 +341,200 @@ export interface ClimbResult {
   isaTemperature: number;
   isaDeviation: number;
   cruisePa: number;
-  // T/O climb ROC (5.3.8)
-  takeoffClimbRoc: number;
-  takeoffClimbGradient: number;
-  takeoffClimbTas: number;
-  takeoffClimbDetail: ClimbRocDetail | null;
-  // Cruise climb ROC (5.3.9)
-  cruiseClimbRoc: number;
-  cruiseClimbGradient: number;
-  cruiseClimbTas: number;
-  cruiseClimbDetail: ClimbRocDetail | null;
+  flapRetractionPa: number;
+  // T/O climb ROC (5.3.8) — at flap retraction PA
+  takeoffClimb: ClimbPointResult;
+  // Cruise climb ROC (5.3.9) — at three PAs
+  cruiseClimbStart: ClimbPointResult;
+  cruiseClimbAvg: ClimbPointResult;
+  cruiseClimbToc: ClimbPointResult;
   // Climb segment (5.3.10)
   climbSegment: ClimbSegmentResult | null;
   // Warnings
   warnings: ClimbWarning[];
+}
+
+// ── Cruise performance types ─────────────────────────────────────
+
+/** Power setting options for cruise */
+export type CruisePower = 92 | 75 | 60 | 45;
+
+/** ISA deviation categories in the cruise table */
+export type CruiseIsaDev = -10 | 0 | 10 | 30;
+
+/** A single row in the cruise performance table (one PA level) */
+export interface CruiseTableRow {
+  pressureAltitude: number;
+  /** Indexed by ISA deviation: { [isaDev]: { [power]: { ff, tas } } } */
+  data: Record<CruiseIsaDev, Record<CruisePower, { ff: number; tas: number }>>;
+}
+
+/** The full cruise performance table */
+export interface CruisePerformanceTable {
+  rows: CruiseTableRow[];
+}
+
+export interface CruiseInputs {
+  cruiseAltitude: number;
+  qnh: number;
+  oat: number;
+  power: CruisePower;
+  wheelFairings: boolean;
+  usableFuelUsg: number;
+}
+
+export interface CruiseInterpolationDetail {
+  lowerPa: number;
+  upperPa: number;
+  paFraction: number;
+  lowerIsaDev: CruiseIsaDev;
+  upperIsaDev: CruiseIsaDev;
+  isaDevFraction: number;
+  /** The 4 corner values used for bilinear interpolation */
+  corners: { ff: number; tas: number }[];
+  baseFf: number;
+  baseTas: number;
+}
+
+export interface CruiseWarning {
+  level: 'amber' | 'red';
+  message: string;
+}
+
+export interface CruiseResult {
+  pressureAltitude: number;
+  isaTemperature: number;
+  isaDeviation: number;
+  densityAltitude: number;
+  // Cruise performance
+  tas: number;
+  fuelFlow: number;
+  fuelFlowLph: number;
+  // Derived
+  range: number;
+  endurance: number;
+  // Interpolation detail
+  interpolation: CruiseInterpolationDetail | null;
+  // Warnings
+  warnings: CruiseWarning[];
+}
+
+// ── Landing performance types ────────────────────────────────────
+
+/** Flap setting for landing */
+export type LandingFlap = 'LDG' | 'TO' | 'UP';
+
+/** A single cell in a landing distance table: [groundRoll, dist50ft] or null if N/A */
+export type LandingCell = [number, number] | null;
+
+/** One weight table for landing: PA rows × OAT columns */
+export interface LandingTable {
+  weight: number;
+  vRef: number;
+  /** For abnormal flap: separate vRef per flap setting */
+  vRefUp?: number;
+  pressureAltitudes: number[];
+  oats: number[];
+  /** rows[paIndex][oatIndex] */
+  rows: LandingCell[][];
+}
+
+/** Go-around ROC table: PA × OAT, same structure as climb ROC */
+export interface GoAroundRocTable {
+  weight: number;
+  pressureAltitudes: number[];
+  oats: number[];
+  /** rows[paIndex][oatIndex] — ROC in ft/min, null = N/A */
+  rows: ClimbRocCell[][];
+}
+
+export interface LandingInputs {
+  mass: number;
+  elevation: number;
+  qnh: number;
+  oat: number;
+  windDirection: number;
+  windSpeed: number;
+  runwayHeading: number;
+  surface: SurfaceType;
+  grassLength: GrassLength;
+  rwycc: Rwycc;
+  slope: number;
+  wheelFairings: boolean;
+  flap: LandingFlap;
+  lda: number;
+}
+
+export interface LandingCorrectionStep {
+  label: string;
+  factor: number | null;
+  addGr: number;
+  addD50: number;
+  grAfter: number;
+  d50After: number;
+}
+
+export interface LandingInterpolationDetail {
+  lowerWeight: number;
+  upperWeight: number;
+  weightFraction: number;
+  lowerPa: number;
+  upperPa: number;
+  paFraction: number;
+  lowerOat: number;
+  upperOat: number;
+  oatFraction: number;
+  lowerTableCells: LandingCell[];
+  upperTableCells: LandingCell[];
+  lowerTableGr: number;
+  lowerTableD50: number;
+  upperTableGr: number;
+  upperTableD50: number;
+  baseGr: number;
+  baseD50: number;
+}
+
+export interface LandingVSpeeds {
+  vRef: number;
+}
+
+export interface GoAroundDetail {
+  roc: number;
+  gradient: number;
+  tas: number;
+  isNa: boolean;
+  detail: ClimbRocDetail | null;
+}
+
+export interface LandingWarning {
+  level: 'amber' | 'red';
+  message: string;
+}
+
+export interface LandingResult {
+  // Derived conditions
+  pressureAltitude: number;
+  densityAltitude: number;
+  isaTemperature: number;
+  isaDeviation: number;
+  headwind: number;
+  crosswind: number;
+  // Table lookup
+  interpolation: LandingInterpolationDetail;
+  // Corrections
+  corrections: LandingCorrectionStep[];
+  // Final distances
+  lgrr: number;
+  ldr: number;
+  // V-speeds
+  vSpeeds: LandingVSpeeds;
+  // Go-around
+  goAround: GoAroundDetail;
+  // Warnings
+  warnings: LandingWarning[];
+  // Flap setting used
+  flap: LandingFlap;
+  /** OAT was clamped to table range */
+  oatClamped: boolean;
+  clampedOat: number;
 }
