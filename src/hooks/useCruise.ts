@@ -10,6 +10,9 @@ const defaultInputs: CruiseInputs = {
   power: 75,
   wheelFairings: true,
   usableFuelUsg: 28,
+  reserveMinutes: 30,
+  alternateDistance: 0,
+  alternateAltitude: 3000,
 };
 
 /**
@@ -18,7 +21,7 @@ const defaultInputs: CruiseInputs = {
 function getInitialInputs(): CruiseInputs {
   try {
     const stored = localStorage.getItem('da40ng-perf-cruise-inputs');
-    if (stored) return JSON.parse(stored) as CruiseInputs;
+    if (stored) return { ...defaultInputs, ...JSON.parse(stored) } as CruiseInputs;
   } catch { /* ignore */ }
 
   // Seed from climb inputs if available

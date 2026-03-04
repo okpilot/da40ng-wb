@@ -9,6 +9,9 @@ const baseInputs: CruiseInputs = {
   power: 75,
   wheelFairings: true,
   usableFuelUsg: 28,
+  reserveMinutes: 30,
+  alternateDistance: 0,
+  alternateAltitude: 3000,
 };
 
 function calc(overrides: Partial<CruiseInputs> = {}) {
@@ -213,5 +216,78 @@ describe('power-limited conditions', () => {
     const r = calc({ cruiseAltitude: 14000, oat: 17, power: 75 });
     expect(r.fuelFlow).toBeCloseTo(6.6, 1);
     expect(r.tas).toBeCloseTo(142, 0);
+  });
+});
+
+// ── Fuel planning: reserves and alternate ────────────────────────
+
+describe('fuel planning — reserves', () => {
+  it('computes 30-min VFR reserve fuel', () => {
+    const r = calc({ reserveMinutes: 30 });
+    // 30/60 × 4.0 = 2.0 USG
+    expect(r.reserveFuelUsg).toBeCloseTo(2.0, 2);
+  });
+
+  it('computes 45-min IFR reserve fuel', () => {
+    const r = calc({ reserveMinutes: 45 });
+    // 45/60 × 4.0 = 3.0 USG
+    expect(r.reserveFuelUsg).toBeCloseTo(3.0, 2);
+  });
+
+  it('computes trip fuel as usable minus reserve', () => {
+    const r = calc({ reserveMinutes: 30 });
+    // 28 - 2.0 - 0 (no alternate) = 26.0
+    expect(r.tripFuel).toBeCloseTo(26.0, 1);
+  });
+
+  it('computes range with reserve', () => {
+    const r = calc({ reserveMinutes: 30 });
+    // fuelAfterReserve = 26 USG, endurance = 26/6.6, range = endurance × TAS
+    const expectedEndurance = 26 / r.fuelFlow;
+    expect(r.rangeWithReserve).toBeCloseTo(expectedEndurance * r.tas, 0);
+    expect(r.rangeWithAll).toBeCloseTo(r.rangeWithReserve, 0); // no alternate
+  });
+
+  it('range with reserve is less than total range', () => {
+    const r = calc({ reserveMinutes: 30 });
+    expect(r.rangeWithAll).toBeLessThan(r.range);
+  });
+});
+
+describe('fuel planning — alternate', () => {
+  it('computes alternate fuel for a known distance', () => {
+    // 50 NM at 3000 ft altitude, 75% power
+    const r = calc({ alternateDistance: 50, alternateAltitude: 3000 });
+    expect(r.alternateFuelUsg).toBeGreaterThan(0);
+    expect(r.alternateTas).toBeGreaterThan(0);
+    expect(r.alternateFf).toBeGreaterThan(0);
+    // altTime = 50/TAS, altFuel = altTime × FF
+    const expectedTime = 50 / r.alternateTas;
+    expect(r.alternateFuelUsg).toBeCloseTo(expectedTime * r.alternateFf, 2);
+  });
+
+  it('zero alternate distance = zero alternate fuel', () => {
+    const r = calc({ alternateDistance: 0 });
+    expect(r.alternateFuelUsg).toBe(0);
+    expect(r.alternateTas).toBe(0);
+    expect(r.alternateFf).toBe(0);
+  });
+
+  it('trip fuel accounts for both reserve and alternate', () => {
+    const r = calc({ reserveMinutes: 30, alternateDistance: 50, alternateAltitude: 3000 });
+    // trip = max(0, 28 - 2.0 - alternateFuel)
+    expect(r.tripFuel).toBeCloseTo(Math.max(0, 28 - 2.0 - r.alternateFuelUsg), 1);
+  });
+
+  it('warns when reserves exceed usable fuel', () => {
+    // 45 min reserve = 3.0 USG, alternate ~2 USG, usable = 4 USG → should warn
+    const r = calc({ usableFuelUsg: 4, reserveMinutes: 45, alternateDistance: 50, alternateAltitude: 3000 });
+    expect(r.warnings.some((w) => w.message.includes('exceeds usable fuel'))).toBe(true);
+    expect(r.warnings.some((w) => w.level === 'red')).toBe(true);
+  });
+
+  it('no warning when fuel is sufficient', () => {
+    const r = calc({ reserveMinutes: 30, alternateDistance: 50 });
+    expect(r.warnings.some((w) => w.message.includes('exceeds usable fuel'))).toBe(false);
   });
 });

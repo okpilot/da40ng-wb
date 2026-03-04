@@ -1,5 +1,6 @@
 import { useCruise } from '@/hooks/useCruise';
 import { CruiseInputsPanel } from './CruiseInputs';
+import { CruiseAdvisoryData } from './CruiseAdvisoryData';
 import { CruiseResultsPanel } from './CruiseResults';
 import { CruiseShowWorking } from './CruiseShowWorking';
 
@@ -14,8 +15,12 @@ export function CruiseSection() {
           onUpdate={updateInput}
           onSyncFromClimb={syncFromClimb}
         />
-        <CruiseResultsPanel result={result} />
+        <div className="space-y-4">
+          <CruiseAdvisoryData result={result} inputs={inputs} onUpdate={updateInput} />
+        </div>
       </div>
+
+      <CruiseResultsPanel result={result} inputs={inputs} />
       <CruiseShowWorking result={result} inputs={inputs} />
     </div>
   );

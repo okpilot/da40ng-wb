@@ -17,7 +17,7 @@ export function AircraftConfigStrip({
   onMassChange,
   wheelFairings,
   onWheelFairingsChange,
-  flapsLabel = 'T/O (5°)',
+  flapsLabel = 'Take-off',
   fairingsPenalty = 'GR +20, D50 +30',
 }: AircraftConfigStripProps) {
   return (

@@ -15,6 +15,9 @@ import {
 } from './performanceCalculations';
 import { cruisePerformanceTable } from '@/data/performance/cruisePerformance';
 
+/** AFM 5.3.2: final reserve at 45% power = 4.0 USG/h */
+export const RESERVE_FF_USG = 4.0;
+
 // ── ISA deviation bracket lookup ──────────────────────────────────
 
 const ISA_DEVS: CruiseIsaDev[] = [-10, 0, 10, 30];
@@ -34,6 +37,37 @@ function findIsaDevBracket(
   }
 
   return [ISA_DEVS[ISA_DEVS.length - 1], ISA_DEVS[ISA_DEVS.length - 1], 0];
+}
+
+// ── Interpolate FF/TAS at a given PA + ISA dev + power ───────────
+
+function interpolateFfTas(
+  pa: number,
+  isaDev: number,
+  power: CruiseInputs['power'],
+  wheelFairings: boolean,
+): { ff: number; tas: number } {
+  const tablePas = cruisePerformanceTable.rows.map((r) => r.pressureAltitude);
+  const [loPaIdx, hiPaIdx, paFrac] = findBracket(tablePas, pa);
+  const loRow = cruisePerformanceTable.rows[loPaIdx];
+  const hiRow = cruisePerformanceTable.rows[hiPaIdx];
+  const [loIsaDev, hiIsaDev, isaFrac] = findIsaDevBracket(isaDev);
+
+  const c00 = loRow.data[loIsaDev][power];
+  const c01 = loRow.data[hiIsaDev][power];
+  const c10 = hiRow.data[loIsaDev][power];
+  const c11 = hiRow.data[hiIsaDev][power];
+
+  const ffTop = lerp(c00.ff, c01.ff, isaFrac);
+  const ffBot = lerp(c10.ff, c11.ff, isaFrac);
+  const ff = lerp(ffTop, ffBot, paFrac);
+
+  const tasTop = lerp(c00.tas, c01.tas, isaFrac);
+  const tasBot = lerp(c10.tas, c11.tas, isaFrac);
+  let tas = lerp(tasTop, tasBot, paFrac);
+  if (!wheelFairings) tas *= 0.96;
+
+  return { ff, tas };
 }
 
 // ── Main calculation ──────────────────────────────────────────────
@@ -112,9 +146,42 @@ export function calculateCruise(inputs: CruiseInputs): CruiseResult {
   // Fuel flow in litres per hour (1 USG = 3.785 litres)
   const fuelFlowLph = baseFf * 3.785;
 
-  // Range and endurance from usable fuel
+  // Range and endurance from total usable fuel (no reserves)
   const endurance = inputs.usableFuelUsg > 0 ? inputs.usableFuelUsg / baseFf : 0;
   const range = endurance * baseTas;
+
+  // ── Fuel planning ──────────────────────────────────────────────
+  const reserveFuelUsg = (inputs.reserveMinutes / 60) * RESERVE_FF_USG;
+
+  // Alternate fuel: interpolate at alternate altitude with same power/OAT/QNH
+  let alternateFuelUsg = 0;
+  let alternateTas = 0;
+  let alternateFf = 0;
+  if (inputs.alternateDistance > 0) {
+    const altPa = pressureAltitude(inputs.alternateAltitude, inputs.qnh);
+    const altIsaDev = isaDeviation(inputs.oat, altPa);
+    const alt = interpolateFfTas(altPa, altIsaDev, inputs.power, inputs.wheelFairings);
+    alternateTas = alt.tas;
+    alternateFf = alt.ff;
+    const altTime = alt.tas > 0 ? inputs.alternateDistance / alt.tas : 0;
+    alternateFuelUsg = altTime * alt.ff;
+  }
+
+  const fuelAfterReserve = Math.max(0, inputs.usableFuelUsg - reserveFuelUsg);
+  const tripFuel = Math.max(0, fuelAfterReserve - alternateFuelUsg);
+
+  const enduranceWithReserve = baseFf > 0 ? fuelAfterReserve / baseFf : 0;
+  const rangeWithReserve = enduranceWithReserve * baseTas;
+  const enduranceWithAll = baseFf > 0 ? tripFuel / baseFf : 0;
+  const rangeWithAll = enduranceWithAll * baseTas;
+
+  // Warning if reserves exceed usable
+  if (reserveFuelUsg + alternateFuelUsg > inputs.usableFuelUsg) {
+    warnings.push({
+      level: 'red',
+      message: `Reserve + alternate fuel (${(reserveFuelUsg + alternateFuelUsg).toFixed(1)} USG) exceeds usable fuel (${inputs.usableFuelUsg} USG)`,
+    });
+  }
 
   const interpolation: CruiseInterpolationDetail = {
     lowerPa: loRow.pressureAltitude,
@@ -138,6 +205,15 @@ export function calculateCruise(inputs: CruiseInputs): CruiseResult {
     fuelFlowLph,
     range,
     endurance,
+    reserveFuelUsg,
+    alternateFuelUsg,
+    alternateTas,
+    alternateFf,
+    tripFuel,
+    rangeWithReserve,
+    enduranceWithReserve,
+    rangeWithAll,
+    enduranceWithAll,
     interpolation,
     warnings,
   };

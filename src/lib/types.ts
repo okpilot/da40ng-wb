@@ -381,6 +381,9 @@ export interface CruiseInputs {
   power: CruisePower;
   wheelFairings: boolean;
   usableFuelUsg: number;
+  reserveMinutes: 30 | 45;
+  alternateDistance: number;
+  alternateAltitude: number;
 }
 
 export interface CruiseInterpolationDetail {
@@ -410,9 +413,19 @@ export interface CruiseResult {
   tas: number;
   fuelFlow: number;
   fuelFlowLph: number;
-  // Derived
+  // Derived (total, no reserves)
   range: number;
   endurance: number;
+  // Fuel planning
+  reserveFuelUsg: number;
+  alternateFuelUsg: number;
+  alternateTas: number;
+  alternateFf: number;
+  tripFuel: number;
+  rangeWithReserve: number;
+  enduranceWithReserve: number;
+  rangeWithAll: number;
+  enduranceWithAll: number;
   // Interpolation detail
   interpolation: CruiseInterpolationDetail | null;
   // Warnings

@@ -387,60 +387,38 @@ Linear interpolation between the 4 weight-specific values:
 - [x] "Show working" collapsible panel (step-by-step, AFM tables with highlights, interpolation walkthrough, correction breakdown)
 - [x] Navigation links on Calculator and Learn pages
 
-### Phase 2 — Takeoff climb
+### Phase 2 — Climb calculator ✅ COMPLETE
 
-- [ ] Digitize take-off climb ROC tables (5.3.8, Flaps T/O, 72 KIAS)
-  - 4 weights × 10 PA (SL–16400 ft) × 8 OAT (−20 to +50°C)
-  - No wheel fairings: ROC −20 ft/min
-- [ ] Digitize cruise climb ROC tables (5.3.9, Flaps UP, 88 KIAS)
-  - 4 weights × 10 PA × 8 OAT
-  - No wheel fairings: ROC −40 ft/min
-- [ ] Climb gradient: Gradient [%] = ROC [fpm] / TAS [KTAS] × 0.98
-- [ ] Show climb ROC + gradient in takeoff extras
+- [x] Digitize take-off climb ROC tables (5.3.8, Flaps T/O, 72 KIAS)
+- [x] Digitize cruise climb ROC tables (5.3.9, Flaps UP, 88 KIAS)
+- [x] Digitize time/fuel/distance to climb tables (5.3.10)
+- [x] Climb gradient: Gradient [%] = ROC [fpm] / TAS [KTAS] × 0.98
+- [x] Climb profile diagram (DEP→FRA→TOC with gradient segments)
+- [x] ISA correction factors for 5.3.10
+- [x] "Show working" panel with AFM tables
 
-### Phase 3 — Landing section
+### Phase 3 — Cruise calculator ✅ COMPLETE
 
-- [ ] Landing conditions inputs (destination aerodrome)
-- [ ] Landing mass input (manual or TOM − trip fuel)
-- [ ] Digitize landing distance tables — normal, Flaps LDG (5.3.12)
-  - 4 weights × 11 PA × 7 OAT, ground roll + 50ft
-  - v_REF: 77/77/76/72 KIAS per weight
-- [ ] Digitize landing distance tables — abnormal flap, Flaps T/O or UP (5.3.13)
-  - v_REF: 78/78/78/74 KIAS (T/O), 83/83/82/78 KIAS (UP)
-- [ ] Landing correction factors
-  - Headwind: −10% per 20 kt
-  - Tailwind: +10% per 3 kt
-  - Paved wet: +15%
-  - Grass dry ≤5cm: ground roll +30%
-  - Grass dry >5cm: ground roll +45%
-  - Grass wet/soft: ground roll +15%
-  - Downhill slope: ground roll +10% per 1% slope
-- [ ] Result display with correction breakdown
-- [ ] Flap config selector (LDG / T/O / UP) with appropriate v_REF
-- [ ] "Show working" panel
+- [x] Digitize cruise performance table (5.3.11) — 8 PA × 4 ISA dev × 4 power
+- [x] Cruise performance UI: TAS + fuel flow + range + endurance
+- [x] Wheel fairings: TAS ×0.96
+- [x] Fuel presets (Std 28 USG, LR 39 USG)
+- [x] Final reserve fuel (30 min VFR / 45 min IFR at 4.0 USG/h per AFM 5.3.2)
+- [x] Alternate aerodrome fuel planning (distance + altitude → interpolated FF/TAS)
+- [x] Trip fuel = usable − reserve − alternate; warning if insufficient
+- [x] "Show working" panel with fuel planning breakdown
 
-### Phase 4 — Go-around + alternate
+### Phase 4 — Landing calculator ✅ COMPLETE
 
-- [ ] Digitize go-around climb ROC tables (5.3.14, Flaps LDG, v_REF)
-  - 4 weights × 6 PA (SL–10000 ft) × 8 OAT
-- [ ] Show go-around ROC in landing extras
-- [ ] Alternate sub-section (collapsible)
-  - Alternate mass, conditions, landing distance
+- [x] Digitize landing distance tables — Flaps LDG (5.3.12), abnormal (5.3.13)
+- [x] Landing correction factors (grass, wet, slope, wind)
+- [x] Flap config selector (LDG / T/O / UP) with per-flap vRef
+- [x] Digitize go-around climb ROC tables (5.3.14)
+- [x] Go-around ROC + gradient in results
+- [x] Landing runway diagram with designator
+- [x] "Show working" panel
 
-### Phase 5 — Cruise section
-
-- [ ] Digitize cruise performance table (5.3.11)
-  - 8 PA: 2000–16000 ft
-  - 4 ISA deviations: ISA−10, ISA, ISA+10, ISA+20
-  - 4 power settings: 92%, 75%, 60%, 45%
-  - Values: fuel flow (USG/h), TAS (kt)
-  - No wheel fairings: TAS −4%
-- [ ] Cruise performance UI: TAS + fuel flow
-- [ ] Time, fuel and distance to climb (5.3.10)
-  - 4 weights × 9 PA (SL–16000 ft)
-  - Values: OAT, TAS, ROC, time, fuel, distance
-  - Subtraction method for departure PA → cruise PA
-- [ ] "Show working" panel
+### Phase 5 — (merged into phases 2-4)
 
 ### Phase 6 — Reference tables
 
