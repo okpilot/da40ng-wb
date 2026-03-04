@@ -1,6 +1,6 @@
 # DA40 NG Mass & Balance + Performance
 
-A free, open-source, client-side web app for **calculating** and **learning** mass & balance and **take-off performance** on the **Diamond DA40 NG**. Built for flight students and instructors at Egmont Aviation ATO — no login, no backend, everything runs in your browser.
+A free, open-source, client-side web app for the **Diamond DA40 NG**. What started as a mass & balance calculator has grown into a performance sandbox — and will keep evolving with whatever tools and experiments seem useful. Built for flight students and instructors at Egmont Aviation ATO — no login, no backend, everything runs in your browser.
 
 **[Open the app](https://okpilot.github.io/da40ng-wb/)**
 
@@ -13,20 +13,46 @@ Real-time mass & balance calculator matching the Egmont Aviation OM App 08.2 for
 - **Modification support** — MÄM 40-662, MÄM 40-574, OÄM 40-164, OÄM 40-331
 - **Standard & Long Range tanks** — fuel input in USG, with litres/kg shown
 - **Calculation breakdown** — every step with formulas for verification
-- **Guided tour** — spotlight walkthrough on first visit, replayable via header icon
+- **Guided tour** — 12-step spotlight walkthrough on first visit, replayable via header icon
 - **Fully offline** — no server, no database, no tracking
 
-## Take-off Performance
+## Performance
 
-Take-off distance calculator based on AFM Chapter 5.3.7, with full regulatory comparison.
+Four performance calculators covering the full flight profile, each with guided tour walkthroughs and full calculation breakdowns.
 
-- **AFM table interpolation** — bilinear (PA x OAT) + linear (weight) across 4 digitised weight tables
+### Take-off (AFM 5.3.7)
+
+- **AFM table interpolation** — bilinear (PA × OAT) + linear (weight) across 4 digitised weight tables
 - **Correction factors** — surface (paved/grass), slope, wind, wheel fairings, applied in AFM order
-- **Aerodrome setup** — ICAO, runway designator, THR/DER elevations for slope, declared distances (TORA/TODA/ASDA), intersection departures — all saved to localStorage
-- **NCO runway diagram** — physical runway with SWY/CWY, TODR/TORR above, TORA (binding) below, green/amber/red colour coding
-- **Part CAT safety factors** (CAT.POL.A.305) — flipped math showing max allowable TODR per check (divide available distances down), with dedicated runway diagram showing factored limits and binding constraint
-- **Calculation breakdown** — step-by-step derivation, highlighted AFM tables, interpolation walkthrough, correction breakdown, regulatory comparison (Part NCO + Part CAT)
+- **Aerodrome setup** — ICAO, runway designator, THR/DER elevations for slope, declared distances (TORA/TODA/ASDA), intersection departures — save/load to localStorage
+- **NCO runway diagram** — physical runway with TODR/TORR above, TORA (binding) below, green/amber/red colour coding
+- **Part CAT safety factors** (CAT.POL.A.305) — max allowable TODR per constraint, dedicated runway diagram with factored limits
 - **V-speeds** — V_R and V_50 interpolated for mass
+
+### Climb (AFM 5.3.8 / 5.3.9 / 5.3.10)
+
+- **Take-off climb ROC** (5.3.8) and **cruise climb ROC** (5.3.9) — interpolated by weight and PA
+- **Time, fuel, and distance to TOC** (5.3.10) — with ISA correction factors
+- **Climb profile diagram** — side-view SVG from DEP → FRA → TOC, colour-coded by gradient quality
+- **Wheel fairings penalty** — −20 fpm (T/O climb), −40 fpm (cruise climb)
+- Seeds from Take-off tab with "Sync from Take-off" button
+
+### Cruise (AFM 5.3.11)
+
+- **TAS and fuel flow** — bilinear interpolation by PA and ISA deviation at 92/75/60/45% power
+- **Fuel planning** — usable fuel, VFR/IFR final reserve (30/45 min at 4.0 USG/h), alternate aerodrome fuel
+- **Climb segment integration** — deducts climb fuel/time/distance from the Climb tab
+- **Range and endurance** — trip values accounting for reserve, climb, and alternate
+- **Wheel fairings** — TAS ×0.96 without fairings
+
+### Landing (AFM 5.3.12 / 5.3.13 / 5.3.14)
+
+- **Normal (LDG) and abnormal (T/O, UP) flap tables** — 5.3.12 and 5.3.13
+- **Correction factors** — grass (short/long), wet grass, slope, paved wet, wind
+- **Go-around ROC** (5.3.14) — rate of climb, gradient, and TAS
+- **vRef speeds** — per-weight, per-flap setting
+- **Runway diagram** — LDR vs LDA with colour-coded margin
+- **LDA exceedance warning** — red badge when LDR exceeds available distance
 
 ## Learn Module
 
@@ -51,7 +77,7 @@ Interactive teaching module with 32 slides across 7 sections, covering full M&B 
 
 ## Data Sources
 
-- Diamond DA40 NG AFM, Doc. #6.01.15-E, Rev. 3 (Section 5 — Performance, Section 6 — Mass & Balance)
+- Diamond DA40 NG AFM, Doc. #6.01.15-E, Rev. 3 (Section 5 — Performance: 5.3.7–5.3.14, Section 6 — Mass & Balance)
 - Egmont Aviation OM, App 08.2
 - EASA Regulation (EU) No 965/2012, Annex IV — CAT.POL.A.305
 
