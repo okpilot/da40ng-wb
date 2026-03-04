@@ -36,7 +36,7 @@ export function LearnPage() {
               </Link>
             </Button>
             <Button variant="outline" asChild>
-              <Link to="/">
+              <Link to="/calculator">
                 <Calculator className="mr-2 h-4 w-4" />
                 Calculator
               </Link>
@@ -112,7 +112,6 @@ export function LearnPage() {
             Always verify all data with the Aircraft Flight Manual for your specific aircraft.
           </p>
           <p>
-            Oleksandr Konovalov bears no legal responsibility for the use of this training module or the calculator.
             The pilot-in-command is solely responsible for verifying mass and balance before every flight.
           </p>
         </footer>
