@@ -302,19 +302,22 @@ export function calculateLanding(inputs: LandingInputs): LandingResult {
   const da = densityAltitude(pa, inputs.oat);
   const wind = windComponents(inputs.windDirection, inputs.windSpeed, inputs.runwayHeading);
 
-  // Clamp OAT to table range [0, 50]
+  // Clamp OAT to landing table range [0, 50]
   let clampedOat = inputs.oat;
   let oatClamped = false;
   if (inputs.oat < 0) {
     clampedOat = 0;
     oatClamped = true;
-    warnings.push({ level: 'amber', message: 'OAT below 0°C — using 0°C table values' });
+    warnings.push({ level: 'amber', message: 'OAT below 0°C — using 0°C for landing tables' });
   }
   if (inputs.oat > 50) {
     clampedOat = 50;
     oatClamped = true;
     warnings.push({ level: 'red', message: 'OAT exceeds table maximum (50°C)' });
   }
+
+  // Go-around table supports wider OAT range [-20, 50]
+  const goAroundOat = clamp(inputs.oat, -20, 50);
 
   // PA warnings
   if (pa < 0) {
@@ -341,7 +344,7 @@ export function calculateLanding(inputs: LandingInputs): LandingResult {
   // Handle N/A cells
   if (!lowerResult || !upperResult) {
     warnings.push({ level: 'red', message: 'Conditions outside certified envelope (N/A cells)' });
-    const goAround = lookupGoAroundRoc(inputs.mass, clamp(pa, 0, 10000), clampedOat);
+    const goAround = lookupGoAroundRoc(inputs.mass, clamp(pa, 0, 10000), goAroundOat);
     const vRef = getVRef(inputs);
     return {
       pressureAltitude: pa, densityAltitude: da, isaTemperature: isaTmp, isaDeviation: isaDev,
@@ -387,7 +390,7 @@ export function calculateLanding(inputs: LandingInputs): LandingResult {
   const vSpeeds: LandingVSpeeds = { vRef };
 
   // Go-around
-  const goAround = lookupGoAroundRoc(inputs.mass, clamp(pa, 0, 10000), clampedOat);
+  const goAround = lookupGoAroundRoc(inputs.mass, clamp(pa, 0, 10000), goAroundOat);
 
   // LDA warning
   if (inputs.lda > 0 && finalD50 > inputs.lda) {

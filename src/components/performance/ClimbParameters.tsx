@@ -42,7 +42,11 @@ export function ClimbParameters({ inputs, onUpdate }: ClimbParametersProps) {
           </div>
         </div>
         <div className="text-xs text-muted-foreground bg-muted rounded px-2 py-1.5">
-          Below {inputs.flapRetractionHeight} ft AGL: Flaps T/O, V<sub>Y</sub> 72 KIAS &middot; Above: Flaps UP, V<sub>Y</sub> 88 KIAS
+          {inputs.flapRetractionHeight > 0 ? (
+            <>Below {inputs.flapRetractionHeight} ft AGL: Flaps T/O, V<sub>Y</sub> 72 KIAS &middot; Above: Flaps UP, V<sub>Y</sub> 88 KIAS</>
+          ) : (
+            <>Enter flap retraction height to show the climb phase split.</>
+          )}
         </div>
       </CardContent>
     </Card>

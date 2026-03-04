@@ -14,11 +14,18 @@ export function CruiseShowWorking({ result, inputs }: CruiseShowWorkingProps) {
 
   return (
     <Card className="py-3">
-      <CardHeader className="pb-0 pt-0 cursor-pointer" onClick={() => setOpen(!open)}>
-        <CardTitle className="text-sm flex items-center gap-1">
-          {open ? <ChevronDown className="h-4 w-4" /> : <ChevronRight className="h-4 w-4" />}
-          Calculation Breakdown
-        </CardTitle>
+      <CardHeader className="pb-0 pt-0">
+        <button
+          type="button"
+          onClick={() => setOpen(!open)}
+          aria-expanded={open}
+          className="w-full text-left"
+        >
+          <CardTitle className="text-sm flex items-center gap-1">
+            {open ? <ChevronDown className="h-4 w-4" /> : <ChevronRight className="h-4 w-4" />}
+            Calculation Breakdown
+          </CardTitle>
+        </button>
       </CardHeader>
       {open && (
         <CardContent className="space-y-4 pt-3">

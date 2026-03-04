@@ -80,6 +80,8 @@ export function CruiseInputsPanel({ inputs, onUpdate, onSyncFromClimb }: CruiseI
             <div className="flex gap-1.5 mt-1">
               {POWER_OPTIONS.map((p) => (
                 <button
+                  type="button"
+                  aria-pressed={inputs.power === p}
                   key={p}
                   onClick={() => onUpdate('power', p)}
                   className={`px-3 py-1 rounded-full text-xs font-mono transition-colors ${
@@ -102,6 +104,8 @@ export function CruiseInputsPanel({ inputs, onUpdate, onSyncFromClimb }: CruiseI
               <Label className="text-xs text-muted-foreground">Tank presets</Label>
               <div className="flex gap-1.5 mt-1">
                 <button
+                  type="button"
+                  aria-pressed={inputs.usableFuelUsg === 28}
                   onClick={() => onUpdate('usableFuelUsg', 28)}
                   className={`px-2 py-1 rounded-full text-xs transition-colors ${
                     inputs.usableFuelUsg === 28
@@ -112,6 +116,8 @@ export function CruiseInputsPanel({ inputs, onUpdate, onSyncFromClimb }: CruiseI
                   Std 28
                 </button>
                 <button
+                  type="button"
+                  aria-pressed={inputs.usableFuelUsg === 39}
                   onClick={() => onUpdate('usableFuelUsg', 39)}
                   className={`px-2 py-1 rounded-full text-xs transition-colors ${
                     inputs.usableFuelUsg === 39

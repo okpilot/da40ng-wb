@@ -415,7 +415,7 @@ describe('warnings', () => {
 
   it('warns when OAT below 0°C', () => {
     const r = calc({ oat: -5 });
-    expect(r.warnings.some((w) => w.message.includes('0°C'))).toBe(true);
+    expect(r.warnings.some((w) => w.message.includes('0°C') && w.message.includes('landing'))).toBe(true);
   });
 
   it('warns when OAT above 50°C', () => {

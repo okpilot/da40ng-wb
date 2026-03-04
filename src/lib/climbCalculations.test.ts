@@ -175,9 +175,8 @@ describe('cruise climb average', () => {
   it('average is N/A if either start or TOC is N/A', () => {
     // Very high cruise altitude to trigger N/A at TOC
     const r = calc({ mass: 1310, elevation: 0, cruiseAltitude: 16400, oat: 50 });
-    if (r.cruiseClimbToc.isNa || r.cruiseClimbStart.isNa) {
-      expect(r.cruiseClimbAvg.isNa).toBe(true);
-    }
+    expect(r.cruiseClimbToc.isNa || r.cruiseClimbStart.isNa).toBe(true);
+    expect(r.cruiseClimbAvg.isNa).toBe(true);
   });
 });
 
