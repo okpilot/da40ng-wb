@@ -38,7 +38,7 @@ export function LandingResultsPanel({ result, inputs }: LandingResultsProps) {
   const lgrr = Math.round(result.lgrr);
 
   return (
-    <Card className="py-3">
+    <Card className="py-3" data-tour="ld-results">
       <CardContent className="space-y-3">
         {/* Warnings */}
         {result.warnings.length > 0 && (

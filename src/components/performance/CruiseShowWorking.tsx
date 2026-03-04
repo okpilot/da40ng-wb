@@ -17,7 +17,7 @@ export function CruiseShowWorking({ result, inputs, climbSegment }: CruiseShowWo
   const interp = result.interpolation;
 
   return (
-    <Card className="py-3">
+    <Card className="py-3" data-tour="cr-show-working">
       <CardHeader className="pb-0 pt-0">
         <button
           type="button"

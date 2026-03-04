@@ -16,7 +16,7 @@ export function LandingShowWorking({ result, inputs }: LandingShowWorkingProps) 
   const hasNa = result.warnings.some((w) => w.message.includes('N/A'));
 
   return (
-    <Card className="py-3">
+    <Card className="py-3" data-tour="ld-show-working">
       <CardHeader className="pb-0 pt-0">
         <button
           type="button"

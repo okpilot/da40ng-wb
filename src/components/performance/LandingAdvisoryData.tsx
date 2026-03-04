@@ -12,7 +12,7 @@ export function LandingAdvisoryData({ result, inputs }: LandingAdvisoryDataProps
   const hasNa = result.warnings.some((w) => w.message.includes('N/A'));
 
   return (
-    <Card className="py-3">
+    <Card className="py-3" data-tour="ld-advisory">
       <CardHeader className="pb-0 pt-0">
         <CardTitle className="text-sm">Advisory Data</CardTitle>
       </CardHeader>

@@ -21,7 +21,7 @@ interface LandingConfigPanelProps {
 
 export function LandingConfigPanel({ inputs, onUpdate }: LandingConfigPanelProps) {
   return (
-    <Card className="py-3">
+    <Card className="py-3" data-tour="ld-aircraft-config">
       <CardHeader className="pb-0 pt-0">
         <CardTitle className="text-sm">Aircraft Configuration</CardTitle>
       </CardHeader>
@@ -94,7 +94,7 @@ interface LandingWeatherPanelProps {
 
 export function LandingWeatherPanel({ inputs, onUpdate }: LandingWeatherPanelProps) {
   return (
-    <Card className="py-3">
+    <Card className="py-3" data-tour="ld-weather">
       <CardHeader className="pb-0 pt-0">
         <CardTitle className="text-sm">Weather Conditions</CardTitle>
       </CardHeader>

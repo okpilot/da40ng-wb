@@ -92,7 +92,7 @@ export function LandingRunwayDiagram({ result, inputs, designator }: LandingRunw
   const reqGap = 14;
 
   return (
-    <Card className="py-2">
+    <Card className="py-2" data-tour="ld-runway-diagram">
       <CardContent>
         <svg viewBox={`0 0 ${layout.W} ${layout.H}`} className="w-full" preserveAspectRatio="xMidYMid meet" role="img" aria-label="Landing runway diagram">
           {/* Runway surface */}
@@ -189,7 +189,7 @@ export function LandingRunwayDiagram({ result, inputs, designator }: LandingRunw
 
           {/* REQUIRED DISTANCES — above runway */}
           {lgrr > 0 && (
-            <DimLineH y={reqY} x1={x(0)} x2={x(lgrr)} label="LR" value={`${lgrr} m`} color="#9ca3af" />
+            <DimLineH y={reqY} x1={x(ldr - lgrr)} x2={x(ldr)} label="LR" value={`${lgrr} m`} color="#9ca3af" />
           )}
           {ldr > 0 && (
             <DimLineH y={reqY - reqGap} x1={x(0)} x2={x(ldr)} label="LDR" value={`${ldr} m`} color={ldrColor} />

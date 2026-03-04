@@ -15,7 +15,7 @@ export function CruiseInputsPanel({ inputs, onUpdate }: CruiseInputsPanelProps) 
   return (
     <div className="space-y-4">
       {/* Aircraft config */}
-      <Card className="py-3">
+      <Card className="py-3" data-tour="cr-aircraft-config">
         <CardHeader className="pb-0 pt-0">
           <CardTitle className="text-sm">Aircraft Configuration</CardTitle>
         </CardHeader>
@@ -51,7 +51,7 @@ export function CruiseInputsPanel({ inputs, onUpdate }: CruiseInputsPanelProps) 
       </Card>
 
       {/* Cruise conditions */}
-      <Card className="py-3">
+      <Card className="py-3" data-tour="cr-cruise-conditions">
         <CardHeader className="pb-0 pt-0">
           <CardTitle className="text-sm">Cruise Conditions</CardTitle>
         </CardHeader>

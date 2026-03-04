@@ -20,7 +20,7 @@ export function CruiseResultsPanel({ result, inputs }: CruiseResultsProps) {
     : `Total: ${formatHoursMinutes(result.endurance)}`;
 
   return (
-    <Card className="py-3">
+    <Card className="py-3" data-tour="cr-results">
       <CardContent className="space-y-3">
         {/* Warnings */}
         {result.warnings.length > 0 && (

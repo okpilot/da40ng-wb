@@ -8,6 +8,8 @@ import { SpotlightTour } from '@/components/tour/SpotlightTour';
 import { useTourState } from '@/hooks/useTourState';
 import { takeoffTourSteps } from '@/data/takeoffTourSteps';
 import { climbTourSteps } from '@/data/climbTourSteps';
+import { cruiseTourSteps } from '@/data/cruiseTourSteps';
+import { landingTourSteps } from '@/data/landingTourSteps';
 import type { TourStep } from '@/data/tourSteps';
 import { TakeoffSection } from '@/components/performance/TakeoffSection';
 import { ClimbSection } from '@/components/performance/ClimbSection';
@@ -17,8 +19,8 @@ import { LandingSection } from '@/components/performance/LandingSection';
 const tourConfig: Record<string, { steps: TourStep[]; storageKey: string } | null> = {
   takeoff: { steps: takeoffTourSteps, storageKey: 'da40ng-perf-takeoff-tour-seen' },
   climb: { steps: climbTourSteps, storageKey: 'da40ng-perf-climb-tour-seen' },
-  cruise: null,
-  landing: null,
+  cruise: { steps: cruiseTourSteps, storageKey: 'da40ng-perf-cruise-tour-seen' },
+  landing: { steps: landingTourSteps, storageKey: 'da40ng-perf-landing-tour-seen' },
 };
 
 export function PerformancePage() {
@@ -38,14 +40,13 @@ export function PerformancePage() {
           </div>
           <div className="flex items-center gap-2">
             <Button variant="ghost" size="sm" onClick={() => {
-              localStorage.removeItem('da40ng-perf-inputs');
-              localStorage.removeItem('da40ng-perf-aerodrome');
-              localStorage.removeItem('da40ng-saved-aerodromes');
-              localStorage.removeItem('da40ng-perf-climb-inputs');
-              localStorage.removeItem('da40ng-perf-cruise-inputs');
-              localStorage.removeItem('da40ng-perf-landing-inputs');
-              localStorage.removeItem('da40ng-perf-landing-aerodrome');
-              localStorage.removeItem('da40ng-saved-landing-aerodromes');
+              const keys: Record<string, string[]> = {
+                takeoff: ['da40ng-perf-inputs', 'da40ng-perf-aerodrome', 'da40ng-saved-aerodromes'],
+                climb: ['da40ng-perf-climb-inputs'],
+                cruise: ['da40ng-perf-cruise-inputs'],
+                landing: ['da40ng-perf-landing-inputs', 'da40ng-perf-landing-aerodrome', 'da40ng-saved-landing-aerodromes'],
+              };
+              for (const k of keys[activeTab] ?? []) localStorage.removeItem(k);
               window.location.reload();
             }}>
               <RotateCcw className="mr-2 h-4 w-4" />

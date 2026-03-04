@@ -32,7 +32,7 @@ function Pill({ active, onClick, children }: {
 
 export function CruiseAdvisoryData({ result, inputs, onUpdate, climbSegment }: CruiseAdvisoryDataProps) {
   return (
-    <Card className="py-3">
+    <Card className="py-3" data-tour="cr-advisory">
       <CardHeader className="pb-0 pt-0">
         <CardTitle className="text-sm">Advisory Data</CardTitle>
       </CardHeader>
@@ -106,7 +106,8 @@ export function CruiseAdvisoryData({ result, inputs, onUpdate, climbSegment }: C
           )}
         </div>
 
-        {/* Final reserve */}
+        {/* Reserve & Alternate */}
+        <div data-tour="cr-reserve" className="space-y-0">
         <div className="border-t pt-3 space-y-2">
           <h4 className="text-xs font-semibold text-muted-foreground uppercase tracking-wider">Final Reserve</h4>
           <div className="flex items-center gap-2">
@@ -122,7 +123,6 @@ export function CruiseAdvisoryData({ result, inputs, onUpdate, climbSegment }: C
           </div>
         </div>
 
-        {/* Alternate */}
         <div className="border-t pt-3 space-y-2">
           <h4 className="text-xs font-semibold text-muted-foreground uppercase tracking-wider">Alternate Aerodrome</h4>
           <div className="grid grid-cols-2 gap-2">
@@ -161,6 +161,7 @@ export function CruiseAdvisoryData({ result, inputs, onUpdate, climbSegment }: C
               <div>Alternate fuel: {result.alternateFuelUsg.toFixed(1)} USG</div>
             </div>
           )}
+        </div>
         </div>
       </CardContent>
     </Card>
