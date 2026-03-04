@@ -1,9 +1,10 @@
 import { useState } from 'react';
-import type { ClimbResult, ClimbInputs, ClimbRocDetail, ClimbPointResult, ClimbRocTable, ClimbRocCell } from '@/lib/types';
+import type { ClimbResult, ClimbInputs, ClimbRocDetail, ClimbPointResult, ClimbRocTable, ClimbRocCell, ClimbProfileTable } from '@/lib/types';
 import { Card, CardContent } from '@/components/ui/card';
 import { ChevronDown, ChevronRight } from 'lucide-react';
 import { takeoffClimbRocTables } from '@/data/performance/takeoffClimbRoc';
 import { cruiseClimbRocTables } from '@/data/performance/cruiseClimbRoc';
+import { climbProfileTables } from '@/data/performance/climbProfile';
 
 interface ClimbShowWorkingProps {
   result: ClimbResult;
@@ -80,7 +81,14 @@ export function ClimbShowWorking({ result, inputs }: ClimbShowWorkingProps) {
           />
           <AverageWalkthrough result={result} />
           {result.climbSegment && (
-            <ClimbSegmentWalkthrough result={result} />
+            <>
+              <AfmProfileTables
+                mass={inputs.mass}
+                departurePa={result.climbSegment.departurePa}
+                cruisePa={result.climbSegment.cruisePa}
+              />
+              <ClimbSegmentWalkthrough result={result} />
+            </>
           )}
         </CardContent>
       )}
@@ -240,6 +248,108 @@ function RocTableDisplay({
   );
 }
 
+/* ── AFM 5.3.10 Profile Table Display ────────────────────────────── */
+
+function findWeightBracketIdx(tables: ClimbProfileTable[], mass: number): [number, number, number] {
+  const weights = tables.map((t) => t.weight);
+  const clamped = Math.max(Math.min(mass, weights[0]), weights[weights.length - 1]);
+  for (let i = 0; i < weights.length - 1; i++) {
+    if (clamped >= weights[i + 1] && clamped <= weights[i]) {
+      const frac = (clamped - weights[i + 1]) / (weights[i] - weights[i + 1]);
+      return [i + 1, i, frac];
+    }
+  }
+  return [0, 0, 0];
+}
+
+function AfmProfileTables({ mass, departurePa, cruisePa }: {
+  mass: number; departurePa: number; cruisePa: number;
+}) {
+  const [loIdx, hiIdx, frac] = findWeightBracketIdx(climbProfileTables, mass);
+  const lo = climbProfileTables[loIdx];
+  const hi = climbProfileTables[hiIdx];
+  const tablesToShow = lo === hi ? [lo] : [hi, lo];
+
+  return (
+    <div>
+      <SectionTitle>6. AFM 5.3.10 — Time, Fuel & Distance to Climb Tables</SectionTitle>
+      <div className="text-xs text-muted-foreground mb-3">
+        Flaps UP, Vy 88 KIAS, Power 92% — cumulative from SL at ISA.
+        {lo !== hi && ` Interpolating ${(frac * 100).toFixed(0)}% between ${lo.weight} kg and ${hi.weight} kg.`}
+      </div>
+      <div className="space-y-4">
+        {tablesToShow.map((table) => (
+          <ProfileTableDisplay
+            key={table.weight}
+            table={table}
+            departurePa={departurePa}
+            cruisePa={cruisePa}
+          />
+        ))}
+      </div>
+    </div>
+  );
+}
+
+function ProfileTableDisplay({ table, departurePa, cruisePa }: {
+  table: ClimbProfileTable; departurePa: number; cruisePa: number;
+}) {
+  // Find bracketing PA rows for highlighting
+  const pas = table.rows.map((r) => r.pressureAltitude);
+  const depLo = pas.reduce((prev, pa) => pa <= departurePa ? pa : prev, pas[0]);
+  const depHi = pas.reduce((prev, pa) => pa >= departurePa && (prev < departurePa || pa < prev) ? pa : prev, pas[pas.length - 1]);
+  const cruLo = pas.reduce((prev, pa) => pa <= cruisePa ? pa : prev, pas[0]);
+  const cruHi = pas.reduce((prev, pa) => pa >= cruisePa && (prev < cruisePa || pa < prev) ? pa : prev, pas[pas.length - 1]);
+
+  return (
+    <div className="overflow-x-auto">
+      <div className="text-xs font-semibold mb-1">{table.weight} kg</div>
+      <table className="text-[11px] border-collapse w-full">
+        <thead>
+          <tr>
+            <th className="border px-1.5 py-1 bg-muted text-left">PA (ft)</th>
+            <th className="border px-1.5 py-1 bg-muted text-center">OAT °C</th>
+            <th className="border px-1.5 py-1 bg-muted text-center">TAS kt</th>
+            <th className="border px-1.5 py-1 bg-muted text-center">ROC fpm</th>
+            <th className="border px-1.5 py-1 bg-muted text-center">Time min</th>
+            <th className="border px-1.5 py-1 bg-muted text-center">Fuel USG</th>
+            <th className="border px-1.5 py-1 bg-muted text-center">Dist NM</th>
+          </tr>
+        </thead>
+        <tbody>
+          {table.rows.map((row) => {
+            const pa = row.pressureAltitude;
+            const isDep = pa >= depLo && pa <= depHi;
+            const isCru = pa >= cruLo && pa <= cruHi;
+            const highlight = isDep
+              ? 'bg-green-100 dark:bg-green-900/30'
+              : isCru
+                ? 'bg-blue-100 dark:bg-blue-900/30'
+                : '';
+            return (
+              <tr key={pa}>
+                <td className={`border px-1.5 py-0.5 font-mono font-medium ${highlight}`}>
+                  {pa === 0 ? 'SL' : pa.toLocaleString()}
+                </td>
+                <td className={`border px-1.5 py-0.5 font-mono text-center ${highlight}`}>{row.oat}</td>
+                <td className={`border px-1.5 py-0.5 font-mono text-center ${highlight}`}>{row.tas}</td>
+                <td className={`border px-1.5 py-0.5 font-mono text-center ${highlight}`}>{row.roc}</td>
+                <td className={`border px-1.5 py-0.5 font-mono text-center ${highlight}`}>{row.time}</td>
+                <td className={`border px-1.5 py-0.5 font-mono text-center ${highlight}`}>{row.fuel.toFixed(1)}</td>
+                <td className={`border px-1.5 py-0.5 font-mono text-center ${highlight}`}>{row.distance}</td>
+              </tr>
+            );
+          })}
+        </tbody>
+      </table>
+      <div className="text-[10px] text-muted-foreground mt-1">
+        <span className="inline-block w-3 h-2 bg-green-100 dark:bg-green-900/30 border mr-1 align-middle" /> Departure PA rows
+        <span className="inline-block w-3 h-2 bg-blue-100 dark:bg-blue-900/30 border mr-1 ml-3 align-middle" /> Cruise PA rows
+      </div>
+    </div>
+  );
+}
+
 /* ── ROC Interpolation Walkthrough ───────────────────────────────── */
 
 function RocWalkthrough({ title, subtitle, detail, cas, fairingsLabel, point }: {
@@ -354,7 +464,7 @@ function ClimbSegmentWalkthrough({ result }: { result: ClimbResult }) {
 
   return (
     <div>
-      <SectionTitle>6. Time, Fuel & Distance to Climb (AFM 5.3.10)</SectionTitle>
+      <SectionTitle>7. Time, Fuel & Distance — Interpolation (AFM 5.3.10)</SectionTitle>
       <div className="text-xs text-muted-foreground mb-3">Flaps UP, Vy 88 KIAS, Power 92% — subtraction method</div>
       <div className="space-y-3">
         <div className="bg-muted rounded-lg p-3">
