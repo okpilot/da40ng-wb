@@ -43,11 +43,11 @@ export function windComponents(
 
 // ── Table interpolation ────────────────────────────────────────────
 
-function clamp(value: number, min: number, max: number): number {
+export function clamp(value: number, min: number, max: number): number {
   return Math.min(max, Math.max(min, value));
 }
 
-function lerp(a: number, b: number, t: number): number {
+export function lerp(a: number, b: number, t: number): number {
   return a + (b - a) * t;
 }
 
@@ -56,7 +56,7 @@ function lerp(a: number, b: number, t: number): number {
  * Returns [lowerIdx, upperIdx, fraction].
  * Clamps to array bounds.
  */
-function findBracket(
+export function findBracket(
   arr: number[],
   value: number,
 ): [number, number, number] {

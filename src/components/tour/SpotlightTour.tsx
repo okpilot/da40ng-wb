@@ -1,10 +1,11 @@
 import { useEffect } from 'react';
 import { createPortal } from 'react-dom';
-import { tourSteps } from '@/data/tourSteps';
+import type { TourStep } from '@/data/tourSteps';
 import { useSpotlightPosition } from './useSpotlightPosition';
 import { TourTooltip } from './TourTooltip';
 
 interface Props {
+  steps: TourStep[];
   isActive: boolean;
   currentStep: number;
   totalSteps: number;
@@ -14,6 +15,7 @@ interface Props {
 }
 
 export function SpotlightTour({
+  steps,
   isActive,
   currentStep,
   totalSteps,
@@ -21,7 +23,7 @@ export function SpotlightTour({
   onPrev,
   onStop,
 }: Props) {
-  const step = isActive ? tourSteps[currentStep] : null;
+  const step = isActive ? steps[currentStep] : null;
   const rect = useSpotlightPosition(step?.target ?? null);
 
   // Keyboard navigation

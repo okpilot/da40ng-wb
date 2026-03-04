@@ -10,7 +10,7 @@ interface TakeoffInputsProps {
 
 export function TakeoffInputsPanel({ inputs, onUpdate }: TakeoffInputsProps) {
   return (
-    <Card className="py-3">
+    <Card className="py-3" data-tour="to-weather">
       <CardHeader className="pb-0 pt-0">
         <CardTitle className="text-sm">Weather Conditions</CardTitle>
       </CardHeader>
@@ -68,7 +68,7 @@ function InputField({ label, id, value, min, max, step, onChange }: {
         step={step}
         value={value || ''}
         className="h-8 text-sm"
-        onChange={(e) => { const n = Number(e.target.value); onChange(e.target.value === '' || !Number.isFinite(n) ? 0 : n); }}
+        onChange={(e) => { if (e.target.value === '') { onChange(0); return; } const n = Number(e.target.value); if (Number.isFinite(n)) onChange(n); }}
       />
     </div>
   );

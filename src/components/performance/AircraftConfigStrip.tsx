@@ -8,6 +8,9 @@ interface AircraftConfigStripProps {
   onMassChange: (value: number) => void;
   wheelFairings: boolean;
   onWheelFairingsChange: (value: boolean) => void;
+  flapsLabel?: string;
+  fairingsPenalty?: string;
+  tourId?: string;
 }
 
 export function AircraftConfigStrip({
@@ -15,9 +18,12 @@ export function AircraftConfigStrip({
   onMassChange,
   wheelFairings,
   onWheelFairingsChange,
+  flapsLabel = 'Take-off',
+  fairingsPenalty = 'GR +20, D50 +30',
+  tourId = 'to-aircraft-config',
 }: AircraftConfigStripProps) {
   return (
-    <Card className="py-3">
+    <Card className="py-3" data-tour={tourId}>
       <CardHeader className="pb-0 pt-0">
         <CardTitle className="text-sm">Aircraft Configuration</CardTitle>
       </CardHeader>
@@ -33,15 +39,15 @@ export function AircraftConfigStrip({
               max={1310}
               value={mass}
               className="h-8 text-sm w-28"
-              onChange={(e) => { const n = Number(e.target.value); onMassChange(e.target.value === '' || !Number.isFinite(n) ? 0 : n); }}
+              onChange={(e) => { if (e.target.value === '') { onMassChange(0); return; } const n = Number(e.target.value); if (Number.isFinite(n)) onMassChange(n); }}
             />
           </div>
 
-          {/* Flap setting — fixed for now */}
+          {/* Flap setting */}
           <div>
             <Label className="text-xs text-muted-foreground">Flaps</Label>
             <div className="h-8 flex items-center px-3 rounded-md border bg-muted/50 text-sm font-mono w-28">
-              T/O (5°)
+              {flapsLabel}
             </div>
           </div>
 
@@ -56,7 +62,7 @@ export function AircraftConfigStrip({
               Wheel fairings
             </Label>
             {!wheelFairings && (
-              <span className="text-[10px] text-amber-500">GR +20, D50 +30</span>
+              <span className="text-[10px] text-amber-500">{fairingsPenalty}</span>
             )}
           </div>
         </div>

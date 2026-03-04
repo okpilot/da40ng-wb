@@ -45,12 +45,6 @@ function toConfig(stored: StoredConfig): AircraftConfig {
   };
 }
 
-function toStored(config: AircraftConfig): StoredConfig {
-  return {
-    ...config,
-    activeMods: [...config.activeMods],
-  };
-}
 
 export function useCalculation() {
   const [storedConfig, setStoredConfig, resetConfig] = useLocalStorage<StoredConfig>(

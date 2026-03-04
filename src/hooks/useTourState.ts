@@ -1,41 +1,48 @@
 import { useCallback, useEffect, useState } from 'react';
 
-const STORAGE_KEY = 'da40ng-tour-seen';
+const DEFAULT_STORAGE_KEY = 'da40ng-tour-seen';
 
-function hasSeenTour(): boolean {
+function hasSeenTour(key: string): boolean {
   try {
-    return localStorage.getItem(STORAGE_KEY) === '1';
+    return localStorage.getItem(key) === '1';
   } catch {
     return false;
   }
 }
 
-function markTourSeen(): void {
+function markTourSeen(key: string): void {
   try {
-    localStorage.setItem(STORAGE_KEY, '1');
+    localStorage.setItem(key, '1');
   } catch {
     // gracefully degrade — tour state still works in-memory
   }
 }
 
-export function useTourState(totalSteps: number) {
+export function useTourState(totalSteps: number, storageKey = DEFAULT_STORAGE_KEY) {
   const [isActive, setIsActive] = useState(false);
   const [currentStep, setCurrentStep] = useState(0);
 
+  // Reset tour state when storageKey changes (e.g. switching tabs)
+  useEffect(() => {
+    setIsActive(false);
+    setCurrentStep(0);
+  }, [storageKey]);
+
   // Auto-start on first visit
   useEffect(() => {
-    if (hasSeenTour()) return;
+    if (!storageKey || totalSteps === 0) return;
+    if (hasSeenTour(storageKey)) return;
     const id = setTimeout(() => {
       setCurrentStep(0);
       setIsActive(true);
     }, 600);
     return () => clearTimeout(id);
-  }, []);
+  }, [storageKey, totalSteps]);
 
   const stop = useCallback(() => {
     setIsActive(false);
-    markTourSeen();
-  }, []);
+    if (storageKey) markTourSeen(storageKey);
+  }, [storageKey]);
 
   const start = useCallback(() => {
     setCurrentStep(0);
@@ -46,12 +53,12 @@ export function useTourState(totalSteps: number) {
     setCurrentStep((s) => {
       if (s >= totalSteps - 1) {
         setIsActive(false);
-        markTourSeen();
+        markTourSeen(storageKey);
         return s;
       }
       return s + 1;
     });
-  }, [totalSteps]);
+  }, [totalSteps, storageKey]);
 
   const prev = useCallback(() => {
     setCurrentStep((s) => Math.max(0, s - 1));
